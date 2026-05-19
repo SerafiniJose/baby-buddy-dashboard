@@ -277,3 +277,22 @@ export function toBathTimeline(baths) {
       entry: n,
     }));
 }
+
+export function dailyFeedingByMetric(entries, metric = "volume", numDays = 30) {
+  const days = getLastNDays(numDays);
+  const sums = {};
+  days.forEach((d) => (sums[d.dateStr] = 0));
+  (entries || []).forEach((e) => {
+    const key = entryDateStr(e.start || e.time || e.date);
+    if (!(key in sums)) return;
+    if (metric === "count") sums[key] += 1;
+    else if (metric === "duration") sums[key] += parseDuration(e.duration) * 60;
+    else sums[key] += parseFloat(e.amount || 0);
+  });
+  const result = days.map((d) => ({
+    date: d.label,
+    value: Math.round(sums[d.dateStr] * 10) / 10,
+  }));
+  const firstNonZero = result.findIndex((d) => d.value > 0);
+  return firstNonZero > 0 ? result.slice(firstNonZero) : result;
+}
