@@ -296,3 +296,22 @@ export function dailyFeedingByMetric(entries, metric = "volume", numDays = 30) {
   const firstNonZero = result.findIndex((d) => d.value > 0);
   return firstNonZero > 0 ? result.slice(firstNonZero) : result;
 }
+
+export function eventsForMonth(events, year, month) {
+  const map = {};
+  (events || []).forEach((e) => {
+    const d = new Date(e.time);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const day = d.getDate();
+      (map[day] = map[day] || []).push(e);
+    }
+  });
+  Object.values(map).forEach((list) => list.sort((a, b) => new Date(a.time) - new Date(b.time)));
+  return map;
+}
+
+export function upcomingEvents(events, from = new Date()) {
+  return (events || [])
+    .filter((e) => new Date(e.time) >= from)
+    .sort((a, b) => new Date(a.time) - new Date(b.time));
+}

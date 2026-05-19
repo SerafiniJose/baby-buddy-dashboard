@@ -8,6 +8,7 @@ import { getAge, formatElapsed, timeAgo } from "./utils/formatters";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
+import CalendarTab from "./tabs/CalendarTab";
 import FeedingForm from "./components/forms/FeedingForm";
 import SleepForm from "./components/forms/SleepForm";
 import DiaperForm from "./components/forms/DiaperForm";
@@ -15,6 +16,7 @@ import TemperatureForm from "./components/forms/TemperatureForm";
 import TummyTimeForm from "./components/forms/TummyTimeForm";
 import NoteForm from "./components/forms/NoteForm";
 import BathForm from "./components/forms/BathForm";
+import EventForm from "./components/forms/EventForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import TimerButton from "./components/TimerButton";
@@ -25,6 +27,7 @@ const TABS = [
   { id: "overview", label: "Overview", icon: <Icons.Activity /> },
   { id: "growth", label: "Growth", icon: <Icons.TrendUp /> },
   { id: "notes", label: "Notes", icon: <Icons.StickyNote /> },
+  { id: "calendar", label: "Calendar", icon: <Icons.Calendar /> },
 ];
 
 const ACTION_GROUPS = [
@@ -270,6 +273,13 @@ export default function App() {
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
+        {activeTab === "calendar" && (
+          <CalendarTab
+            events={data.events}
+            onAddEvent={() => setModal({ type: "event" })}
+            onEditEntry={(type, entry) => setModal({ type, entry })}
+          />
+        )}
       </main>
 
       {/* Quick Action FAB */}
@@ -426,6 +436,14 @@ export default function App() {
       )}
       {modal?.type === "bath" && (
         <BathForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "event" && (
+        <EventForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}
