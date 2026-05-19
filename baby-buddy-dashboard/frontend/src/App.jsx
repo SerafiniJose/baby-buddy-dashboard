@@ -233,6 +233,7 @@ export default function App() {
             changes={data.changes}
             tummyTimes={data.tummyTimes}
             weeklyTummyTimes={data.weeklyTummyTimes}
+            baths={data.baths}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}

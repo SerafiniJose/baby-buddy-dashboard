@@ -26,12 +26,13 @@ import {
   aggregateTummyByDay,
   getEntriesForDay,
   parseDuration,
+  toBathTimeline,
 } from "../utils/formatters";
 import { useUnits } from "../utils/units";
 
 const COLLAPSED_COUNT = 2;
 
-export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, tummyTimes, weeklyTummyTimes, onEditEntry }) {
+export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
   const units = useUnits();
   const [expanded, setExpanded] = useState({});
   const [dayModal, setDayModal] = useState(null);
@@ -41,6 +42,7 @@ export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRa
   const feedingTimeline = toFeedingTimeline(feedings, units.volume);
   const diaperTimeline = toDiaperTimeline(changes);
   const sleepBlocks = toSleepBlocks(sleepEntries);
+  const bathTimeline = toBathTimeline(baths || []);
   const weeklyFeedings = aggregateByDayOfWeek(weeklyFeedingsRaw, "amount");
   const sleepByDay = aggregateSleepByDay(weeklySleep);
   const tummyByDay = aggregateTummyByDay(weeklyTummyTimes);
@@ -368,6 +370,39 @@ export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRa
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
                 No tummy time recorded today
+              </div>
+            )}
+          </SectionCard>
+        </div>
+
+        {/* Baths */}
+        <div className="fade-in fade-in-7">
+          <SectionCard title="Baths" icon={<Icons.Bath />} color={colors.bath}>
+            {bathTimeline.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {(expanded.baths ? bathTimeline : bathTimeline.slice(0, COLLAPSED_COUNT)).map((b, i, arr) => (
+                  <div key={i} className="entry-clickable" onClick={() => onEditEntry?.("bath", b.entry)}>
+                    <TimelineItem
+                      time={b.time}
+                      label={b.label}
+                      detail={b.ago}
+                      color={colors.bath}
+                      isLast={i === arr.length - 1}
+                    />
+                  </div>
+                ))}
+                {bathTimeline.length > COLLAPSED_COUNT && (
+                  <button className="expand-toggle" onClick={() => toggle("baths")}>
+                    {expanded.baths ? "Show less" : `Show ${bathTimeline.length - COLLAPSED_COUNT} more`}
+                  </button>
+                )}
+                <div style={{ marginTop: 12, fontSize: 12, color: "var(--text-muted)" }}>
+                  Last bath <strong style={{ color: colors.bath }}>{bathTimeline[0].ago}</strong>
+                </div>
+              </div>
+            ) : (
+              <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
+                No baths recorded yet — tap + to add one
               </div>
             )}
           </SectionCard>
