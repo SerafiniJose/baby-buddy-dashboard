@@ -99,7 +99,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             icon={<Icons.Bottle />}
             label="Feedings"
             value={totalFeeding > 0 ? `${Math.round(totalFeeding)} ${units.volume}` : `${feedings.length}`}
-            sub={`${feedings.length} feeding${feedings.length !== 1 ? "s" : ""} today`}
+            sub={`${feedings.length} feeding${feedings.length !== 1 ? "s" : ""}, last 24h`}
             color={colors.feeding}
           />
         </div>
@@ -126,7 +126,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             icon={<Icons.Sun />}
             label="Tummy Time"
             value={`${Math.round(avgTummy)}m`}
-            sub={`${tummyTimes.length} session${tummyTimes.length !== 1 ? "s" : ""} today`}
+            sub={`${tummyTimes.length} session${tummyTimes.length !== 1 ? "s" : ""}, last 24h`}
             color={colors.tummy}
           />
         </div>
