@@ -4,7 +4,7 @@ import { useTimers } from "./hooks/useTimers";
 import { UnitContext } from "./utils/units";
 import { Icons } from "./components/Icons";
 import { colors } from "./utils/colors";
-import { getAge, formatElapsed } from "./utils/formatters";
+import { getAge, formatElapsed, timeAgo } from "./utils/formatters";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
@@ -18,6 +18,7 @@ import BathForm from "./components/forms/BathForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import TimerButton from "./components/TimerButton";
+import AlertBanner from "./components/AlertBanner";
 import "./styles.css";
 
 const TABS = [
@@ -81,12 +82,28 @@ export default function App() {
   const [expandedGroup, setExpandedGroup] = useState("Track");
   const [showTimerPicker, setShowTimerPicker] = useState(false);
   const [editingTimerId, setEditingTimerId] = useState(null);
+  const [dismissedAlerts, setDismissedAlerts] = useState({});
 
   const closeModal = () => setModal(null);
   const handleFormDone = () => {
     closeModal();
     data.refetch();
   };
+
+  const alertMessages = [];
+  const feedHrs = data.alertConfig?.feeding_alert_hours ?? 3;
+  const diaperHrs = data.alertConfig?.diaper_alert_hours ?? 3;
+  const lastFeed = data.feedings?.[0];
+  const lastChange = data.changes?.[0];
+  const hoursSince = (t) => (Date.now() - new Date(t).getTime()) / 3600000;
+  if (lastFeed && hoursSince(lastFeed.end || lastFeed.start) >= feedHrs) {
+    const key = `feed-${lastFeed.id}`;
+    if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastFeed.end || lastFeed.start)} since last feeding` });
+  }
+  if (lastChange && hoursSince(lastChange.time) >= diaperHrs) {
+    const key = `diaper-${lastChange.id}`;
+    if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastChange.time)} since last diaper change` });
+  }
 
   if (data.loading) {
     return (
@@ -224,6 +241,7 @@ export default function App() {
 
       {/* Tab Content */}
       <main className="tab-content">
+        <AlertBanner messages={alertMessages} onDismiss={(k) => setDismissedAlerts((p) => ({ ...p, [k]: true }))} />
         {activeTab === "overview" && (
           <OverviewTab
             feedings={data.feedings}
