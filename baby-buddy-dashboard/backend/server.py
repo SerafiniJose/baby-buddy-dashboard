@@ -15,6 +15,10 @@ BABY_BUDDY_API_KEY = os.environ.get("BABY_BUDDY_API_KEY", "")
 REFRESH_INTERVAL = int(os.environ.get("REFRESH_INTERVAL", "30"))
 DEMO_MODE = os.environ.get("DEMO_MODE", "").lower() in ("true", "1", "yes")
 UNIT_SYSTEM = os.environ.get("UNIT_SYSTEM", "metric").lower()
+FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS", "3"))
+DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS", "3"))
+HA_NOTIFY_SERVICE = os.environ.get("HA_NOTIFY_SERVICE", "persistent_notification")
+SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
 
 # Fallback: read from HA add-on options.json
 if not BABY_BUDDY_URL:
@@ -26,6 +30,9 @@ if not BABY_BUDDY_URL:
         REFRESH_INTERVAL = opts.get("refresh_interval", 30)
         DEMO_MODE = DEMO_MODE or opts.get("demo_mode", False)
         UNIT_SYSTEM = opts.get("unit_system", UNIT_SYSTEM)
+        FEEDING_ALERT_HOURS = float(opts.get("feeding_alert_hours", FEEDING_ALERT_HOURS))
+        DIAPER_ALERT_HOURS = float(opts.get("diaper_alert_hours", DIAPER_ALERT_HOURS))
+        HA_NOTIFY_SERVICE = opts.get("ha_notify_service", HA_NOTIFY_SERVICE)
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -58,7 +65,13 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/api/config")
 async def get_config():
-    return {"refresh_interval": REFRESH_INTERVAL, "demo_mode": DEMO_MODE, "unit_system": UNIT_SYSTEM}
+    return {
+        "refresh_interval": REFRESH_INTERVAL,
+        "demo_mode": DEMO_MODE,
+        "unit_system": UNIT_SYSTEM,
+        "feeding_alert_hours": FEEDING_ALERT_HOURS,
+        "diaper_alert_hours": DIAPER_ALERT_HOURS,
+    }
 
 
 @app.api_route(
