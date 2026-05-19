@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "../api";
 import { getMockData } from "../utils/mockData";
+import { splitNotesByTag } from "../utils/formatters";
 
 function toLocalISODate(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -35,6 +36,8 @@ export function useBabyData() {
   const [monthlyFeedings, setMonthlyFeedings] = useState([]);
   const [monthlySleep, setMonthlySleep] = useState([]);
   const [notes, setNotes] = useState([]);
+  const [baths, setBaths] = useState([]);
+  const [events, setEvents] = useState([]);
   const [timers, setTimers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -91,7 +94,7 @@ export function useBabyData() {
         api.getWeight({ child: c, limit: 20, ordering: "-date" }),
         api.getHeight({ child: c, limit: 20, ordering: "-date" }),
         api.getTimers(),
-        api.getNotes({ child: c, limit: 20, ordering: "-time" }),
+        api.getNotes({ child: c, limit: 200, ordering: "-time" }),
         api.getFeedings({ child: c, start_min: monthMin, limit: 500, ordering: "-start" }),
         api.getSleep({ child: c, start_min: monthMin, limit: 500, ordering: "-start" }),
       ]);
@@ -107,7 +110,12 @@ export function useBabyData() {
       setWeights(weightRes.results || []);
       setHeights(heightRes.results || []);
       setTimers(timersRes.results || []);
-      setNotes(notesRes.results || []);
+      {
+        const split = splitNotesByTag(notesRes.results || []);
+        setNotes(split.plain);
+        setBaths(split.baths);
+        setEvents(split.events);
+      }
       setMonthlyFeedings(monthlyFeedingsRes.results || []);
       setMonthlySleep(monthlySleepRes.results || []);
       setLastSync(new Date());
@@ -166,7 +174,12 @@ export function useBabyData() {
     setWeights(mock.weights);
     setHeights(mock.heights);
     setTimers(mock.timers);
-    setNotes(mock.notes);
+    {
+      const split = splitNotesByTag(mock.notes || []);
+      setNotes(split.plain);
+      setBaths(split.baths);
+      setEvents(split.events);
+    }
     setMonthlyFeedings(mock.monthlyFeedings);
     setMonthlySleep(mock.monthlySleep);
     setLastSync(new Date());
@@ -191,7 +204,12 @@ export function useBabyData() {
       setWeights(mock.weights);
       setHeights(mock.heights);
       setTimers(mock.timers);
-      setNotes(mock.notes);
+      {
+        const split = splitNotesByTag(mock.notes || []);
+        setNotes(split.plain);
+        setBaths(split.baths);
+        setEvents(split.events);
+      }
       setMonthlyFeedings(mock.monthlyFeedings);
       setMonthlySleep(mock.monthlySleep);
     },
@@ -239,6 +257,8 @@ export function useBabyData() {
     monthlyFeedings,
     monthlySleep,
     notes,
+    baths,
+    events,
     timers,
     loading,
     error,
