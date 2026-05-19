@@ -1,5 +1,6 @@
 import os
 import json
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -19,6 +20,7 @@ FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS", "3"))
 DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS", "3"))
 HA_NOTIFY_SERVICE = os.environ.get("HA_NOTIFY_SERVICE", "persistent_notification")
 SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
+HA_API_BASE = "http://supervisor/core/api"
 
 # Fallback: read from HA add-on options.json
 if not BABY_BUDDY_URL:
@@ -41,6 +43,64 @@ STATIC_DIR = Path(__file__).parent.parent / "static"
 http_client: httpx.AsyncClient | None = None
 
 
+async def _latest_entry(endpoint, time_field):
+    """Return (time_str, id) of the most recent entry for the endpoint, or (None, None)."""
+    r = await http_client.get(f"/api/{endpoint}", params={"limit": 1, "ordering": f"-{time_field}"})
+    r.raise_for_status()
+    results = r.json().get("results") or []
+    if not results:
+        return None, None
+    return results[0].get(time_field), results[0].get("id")
+
+
+async def _send_ha_notification(message: str):
+    if not SUPERVISOR_TOKEN:
+        return
+    payload = {"message": message}
+    if HA_NOTIFY_SERVICE == "persistent_notification":
+        payload["title"] = "Baby Dashboard"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        await client.post(
+            f"{HA_API_BASE}/services/notify/{HA_NOTIFY_SERVICE}",
+            headers={"Authorization": f"Bearer {SUPERVISOR_TOKEN}"},
+            json=payload,
+        )
+
+
+async def alert_loop():
+    """Poll Baby Buddy; fire one HA notification per threshold breach, re-arm on a newer entry."""
+    if not SUPERVISOR_TOKEN:
+        return  # standalone / local: banner-only, no HA push
+    from datetime import datetime, timezone
+
+    alerted = {"feeding": None, "diaper": None}  # entry id already notified for
+    while True:
+        try:
+            for kind, endpoint, tfield, hours in (
+                ("feeding", "feedings", "start", FEEDING_ALERT_HOURS),
+                ("diaper", "changes", "time", DIAPER_ALERT_HOURS),
+            ):
+                ts, eid = await _latest_entry(endpoint, tfield)
+                if not ts:
+                    continue
+                if eid != alerted[kind]:
+                    # a different (newer) entry than the one we alerted for → re-arm
+                    alerted[kind] = None
+                    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    elapsed_h = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
+                    if elapsed_h >= hours:
+                        label = "feeding" if kind == "feeding" else "diaper change"
+                        await _send_ha_notification(
+                            f"{int(elapsed_h)}h since last {label} (threshold {hours:g}h)"
+                        )
+                        alerted[kind] = eid  # don't re-notify until a newer entry appears
+        except Exception:
+            pass  # never let the loop die; retry next interval
+        await asyncio.sleep(max(REFRESH_INTERVAL, 60))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global http_client
@@ -53,8 +113,12 @@ async def lifespan(app: FastAPI):
         timeout=15.0,
         limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
     )
-    yield
-    await http_client.aclose()
+    notifier_task = asyncio.create_task(alert_loop())
+    try:
+        yield
+    finally:
+        notifier_task.cancel()
+        await http_client.aclose()
 
 
 app = FastAPI(lifespan=lifespan)
