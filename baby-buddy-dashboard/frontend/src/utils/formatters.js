@@ -240,3 +240,40 @@ export function dailySleepTotals(entries, numDays = 30) {
   const firstNonZero = result.findIndex((d) => d.hours > 0);
   return firstNonZero > 0 ? result.slice(firstNonZero) : result;
 }
+
+export const BATH_TAG = "bath";
+export const EVENT_TAG = "event";
+
+export function noteHasTag(note, tag) {
+  const tags = note?.tags;
+  if (!Array.isArray(tags)) return false;
+  const want = tag.toLowerCase();
+  return tags.some((t) => {
+    const name = typeof t === "string" ? t : t?.name;
+    return typeof name === "string" && name.toLowerCase() === want;
+  });
+}
+
+export function splitNotesByTag(notes) {
+  const baths = [];
+  const events = [];
+  const plain = [];
+  (notes || []).forEach((n) => {
+    if (noteHasTag(n, BATH_TAG)) baths.push(n);
+    else if (noteHasTag(n, EVENT_TAG)) events.push(n);
+    else plain.push(n);
+  });
+  return { baths, events, plain };
+}
+
+export function toBathTimeline(baths) {
+  return (baths || [])
+    .slice()
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .map((n) => ({
+      time: formatTime(n.time),
+      label: (n.note && n.note.trim()) || "Bath",
+      ago: timeAgo(n.time),
+      entry: n,
+    }));
+}
