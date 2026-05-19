@@ -26,13 +26,17 @@ export function formatElapsed(seconds) {
 
 export function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  const totalMins = Math.floor(diff / 60000);
+  if (totalMins < 1) return "just now";
+  if (totalMins < 60) return `${totalMins}m ago`;
+  const totalHours = Math.floor(totalMins / 60);
+  if (totalHours < 24) {
+    const mins = totalMins % 60;
+    return mins ? `${totalHours}h ${mins}m ago` : `${totalHours}h ago`;
+  }
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  return hours ? `${days}d ${hours}h ago` : `${days}d ago`;
 }
 
 export function formatTime(dateStr) {
