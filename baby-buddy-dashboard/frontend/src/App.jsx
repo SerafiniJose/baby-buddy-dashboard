@@ -96,8 +96,8 @@ export default function App() {
   const alertMessages = [];
   const feedHrs = data.alertConfig?.feeding_alert_hours ?? 3;
   const diaperHrs = data.alertConfig?.diaper_alert_hours ?? 3;
-  const lastFeed = data.feedings?.[0];
-  const lastChange = data.changes?.[0];
+  const lastFeed = data.recentFeedings?.[0];
+  const lastChange = data.recentChanges?.[0];
   const hoursSince = (t) => (Date.now() - new Date(t).getTime()) / 3600000;
   if (lastFeed && hoursSince(lastFeed.end || lastFeed.start) >= feedHrs) {
     const key = `feed-${lastFeed.id}`;
@@ -248,10 +248,12 @@ export default function App() {
         {activeTab === "overview" && (
           <OverviewTab
             feedings={data.feedings}
+            recentFeedings={data.recentFeedings}
             weeklyFeedings={data.weeklyFeedings}
             sleepEntries={data.sleepEntries}
             weeklySleep={data.weeklySleep}
             changes={data.changes}
+            recentChanges={data.recentChanges}
             tummyTimes={data.tummyTimes}
             weeklyTummyTimes={data.weeklyTummyTimes}
             baths={data.baths}

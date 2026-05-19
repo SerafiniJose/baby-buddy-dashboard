@@ -262,7 +262,7 @@ This repository is a personal fork of the upstream project. All upstream functio
 
 **Threshold alerts**
 
-- An in-app dismissible banner fires when the time since the last feeding or diaper change exceeds a configurable threshold (default 3 h for each). The banner is computed from today's entries only, so an overnight gap (last feed at 11 pm, dashboard opened at 4 am the next day) is not covered by the banner — HA push (below) is the reliable channel for that case.
+- An in-app dismissible banner fires when the time since the last feeding or diaper change exceeds a configurable threshold (default 3 h for each).
 - When running as a Home Assistant add-on (`homeassistant_api: true` + `SUPERVISOR_TOKEN` present) the same alert is also sent as a Home Assistant notification via the Supervisor API. In standalone Docker or local dev the banner-only fallback is used.
 - Three new add-on options in `config.yaml`:
 

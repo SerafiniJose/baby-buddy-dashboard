@@ -24,10 +24,12 @@ export function useBabyData() {
   const [children, setChildren] = useState([]);
   const [child, setChild] = useState(null);
   const [feedings, setFeedings] = useState([]);
+  const [recentFeedings, setRecentFeedings] = useState([]);
   const [weeklyFeedings, setWeeklyFeedings] = useState([]);
   const [sleepEntries, setSleepEntries] = useState([]);
   const [weeklySleep, setWeeklySleep] = useState([]);
   const [changes, setChanges] = useState([]);
+  const [recentChanges, setRecentChanges] = useState([]);
   const [tummyTimes, setTummyTimes] = useState([]);
   const [weeklyTummyTimes, setWeeklyTummyTimes] = useState([]);
   const [temperatures, setTemperatures] = useState([]);
@@ -83,6 +85,8 @@ export function useBabyData() {
         notesRes,
         monthlyFeedingsRes,
         monthlySleepRes,
+        recentFeedingsRes,
+        recentChangesRes,
       ] = await Promise.all([
         api.getFeedings({ child: c, start_min: todayMin, start_max: todayMax, limit: 100, ordering: "-start" }),
         api.getFeedings({ child: c, start_min: weekMin, limit: 200, ordering: "-start" }),
@@ -98,13 +102,17 @@ export function useBabyData() {
         api.getNotes({ child: c, limit: 200, ordering: "-time" }),
         api.getFeedings({ child: c, start_min: monthMin, limit: 500, ordering: "-start" }),
         api.getSleep({ child: c, start_min: monthMin, limit: 500, ordering: "-start" }),
+        api.getFeedings({ child: c, limit: 10, ordering: "-start" }),
+        api.getChanges({ child: c, limit: 10, ordering: "-time" }),
       ]);
 
       setFeedings(feedingsRes.results || []);
+      setRecentFeedings(recentFeedingsRes.results || []);
       setWeeklyFeedings(weeklyFeedingsRes.results || []);
       setSleepEntries(sleepRes.results || []);
       setWeeklySleep(weeklySleepRes.results || []);
       setChanges(changesRes.results || []);
+      setRecentChanges(recentChangesRes.results || []);
       setTummyTimes(tummyRes.results || []);
       setWeeklyTummyTimes(weeklyTummyRes.results || []);
       setTemperatures(tempRes.results || []);
@@ -165,10 +173,12 @@ export function useBabyData() {
     setChild(mock.children[0]);
     childIdRef.current = mock.children[0].id;
     setFeedings(mock.feedings);
+    setRecentFeedings(mock.feedings || []);
     setWeeklyFeedings(mock.weeklyFeedings);
     setSleepEntries(mock.sleepEntries);
     setWeeklySleep(mock.weeklySleep);
     setChanges(mock.changes);
+    setRecentChanges(mock.changes || []);
     setTummyTimes(mock.tummyTimes);
     setWeeklyTummyTimes(mock.weeklyTummyTimes);
     setTemperatures(mock.temperatures);
@@ -195,10 +205,12 @@ export function useBabyData() {
       setChild(selected);
       const mock = getMockData(id);
       setFeedings(mock.feedings);
+      setRecentFeedings(mock.feedings || []);
       setWeeklyFeedings(mock.weeklyFeedings);
       setSleepEntries(mock.sleepEntries);
       setWeeklySleep(mock.weeklySleep);
       setChanges(mock.changes);
+      setRecentChanges(mock.changes || []);
       setTummyTimes(mock.tummyTimes);
       setWeeklyTummyTimes(mock.weeklyTummyTimes);
       setTemperatures(mock.temperatures);
@@ -250,10 +262,12 @@ export function useBabyData() {
     child,
     selectChild: demoRef.current ? selectMockChild : selectChild,
     feedings,
+    recentFeedings,
     weeklyFeedings,
     sleepEntries,
     weeklySleep,
     changes,
+    recentChanges,
     tummyTimes,
     weeklyTummyTimes,
     temperatures,

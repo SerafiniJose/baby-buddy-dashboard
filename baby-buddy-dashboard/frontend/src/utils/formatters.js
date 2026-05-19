@@ -46,6 +46,18 @@ export function formatTime(dateStr) {
   });
 }
 
+export function formatTimeWithDay(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  const hhmm = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (d >= startOfToday) return hhmm;
+  if (d >= startOfYesterday) return `Yest ${hhmm}`;
+  return `${d.toLocaleDateString([], { month: "short", day: "numeric" })} ${hhmm}`;
+}
+
 export function parseDuration(durationStr) {
   if (!durationStr) return 0;
   const parts = durationStr.split(":").map(Number);
@@ -63,7 +75,7 @@ export function formatDuration(durationStr) {
 
 export function toFeedingTimeline(feedings, volumeUnit = "mL") {
   return feedings.map((f) => ({
-    time: formatTime(f.end || f.start),
+    time: formatTimeWithDay(f.end || f.start),
     label: `${f.amount ? f.amount + " " + volumeUnit : ""} ${f.method || f.type || ""}`.trim() || "Feeding",
     detail: timeAgo(f.end || f.start),
     amount: f.amount || 0,
@@ -75,7 +87,7 @@ export function toFeedingTimeline(feedings, volumeUnit = "mL") {
 
 export function toDiaperTimeline(changes) {
   return changes.map((c) => ({
-    time: formatTime(c.time),
+    time: formatTimeWithDay(c.time),
     type: c.solid && c.wet ? "both" : c.solid ? "solid" : "wet",
     ago: timeAgo(c.time),
     color: c.color,

@@ -32,15 +32,15 @@ import { useUnits } from "../utils/units";
 
 const COLLAPSED_COUNT = 2;
 
-export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
+export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, recentChanges, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
   const units = useUnits();
   const [expanded, setExpanded] = useState({});
   const [dayModal, setDayModal] = useState(null);
   const [selectedBar, setSelectedBar] = useState(null);
   const toggle = (key) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const feedingTimeline = toFeedingTimeline(feedings, units.volume);
-  const diaperTimeline = toDiaperTimeline(changes);
+  const feedingTimeline = toFeedingTimeline(recentFeedings || [], units.volume);
+  const diaperTimeline = toDiaperTimeline(recentChanges || []);
   const sleepBlocks = toSleepBlocks(sleepEntries);
   const bathTimeline = toBathTimeline(baths || []);
   const weeklyFeedings = aggregateByDayOfWeek(weeklyFeedingsRaw, "amount");
@@ -164,7 +164,7 @@ export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRa
               </div>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No feedings recorded today
+                No feedings recorded yet
               </div>
             )}
             {weeklyFeedings.some((d) => d.amount > 0) && (
@@ -314,7 +314,7 @@ export default function OverviewTab({ feedings, weeklyFeedings: weeklyFeedingsRa
               </>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No diaper changes recorded today
+                No diaper changes recorded yet
               </div>
             )}
           </SectionCard>
