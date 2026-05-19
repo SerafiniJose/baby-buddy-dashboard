@@ -92,6 +92,7 @@ export const api = {
     request("notes/", { method: "POST", body: JSON.stringify(data) }),
   updateNote: (id, data) =>
     request(`notes/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteNote: (id) => request(`notes/${id}/`, { method: "DELETE" }),
 
   // Timers
   getTimers: () => request("timers/"),

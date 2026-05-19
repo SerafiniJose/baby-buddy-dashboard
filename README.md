@@ -237,6 +237,41 @@ This dashboard uses Baby Buddy's REST API. A few important details about the fil
 - All date filters expect **ISO 8601 datetime strings** (e.g., `2025-01-15T00:00:00`), not plain dates
 - Datetimes should be in **local time without a timezone suffix** so Baby Buddy interprets them in its configured timezone
 
+## Fork additions (Baby Dashboard Plus)
+
+This repository is a personal fork of the upstream project. All upstream functionality is preserved; the additions below are layered on top.
+
+**UX / display**
+
+- **Time-since precision** — elapsed-time labels now show hours and minutes (e.g. `2h 35m ago`, `1d 4h ago`) instead of rounding to whole hours.
+- **Notes — delete button** — notes can now be deleted from the Notes tab (the upstream UI let you create notes but offered no way to remove them).
+
+**Bath / shower tracking**
+
+- Baths are stored as Baby Buddy Notes with the tag `bath`. A **Bath** quick-action appears under the Track FAB, and a **Baths** card on the Overview tab shows a "Last bath …" stat.
+- Notes tagged `bath` are managed exclusively by this dashboard and do **not** appear in the plain Notes tab. Do not add or remove the `bath` tag manually in Baby Buddy — doing so will cause unexpected behaviour.
+
+**Calendar tab**
+
+- A **Calendar** tab shows a month grid plus an Upcoming list of future events. Events are stored as Baby Buddy Notes tagged `event`. A "+ Add Event" button lets you create them from within the dashboard.
+- Notes tagged `event` do **not** appear in the Notes tab. Same caution applies: manage these tags only through this dashboard.
+
+**Feeding growth metric toggle**
+
+- The Daily Feeding chart on the Growth tab now has a **Volume / Count / Duration** toggle so you can switch between the three metrics without leaving the page.
+
+**Threshold alerts**
+
+- An in-app dismissible banner fires when the time since the last feeding or diaper change exceeds a configurable threshold (default 3 h for each). The banner is computed from today's entries only, so an overnight gap (last feed at 11 pm, dashboard opened at 4 am the next day) is not covered by the banner — HA push (below) is the reliable channel for that case.
+- When running as a Home Assistant add-on (`homeassistant_api: true` + `SUPERVISOR_TOKEN` present) the same alert is also sent as a Home Assistant notification via the Supervisor API. In standalone Docker or local dev the banner-only fallback is used.
+- Three new add-on options in `config.yaml`:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `feeding_alert_hours` | float (0.5–48) | `3` | Hours since last feeding before alert fires |
+| `diaper_alert_hours` | float (0.5–48) | `3` | Hours since last diaper change before alert fires |
+| `ha_notify_service` | string | `persistent_notification` | HA service to call for notifications (e.g. `notify.mobile_app_<device>`) |
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute it. See the LICENSE file for the full text.

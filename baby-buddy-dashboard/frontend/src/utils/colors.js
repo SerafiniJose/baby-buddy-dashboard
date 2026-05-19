@@ -7,4 +7,6 @@ export const colors = {
   temp: "#EF4444",
   height: "#6366F1",
   note: "#84CC16",
+  bath: "#06B6D4",
+  event: "#A855F7",
 };

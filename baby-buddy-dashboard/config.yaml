@@ -20,15 +20,22 @@ ingress_port: 8099
 panel_icon: "mdi:baby-face-outline"
 panel_title: "Baby Dashboard"
 panel_admin: false
+homeassistant_api: true
 options:
   baby_buddy_url: ""
   baby_buddy_api_key: ""
   refresh_interval: 30
   demo_mode: false
   unit_system: metric
+  feeding_alert_hours: 3
+  diaper_alert_hours: 3
+  ha_notify_service: persistent_notification
 schema:
   baby_buddy_url: url
   baby_buddy_api_key: password
   refresh_interval: "int(5,300)"
   demo_mode: bool
   unit_system: "list(metric|imperial)"
+  feeding_alert_hours: "float(0.5,48)"
+  diaper_alert_hours: "float(0.5,48)"
+  ha_notify_service: str

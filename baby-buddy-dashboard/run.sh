@@ -6,6 +6,9 @@ export BABY_BUDDY_API_KEY=$(bashio::config 'baby_buddy_api_key')
 export REFRESH_INTERVAL=$(bashio::config 'refresh_interval')
 export DEMO_MODE=$(bashio::config 'demo_mode')
 export UNIT_SYSTEM=$(bashio::config 'unit_system')
+export FEEDING_ALERT_HOURS=$(bashio::config 'feeding_alert_hours')
+export DIAPER_ALERT_HOURS=$(bashio::config 'diaper_alert_hours')
+export HA_NOTIFY_SERVICE=$(bashio::config 'ha_notify_service')
 
 bashio::log.info "Starting Baby Buddy Dashboard..."
 bashio::log.info "Connecting to Baby Buddy at: ${BABY_BUDDY_URL}"

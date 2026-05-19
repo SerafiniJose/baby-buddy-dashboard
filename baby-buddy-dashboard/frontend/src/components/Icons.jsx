@@ -106,4 +106,18 @@ export const Icons = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
+  Bath: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12h16a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2a1 1 0 0 1 1-1Z" />
+      <path d="M6 12V6a2 2 0 0 1 2-2 2 2 0 0 1 2 2" />
+      <path d="M9 6h.01" />
+      <path d="M6 19l-1 2M18 19l1 2" />
+    </svg>
+  ),
+  Calendar: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+    </svg>
+  ),
 };

@@ -17,24 +17,30 @@ import DayActivitiesModal from "../components/DayActivitiesModal";
 import { Icons } from "../components/Icons";
 import { colors } from "../utils/colors";
 import { useUnits } from "../utils/units";
-import { toGrowthSeries, formatGrowthTick, dailyFeedingTotals, dailySleepTotals, getEntriesForDate } from "../utils/formatters";
+import { toGrowthSeries, formatGrowthTick, dailyFeedingByMetric, dailySleepTotals, getEntriesForDate } from "../utils/formatters";
 
 export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySleep, onEditEntry }) {
   const units = useUnits();
   const [dayModal, setDayModal] = useState(null);
   const [selectedBar, setSelectedBar] = useState(null);
+  const [feedMetric, setFeedMetric] = useState("volume");
   const weightSeries = toGrowthSeries(weights, "weight");
   const heightSeries = toGrowthSeries(heights, "height");
-  const feedingSeries = dailyFeedingTotals(monthlyFeedings);
+  const feedingSeries = dailyFeedingByMetric(monthlyFeedings, feedMetric);
+  const feedMetricMeta = {
+    volume: { unit: units.volume, label: "Volume" },
+    count: { unit: "feeds", label: "Count" },
+    duration: { unit: "min", label: "Duration" },
+  }[feedMetric];
   const sleepSeries = dailySleepTotals(monthlySleep);
 
   const latestWeight = weights[0];
   const latestHeight = heights[0];
 
   // Compute averages for stat cards
-  const feedingDays = feedingSeries.filter((d) => d.amount > 0);
+  const feedingDays = feedingSeries.filter((d) => d.value > 0);
   const avgFeeding = feedingDays.length
-    ? Math.round(feedingDays.reduce((s, d) => s + d.amount, 0) / feedingDays.length)
+    ? Math.round(feedingDays.reduce((s, d) => s + d.value, 0) / feedingDays.length)
     : 0;
   const sleepDays = sleepSeries.filter((d) => d.hours > 0);
   const avgSleep = sleepDays.length
@@ -179,7 +185,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
               </span>
             </div>
             <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
-              {avgFeeding ? `${avgFeeding} ${units.volume}` : "—"}
+              {avgFeeding ? `${avgFeeding} ${feedMetricMeta.unit}` : "—"}
             </div>
             <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
               per day (30d)
@@ -236,7 +242,28 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
         {/* Daily Feeding Totals */}
         <div className="fade-in fade-in-5">
           <SectionCard title="Daily Feeding (30d)" icon={<Icons.Bottle />} color={colors.feeding}>
-            {feedingSeries.some((d) => d.amount > 0) ? (
+            <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+              {["volume", "count", "duration"].map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setFeedMetric(m)}
+                  className="expand-toggle"
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 8,
+                    border: `1px solid ${feedMetric === m ? colors.feeding : "var(--border)"}`,
+                    background: feedMetric === m ? `${colors.feeding}18` : "transparent",
+                    color: feedMetric === m ? colors.feeding : "var(--text-dim)",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            {feedingSeries.some((d) => d.value > 0) ? (
               <>
                 <div style={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -247,7 +274,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
                       <Tooltip content={<CustomTooltip />} />
                       <Area
                         type="monotone"
-                        dataKey="amount"
+                        dataKey="value"
                         stroke={colors.feeding}
                         strokeWidth={2}
                         fill={`${colors.feeding}30`}
@@ -262,7 +289,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
                   <ChartDetailBar
                     label={selectedBar.label}
                     value={selectedBar.value}
-                    unit={units.volume}
+                    unit={feedMetricMeta.unit}
                     color={colors.feeding}
                     onViewEntries={() => openDayModal(selectedBar.label, "feeding")}
                     onDismiss={() => setSelectedBar(null)}

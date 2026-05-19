@@ -1,6 +1,9 @@
 import os
 import json
+import asyncio
+import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Response, HTTPException
@@ -15,6 +18,11 @@ BABY_BUDDY_API_KEY = os.environ.get("BABY_BUDDY_API_KEY", "")
 REFRESH_INTERVAL = int(os.environ.get("REFRESH_INTERVAL", "30"))
 DEMO_MODE = os.environ.get("DEMO_MODE", "").lower() in ("true", "1", "yes")
 UNIT_SYSTEM = os.environ.get("UNIT_SYSTEM", "metric").lower()
+FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS", "3"))
+DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS", "3"))
+HA_NOTIFY_SERVICE = os.environ.get("HA_NOTIFY_SERVICE", "persistent_notification")
+SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
+HA_API_BASE = "http://supervisor/core/api"
 
 # Fallback: read from HA add-on options.json
 if not BABY_BUDDY_URL:
@@ -26,12 +34,75 @@ if not BABY_BUDDY_URL:
         REFRESH_INTERVAL = opts.get("refresh_interval", 30)
         DEMO_MODE = DEMO_MODE or opts.get("demo_mode", False)
         UNIT_SYSTEM = opts.get("unit_system", UNIT_SYSTEM)
+        FEEDING_ALERT_HOURS = float(opts.get("feeding_alert_hours", FEEDING_ALERT_HOURS))
+        DIAPER_ALERT_HOURS = float(opts.get("diaper_alert_hours", DIAPER_ALERT_HOURS))
+        HA_NOTIFY_SERVICE = opts.get("ha_notify_service", HA_NOTIFY_SERVICE)
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
+
+logger = logging.getLogger(__name__)
 
 # --- App lifecycle ---
 
 http_client: httpx.AsyncClient | None = None
+
+
+async def _latest_entry(endpoint, time_field):
+    """Return (time_str, id) of the most recent entry for the endpoint, or (None, None)."""
+    r = await http_client.get(f"/api/{endpoint}", params={"limit": 1, "ordering": f"-{time_field}"})
+    r.raise_for_status()
+    results = r.json().get("results") or []
+    if not results:
+        return None, None
+    return results[0].get(time_field), results[0].get("id")
+
+
+async def _send_ha_notification(message: str):
+    if not SUPERVISOR_TOKEN:
+        return
+    payload = {"message": message}
+    if HA_NOTIFY_SERVICE == "persistent_notification":
+        payload["title"] = "Baby Dashboard"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        await client.post(
+            f"{HA_API_BASE}/services/notify/{HA_NOTIFY_SERVICE}",
+            headers={"Authorization": f"Bearer {SUPERVISOR_TOKEN}"},
+            json=payload,
+        )
+
+
+async def alert_loop():
+    """Poll Baby Buddy; fire one HA notification per threshold breach, re-arm on a newer entry."""
+    if not SUPERVISOR_TOKEN:
+        return  # standalone / local: banner-only, no HA push
+
+    alerted = {"feeding": None, "diaper": None}  # entry id already notified for
+    while True:
+        try:
+            for kind, endpoint, tfield, hours in (
+                ("feeding", "feedings", "start", FEEDING_ALERT_HOURS),
+                ("diaper", "changes", "time", DIAPER_ALERT_HOURS),
+            ):
+                ts, eid = await _latest_entry(endpoint, tfield)
+                if not ts:
+                    continue
+                if eid != alerted[kind]:
+                    # a different (newer) entry than the one we alerted for → re-arm
+                    alerted[kind] = None
+                    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    elapsed_h = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
+                    if elapsed_h >= hours:
+                        label = "feeding" if kind == "feeding" else "diaper change"
+                        await _send_ha_notification(
+                            f"{int(elapsed_h)}h since last {label} (threshold {hours:g}h)"
+                        )
+                        alerted[kind] = eid  # don't re-notify until a newer entry appears
+        except Exception as exc:
+            # never let the loop die; log and retry next interval
+            logger.warning("alert_loop iteration failed: %s", exc)
+        await asyncio.sleep(max(REFRESH_INTERVAL, 60))
 
 
 @asynccontextmanager
@@ -46,8 +117,16 @@ async def lifespan(app: FastAPI):
         timeout=15.0,
         limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
     )
-    yield
-    await http_client.aclose()
+    notifier_task = asyncio.create_task(alert_loop())
+    try:
+        yield
+    finally:
+        notifier_task.cancel()
+        try:
+            await notifier_task
+        except asyncio.CancelledError:
+            pass
+        await http_client.aclose()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -58,7 +137,13 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/api/config")
 async def get_config():
-    return {"refresh_interval": REFRESH_INTERVAL, "demo_mode": DEMO_MODE, "unit_system": UNIT_SYSTEM}
+    return {
+        "refresh_interval": REFRESH_INTERVAL,
+        "demo_mode": DEMO_MODE,
+        "unit_system": UNIT_SYSTEM,
+        "feeding_alert_hours": FEEDING_ALERT_HOURS,
+        "diaper_alert_hours": DIAPER_ALERT_HOURS,
+    }
 
 
 @app.api_route(

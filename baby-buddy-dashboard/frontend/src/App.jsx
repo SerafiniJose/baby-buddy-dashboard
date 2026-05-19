@@ -4,25 +4,30 @@ import { useTimers } from "./hooks/useTimers";
 import { UnitContext } from "./utils/units";
 import { Icons } from "./components/Icons";
 import { colors } from "./utils/colors";
-import { getAge, formatElapsed } from "./utils/formatters";
+import { getAge, formatElapsed, timeAgo } from "./utils/formatters";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
+import CalendarTab from "./tabs/CalendarTab";
 import FeedingForm from "./components/forms/FeedingForm";
 import SleepForm from "./components/forms/SleepForm";
 import DiaperForm from "./components/forms/DiaperForm";
 import TemperatureForm from "./components/forms/TemperatureForm";
 import TummyTimeForm from "./components/forms/TummyTimeForm";
 import NoteForm from "./components/forms/NoteForm";
+import BathForm from "./components/forms/BathForm";
+import EventForm from "./components/forms/EventForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import TimerButton from "./components/TimerButton";
+import AlertBanner from "./components/AlertBanner";
 import "./styles.css";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: <Icons.Activity /> },
   { id: "growth", label: "Growth", icon: <Icons.TrendUp /> },
   { id: "notes", label: "Notes", icon: <Icons.StickyNote /> },
+  { id: "calendar", label: "Calendar", icon: <Icons.Calendar /> },
 ];
 
 const ACTION_GROUPS = [
@@ -33,6 +38,7 @@ const ACTION_GROUPS = [
       { id: "sleep", label: "Sleep", icon: <Icons.Moon />, color: colors.sleep },
       { id: "diaper", label: "Diaper", icon: <Icons.Droplet />, color: colors.diaper },
       { id: "tummy", label: "Tummy", icon: <Icons.Sun />, color: colors.tummy },
+      { id: "bath", label: "Bath", icon: <Icons.Bath />, color: colors.bath },
     ],
   },
   {
@@ -79,12 +85,28 @@ export default function App() {
   const [expandedGroup, setExpandedGroup] = useState("Track");
   const [showTimerPicker, setShowTimerPicker] = useState(false);
   const [editingTimerId, setEditingTimerId] = useState(null);
+  const [dismissedAlerts, setDismissedAlerts] = useState({});
 
   const closeModal = () => setModal(null);
   const handleFormDone = () => {
     closeModal();
     data.refetch();
   };
+
+  const alertMessages = [];
+  const feedHrs = data.alertConfig?.feeding_alert_hours ?? 3;
+  const diaperHrs = data.alertConfig?.diaper_alert_hours ?? 3;
+  const lastFeed = data.feedings?.[0];
+  const lastChange = data.changes?.[0];
+  const hoursSince = (t) => (Date.now() - new Date(t).getTime()) / 3600000;
+  if (lastFeed && hoursSince(lastFeed.end || lastFeed.start) >= feedHrs) {
+    const key = `feed-${lastFeed.id}`;
+    if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastFeed.end || lastFeed.start)} since last feeding` });
+  }
+  if (lastChange && hoursSince(lastChange.time) >= diaperHrs) {
+    const key = `diaper-${lastChange.id}`;
+    if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastChange.time)} since last diaper change` });
+  }
 
   if (data.loading) {
     return (
@@ -222,6 +244,7 @@ export default function App() {
 
       {/* Tab Content */}
       <main className="tab-content">
+        <AlertBanner messages={alertMessages} onDismiss={(k) => setDismissedAlerts((p) => ({ ...p, [k]: true }))} />
         {activeTab === "overview" && (
           <OverviewTab
             feedings={data.feedings}
@@ -231,6 +254,7 @@ export default function App() {
             changes={data.changes}
             tummyTimes={data.tummyTimes}
             weeklyTummyTimes={data.weeklyTummyTimes}
+            baths={data.baths}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
@@ -246,6 +270,13 @@ export default function App() {
         {activeTab === "notes" && (
           <NotesTab
             notes={data.notes}
+            onEditEntry={(type, entry) => setModal({ type, entry })}
+          />
+        )}
+        {activeTab === "calendar" && (
+          <CalendarTab
+            events={data.events}
+            onAddEvent={() => setModal({ type: "event" })}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
@@ -397,6 +428,22 @@ export default function App() {
       )}
       {modal?.type === "note" && (
         <NoteForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "bath" && (
+        <BathForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "event" && (
+        <EventForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}

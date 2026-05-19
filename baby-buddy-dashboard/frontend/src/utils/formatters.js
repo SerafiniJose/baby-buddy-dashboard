@@ -26,13 +26,17 @@ export function formatElapsed(seconds) {
 
 export function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  const totalMins = Math.floor(diff / 60000);
+  if (totalMins < 1) return "just now";
+  if (totalMins < 60) return `${totalMins}m ago`;
+  const totalHours = Math.floor(totalMins / 60);
+  if (totalHours < 24) {
+    const mins = totalMins % 60;
+    return mins ? `${totalHours}h ${mins}m ago` : `${totalHours}h ago`;
+  }
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  return hours ? `${days}d ${hours}h ago` : `${days}d ago`;
 }
 
 export function formatTime(dateStr) {
@@ -235,4 +239,79 @@ export function dailySleepTotals(entries, numDays = 30) {
   const result = days.map((d) => ({ date: d.label, hours: Math.round(sums[d.dateStr] * 10) / 10 }));
   const firstNonZero = result.findIndex((d) => d.hours > 0);
   return firstNonZero > 0 ? result.slice(firstNonZero) : result;
+}
+
+export const BATH_TAG = "bath";
+export const EVENT_TAG = "event";
+
+export function noteHasTag(note, tag) {
+  const tags = note?.tags;
+  if (!Array.isArray(tags)) return false;
+  const want = tag.toLowerCase();
+  return tags.some((t) => {
+    const name = typeof t === "string" ? t : t?.name;
+    return typeof name === "string" && name.toLowerCase() === want;
+  });
+}
+
+export function splitNotesByTag(notes) {
+  const baths = [];
+  const events = [];
+  const plain = [];
+  (notes || []).forEach((n) => {
+    if (noteHasTag(n, BATH_TAG)) baths.push(n);
+    else if (noteHasTag(n, EVENT_TAG)) events.push(n);
+    else plain.push(n);
+  });
+  return { baths, events, plain };
+}
+
+export function toBathTimeline(baths) {
+  return (baths || [])
+    .slice()
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .map((n) => ({
+      time: formatTime(n.time),
+      label: (n.note && n.note.trim()) || "Bath",
+      ago: timeAgo(n.time),
+      entry: n,
+    }));
+}
+
+export function dailyFeedingByMetric(entries, metric = "volume", numDays = 30) {
+  const days = getLastNDays(numDays);
+  const sums = {};
+  days.forEach((d) => (sums[d.dateStr] = 0));
+  (entries || []).forEach((e) => {
+    const key = entryDateStr(e.start || e.time || e.date);
+    if (!(key in sums)) return;
+    if (metric === "count") sums[key] += 1;
+    else if (metric === "duration") sums[key] += parseDuration(e.duration) * 60;
+    else sums[key] += parseFloat(e.amount || 0);
+  });
+  const result = days.map((d) => ({
+    date: d.label,
+    value: Math.round(sums[d.dateStr] * 10) / 10,
+  }));
+  const firstNonZero = result.findIndex((d) => d.value > 0);
+  return firstNonZero > 0 ? result.slice(firstNonZero) : result;
+}
+
+export function eventsForMonth(events, year, month) {
+  const map = {};
+  (events || []).forEach((e) => {
+    const d = new Date(e.time);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const day = d.getDate();
+      (map[day] = map[day] || []).push(e);
+    }
+  });
+  Object.values(map).forEach((list) => list.sort((a, b) => new Date(a.time) - new Date(b.time)));
+  return map;
+}
+
+export function upcomingEvents(events, from = new Date()) {
+  return (events || [])
+    .filter((e) => new Date(e.time) >= from)
+    .sort((a, b) => new Date(a.time) - new Date(b.time));
 }
