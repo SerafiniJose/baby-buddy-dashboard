@@ -14,6 +14,7 @@ import DiaperForm from "./components/forms/DiaperForm";
 import TemperatureForm from "./components/forms/TemperatureForm";
 import TummyTimeForm from "./components/forms/TummyTimeForm";
 import NoteForm from "./components/forms/NoteForm";
+import BathForm from "./components/forms/BathForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import TimerButton from "./components/TimerButton";
@@ -33,6 +34,7 @@ const ACTION_GROUPS = [
       { id: "sleep", label: "Sleep", icon: <Icons.Moon />, color: colors.sleep },
       { id: "diaper", label: "Diaper", icon: <Icons.Droplet />, color: colors.diaper },
       { id: "tummy", label: "Tummy", icon: <Icons.Sun />, color: colors.tummy },
+      { id: "bath", label: "Bath", icon: <Icons.Bath />, color: colors.bath },
     ],
   },
   {
@@ -397,6 +399,14 @@ export default function App() {
       )}
       {modal?.type === "note" && (
         <NoteForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "bath" && (
+        <BathForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}
