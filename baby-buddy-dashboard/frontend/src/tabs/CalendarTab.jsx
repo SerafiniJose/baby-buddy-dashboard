@@ -25,9 +25,12 @@ export default function CalendarTab({ events, onAddEvent, onEditEntry }) {
 
   return (
     <div className="fade-in fade-in-1">
-      <SectionCard title={monthLabel} icon={<Icons.Calendar />} color={colors.event}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+      <SectionCard title="Calendar" icon={<Icons.Calendar />} color={colors.event}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
           <button className="expand-toggle" onClick={() => shift(-1)}>‹ Prev</button>
+          <div style={{ flexGrow: 1, textAlign: "center", fontSize: 14, fontWeight: 600, color: "var(--text)", minWidth: 120 }}>
+            {monthLabel}
+          </div>
           <button className="expand-toggle" onClick={() => setCursor(new Date(today.getFullYear(), today.getMonth(), 1))}>Today</button>
           <button className="expand-toggle" onClick={onAddEvent} style={{ color: colors.event }}>+ Add Event</button>
           <button className="expand-toggle" onClick={() => shift(1)}>Next ›</button>
