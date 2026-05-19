@@ -1,7 +1,9 @@
 import os
 import json
 import asyncio
+import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Response, HTTPException
@@ -38,6 +40,8 @@ if not BABY_BUDDY_URL:
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
+logger = logging.getLogger(__name__)
+
 # --- App lifecycle ---
 
 http_client: httpx.AsyncClient | None = None
@@ -71,7 +75,6 @@ async def alert_loop():
     """Poll Baby Buddy; fire one HA notification per threshold breach, re-arm on a newer entry."""
     if not SUPERVISOR_TOKEN:
         return  # standalone / local: banner-only, no HA push
-    from datetime import datetime, timezone
 
     alerted = {"feeding": None, "diaper": None}  # entry id already notified for
     while True:
@@ -96,8 +99,9 @@ async def alert_loop():
                             f"{int(elapsed_h)}h since last {label} (threshold {hours:g}h)"
                         )
                         alerted[kind] = eid  # don't re-notify until a newer entry appears
-        except Exception:
-            pass  # never let the loop die; retry next interval
+        except Exception as exc:
+            # never let the loop die; log and retry next interval
+            logger.warning("alert_loop iteration failed: %s", exc)
         await asyncio.sleep(max(REFRESH_INTERVAL, 60))
 
 
@@ -118,6 +122,10 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         notifier_task.cancel()
+        try:
+            await notifier_task
+        except asyncio.CancelledError:
+            pass
         await http_client.aclose()
 
 
