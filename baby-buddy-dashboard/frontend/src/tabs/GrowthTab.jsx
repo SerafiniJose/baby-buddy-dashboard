@@ -23,7 +23,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
   const units = useUnits();
   const [dayModal, setDayModal] = useState(null);
   const [selectedBar, setSelectedBar] = useState(null);
-  const [feedMetric, setFeedMetric] = useState("volume");
+  const [feedMetric, setFeedMetric] = useState("count");
   const weightSeries = toGrowthSeries(weights, "weight");
   const heightSeries = toGrowthSeries(heights, "height");
   const feedingSeries = dailyFeedingByMetric(monthlyFeedings, feedMetric);
