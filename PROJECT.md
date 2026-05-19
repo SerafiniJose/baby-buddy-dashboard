@@ -1,6 +1,6 @@
 ---
 type: personal
-state: in-construction
+state: beta
 ---
 
 # Baby Dashboard Plus
@@ -27,8 +27,16 @@ remote retained.
 
 ## Where it was left
 
-2026-05-19 — Brainstormed and design approved. Spec written to
-`docs/superpowers/specs/2026-05-19-baby-dashboard-plus-design.md`. Folder renamed
-to `baby-dashboard-plus`, on branch `feature/dashboard-plus`, `origin` renamed to
-`upstream`. Next: spec review by user, then writing-plans → implementation.
-Notes fix (#2) must land before baths (#3) and calendar (#6).
+2026-05-19 — Implementation complete. All 14 planned tasks merged on branch
+`feature/dashboard-plus`. 18 Vitest tests pass (`npm test` in
+`baby-buddy-dashboard/frontend`). Build succeeds (`npm run build`) with only the
+pre-existing chunk-size warning. Verified end-to-end against a local Baby Buddy
+instance.
+
+**Deferred to a follow-up**
+
+- Delete buttons for `BathForm` and `EventForm` were not added (out of plan scope).
+  Reuse the existing `api.deleteNote` helper to implement them when needed.
+- Silent error catch (`catch {}`) and the timezone double-conversion in form `time`
+  payloads are pre-existing app-wide patterns inherited from upstream; they were not
+  addressed in this fork and remain as-is.
