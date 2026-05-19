@@ -13,6 +13,18 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
   const [time, setTime] = useState(entry?.time ? toLocalDatetime(new Date(entry.time)) : toLocalDatetime(new Date()));
   const [note, setNote] = useState(entry?.note || "");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this note?")) return;
+    setDeleting(true);
+    try {
+      await api.deleteNote(entry.id);
+      onDone();
+    } catch {
+      setDeleting(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,9 +75,20 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
             }}
           />
         </FormField>
-        <FormButton color={colors.note} disabled={saving || !note.trim()}>
+        <FormButton color={colors.note} disabled={saving || deleting || !note.trim()}>
           {saving ? "Saving..." : isEdit ? "Update Note" : "Save Note"}
         </FormButton>
+        {isEdit && (
+          <FormButton
+            type="button"
+            color="#EF4444"
+            disabled={saving || deleting}
+            onClick={handleDelete}
+            style={{ marginTop: 10, color: "#fff" }}
+          >
+            {deleting ? "Deleting..." : "Delete Note"}
+          </FormButton>
+        )}
       </form>
     </Modal>
   );
