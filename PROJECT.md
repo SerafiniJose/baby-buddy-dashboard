@@ -1,6 +1,6 @@
 ---
 type: personal
-state: beta
+state: ready
 ---
 
 # Baby Dashboard Plus
@@ -27,11 +27,15 @@ remote retained.
 
 ## Where it was left
 
-2026-05-19 — Implementation complete. All 14 planned tasks merged on branch
-`feature/dashboard-plus`. 18 Vitest tests pass (`npm test` in
-`baby-buddy-dashboard/frontend`). Build succeeds (`npm run build`) with only the
-pre-existing chunk-size warning. Verified end-to-end against a local Baby Buddy
-instance.
+2026-05-20 — Published to GitHub as a fork of mbentancour/baby-buddy-dashboard
+under `SerafiniJose/baby-buddy-dashboard`. Local `main` is the canonical branch;
+`upstream` remote retained for future merges from the original repo. Pre-publish
+cleanup: untracked `.claude/settings.json` (upstream maintainer's machine paths)
+and `docs/superpowers/` (internal plan/spec); both now gitignored.
+
+Implementation reference: all 14 planned tasks merged on `feature/dashboard-plus`,
+18 Vitest tests pass (`npm test` in `baby-buddy-dashboard/frontend`), build
+succeeds (`npm run build`) with only the pre-existing chunk-size warning.
 
 **Deferred to a follow-up**
 
