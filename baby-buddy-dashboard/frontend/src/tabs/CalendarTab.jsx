@@ -26,16 +26,16 @@ export default function CalendarTab({ events, onAddEvent, onEditEntry }) {
   return (
     <div className="fade-in fade-in-1">
       <SectionCard title="Calendar" icon={<Icons.Calendar />} color={colors.event}>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <button className="expand-toggle" onClick={() => shift(-1)}>‹ Prev</button>
-          <div style={{ flexGrow: 1, textAlign: "center", fontSize: 14, fontWeight: 600, color: "var(--text)", minWidth: 120 }}>
-            {monthLabel}
-          </div>
-          <button className="expand-toggle" onClick={() => setCursor(new Date(today.getFullYear(), today.getMonth(), 1))}>Today</button>
-          <button className="expand-toggle" onClick={onAddEvent} style={{ color: colors.event }}>+ Add Event</button>
-          <button className="expand-toggle" onClick={() => shift(1)}>Next ›</button>
+        <div className="calendar-nav">
+          <button className="calendar-nav-btn" onClick={() => shift(-1)} aria-label="Previous month">‹</button>
+          <div className="calendar-nav-label">{monthLabel}</div>
+          <button className="calendar-nav-btn" onClick={() => shift(1)} aria-label="Next month">›</button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4 }}>
+        <div className="calendar-nav-actions">
+          <button className="calendar-nav-btn" onClick={() => setCursor(new Date(today.getFullYear(), today.getMonth(), 1))}>Today</button>
+          <button className="calendar-nav-btn calendar-nav-btn-accent" onClick={onAddEvent} style={{ color: colors.event }}>+ Add Event</button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 4 }}>
           {DOW.map((d) => (
             <div key={d} style={{ fontSize: 11, color: "var(--text-dim)", textAlign: "center", padding: 4 }}>{d}</div>
           ))}
@@ -46,7 +46,7 @@ export default function CalendarTab({ events, onAddEvent, onEditEntry }) {
               <div
                 key={i}
                 style={{
-                  minHeight: 46, borderRadius: 8, padding: 4, fontSize: 12,
+                  minWidth: 0, minHeight: 46, borderRadius: 8, padding: 4, fontSize: 12,
                   background: d ? "var(--bg)" : "transparent",
                   border: isToday ? `1px solid ${colors.event}` : "1px solid transparent",
                   color: "var(--text)",
