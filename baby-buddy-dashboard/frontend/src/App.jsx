@@ -9,6 +9,7 @@ import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
 import CalendarTab from "./tabs/CalendarTab";
+import RemindersTab from "./tabs/RemindersTab";
 import FeedingForm from "./components/forms/FeedingForm";
 import SleepForm from "./components/forms/SleepForm";
 import DiaperForm from "./components/forms/DiaperForm";
@@ -17,6 +18,7 @@ import TummyTimeForm from "./components/forms/TummyTimeForm";
 import NoteForm from "./components/forms/NoteForm";
 import BathForm from "./components/forms/BathForm";
 import EventForm from "./components/forms/EventForm";
+import ReminderForm from "./components/forms/ReminderForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import TimerButton from "./components/TimerButton";
@@ -28,6 +30,7 @@ const TABS = [
   { id: "growth", label: "Growth", icon: <Icons.TrendUp /> },
   { id: "notes", label: "Notes", icon: <Icons.StickyNote /> },
   { id: "calendar", label: "Calendar", icon: <Icons.Calendar /> },
+  { id: "reminders", label: "Reminders", icon: <Icons.Clock /> },
 ];
 
 const ACTION_GROUPS = [
@@ -282,6 +285,15 @@ export default function App() {
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
+        {activeTab === "reminders" && (
+          <RemindersTab
+            childId={data.child?.id}
+            reminders={data.reminders}
+            reminderDones={data.reminderDones}
+            onAddReminder={() => setModal({ type: "reminder" })}
+            onEditEntry={(type, entry) => setModal({ type, entry })}
+          />
+        )}
       </main>
 
       {/* Quick Action FAB */}
@@ -446,6 +458,14 @@ export default function App() {
       )}
       {modal?.type === "event" && (
         <EventForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "reminder" && (
+        <ReminderForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}
