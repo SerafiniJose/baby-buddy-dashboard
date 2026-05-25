@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 
 function toLocalDatetime(date) {
@@ -14,14 +14,17 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
   const [note, setNote] = useState(entry?.note || "");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleDelete = async () => {
     if (!window.confirm("Delete this note?")) return;
+    setError("");
     setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
+      setError("Couldn't delete. Try again.");
       setDeleting(false);
     }
   };
@@ -29,6 +32,7 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!note.trim()) return;
+    setError("");
     setSaving(true);
     try {
       const data = { note: note.trim(), time: `${time}:00` };
@@ -40,6 +44,7 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -75,6 +80,7 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
             }}
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.note} disabled={saving || deleting || !note.trim()}>
           {saving ? "Saving..." : isEdit ? "Update Note" : "Save Note"}
         </FormButton>
