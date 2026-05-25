@@ -58,6 +58,22 @@ export function formatTimeWithDay(dateStr) {
   return `${d.toLocaleDateString([], { month: "short", day: "numeric" })} ${hhmm}`;
 }
 
+/**
+ * Convert a "YYYY-MM-DDTHH:MM" string (from <input type="datetime-local">)
+ * into an ISO 8601 string with the browser's current timezone offset, e.g.
+ * "2026-05-25T14:30:00+02:00". This ensures Baby Buddy stores the actual
+ * wall-clock instant the user picked, not a UTC misinterpretation.
+ */
+export function toIsoWithLocalOffset(localDatetimeStr) {
+  const d = new Date(`${localDatetimeStr}:00`);
+  const tzMin = -d.getTimezoneOffset();
+  const sign = tzMin >= 0 ? "+" : "-";
+  const absMin = Math.abs(tzMin);
+  const hh = String(Math.floor(absMin / 60)).padStart(2, "0");
+  const mm = String(absMin % 60).padStart(2, "0");
+  return `${localDatetimeStr}:00${sign}${hh}:${mm}`;
+}
+
 export function parseDuration(durationStr) {
   if (!durationStr) return 0;
   const parts = durationStr.split(":").map(Number);
