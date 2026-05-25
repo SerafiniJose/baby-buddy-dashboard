@@ -149,3 +149,19 @@ export function FormButton({ children, color, ...props }) {
     </button>
   );
 }
+
+export function FormError({ children }) {
+  return (
+    <div
+      role="alert"
+      style={{
+        color: "#EF4444",
+        fontSize: 13,
+        marginTop: 4,
+        marginBottom: 8,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
