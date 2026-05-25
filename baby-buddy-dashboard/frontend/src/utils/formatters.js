@@ -349,3 +349,8 @@ export function upcomingEvents(events, from = new Date()) {
     .filter((e) => new Date(e.time) >= from)
     .sort((a, b) => new Date(a.time) - new Date(b.time));
 }
+
+export function toLocalISODate(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

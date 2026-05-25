@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { timeAgo, formatTimeWithDay } from "./formatters";
+import { toLocalISODate } from "./formatters";
 
 const now = Date.now();
 const ago = (ms) => new Date(now - ms).toISOString();
@@ -46,5 +47,16 @@ describe("formatTimeWithDay", () => {
     expect(s).toMatch(/\d{1,2}:\d{2}/);
     // Has at least a 3-letter month abbreviation followed by a day number
     expect(s).toMatch(/[A-Z][a-z]{2}\s\d{1,2}/);
+  });
+});
+
+describe("toLocalISODate", () => {
+  it("formats a date as YYYY-MM-DD in local timezone", () => {
+    const d = new Date(2026, 4, 25, 14, 30, 0); // May 25, 2026 (month is 0-indexed)
+    expect(toLocalISODate(d)).toBe("2026-05-25");
+  });
+  it("pads single-digit months and days", () => {
+    const d = new Date(2026, 0, 3, 0, 0, 0); // Jan 3
+    expect(toLocalISODate(d)).toBe("2026-01-03");
   });
 });

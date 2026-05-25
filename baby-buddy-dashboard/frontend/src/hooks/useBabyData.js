@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "../api";
 import { getMockData } from "../utils/mockData";
-import { splitNotesByTag } from "../utils/formatters";
-
-function toLocalISODate(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
+import { splitNotesByTag, toLocalISODate } from "../utils/formatters";
 
 function fixChildPicture(c) {
   if (c?.picture) {
