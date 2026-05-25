@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
-import { BATH_TAG } from "../../utils/formatters";
+import { BATH_TAG, toIsoWithLocalOffset } from "../../utils/formatters";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -35,7 +35,7 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
     setError("");
     setSaving(true);
     try {
-      const data = { note: note.trim(), time: `${time}:00`, tags: [BATH_TAG] };
+      const data = { note: note.trim(), time: toIsoWithLocalOffset(time), tags: [BATH_TAG] };
       if (isEdit) {
         await api.updateNote(entry.id, data);
       } else {

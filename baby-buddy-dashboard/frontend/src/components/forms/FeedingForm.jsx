@@ -3,6 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormSelect, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
+import { toIsoWithLocalOffset } from "../../utils/formatters";
 
 const TYPES = [
   { value: "breast milk", label: "Breast Milk" },
@@ -54,16 +55,16 @@ export default function FeedingForm({ childId, timerId, entry, onDone, onClose }
       if (amount) data.amount = parseFloat(amount);
       if (notes.trim()) data.notes = notes.trim();
       if (isEdit) {
-        data.start = `${start}:00`;
-        data.end = `${end}:00`;
+        data.start = toIsoWithLocalOffset(start);
+        data.end = toIsoWithLocalOffset(end);
         await api.updateFeeding(entry.id, data);
       } else {
         data.child = childId;
         if (timerId) {
           data.timer = timerId;
         } else {
-          data.start = `${start}:00`;
-          data.end = `${end}:00`;
+          data.start = toIsoWithLocalOffset(start);
+          data.end = toIsoWithLocalOffset(end);
         }
         await api.createFeeding(data);
       }

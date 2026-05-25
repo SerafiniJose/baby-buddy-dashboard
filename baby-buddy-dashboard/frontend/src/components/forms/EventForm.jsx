@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
-import { EVENT_TAG } from "../../utils/formatters";
+import { EVENT_TAG, toIsoWithLocalOffset } from "../../utils/formatters";
 
 function defaultWhen(entry) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -39,7 +39,7 @@ export default function EventForm({ childId, entry, onDone, onClose }) {
     setError("");
     setSaving(true);
     try {
-      const data = { note: title.trim(), time: `${time}:00`, tags: [EVENT_TAG] };
+      const data = { note: title.trim(), time: toIsoWithLocalOffset(time), tags: [EVENT_TAG] };
       if (isEdit) await api.updateNote(entry.id, data);
       else { data.child = childId; await api.createNote(data); }
       onDone();

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
+import { toIsoWithLocalOffset } from "../../utils/formatters";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -30,7 +31,7 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
     setSaving(true);
     try {
       if (isEdit) {
-        const data = { start: `${start}:00`, end: `${end}:00` };
+        const data = { start: toIsoWithLocalOffset(start), end: toIsoWithLocalOffset(end) };
         if (milestone.trim()) data.milestone = milestone.trim();
         await api.updateTummyTime(entry.id, data);
       } else {
@@ -38,8 +39,8 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
         if (timerId) {
           data.timer = timerId;
         } else {
-          data.start = `${start}:00`;
-          data.end = `${end}:00`;
+          data.start = toIsoWithLocalOffset(start);
+          data.end = toIsoWithLocalOffset(end);
         }
         if (milestone.trim()) data.milestone = milestone.trim();
         await api.createTummyTime(data);

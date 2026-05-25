@@ -3,6 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 
 import { colors } from "../../utils/colors";
+import { toIsoWithLocalOffset } from "../../utils/formatters";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -26,8 +27,8 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
     try {
       if (isEdit) {
         const data = {
-          start: `${start}:00`,
-          end: `${end}:00`,
+          start: toIsoWithLocalOffset(start),
+          end: toIsoWithLocalOffset(end),
         };
         if (notes.trim()) data.notes = notes.trim();
         await api.updateSleep(entry.id, data);
@@ -37,8 +38,8 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
         if (timerId) {
           data.timer = timerId;
         } else {
-          data.start = `${start}:00`;
-          data.end = `${end}:00`;
+          data.start = toIsoWithLocalOffset(start);
+          data.end = toIsoWithLocalOffset(end);
         }
         await api.createSleep(data);
       }

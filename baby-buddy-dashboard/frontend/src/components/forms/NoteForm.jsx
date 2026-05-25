@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
+import { toIsoWithLocalOffset } from "../../utils/formatters";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -35,7 +36,7 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
     setError("");
     setSaving(true);
     try {
-      const data = { note: note.trim(), time: `${time}:00` };
+      const data = { note: note.trim(), time: toIsoWithLocalOffset(time) };
       if (isEdit) {
         await api.updateNote(entry.id, data);
       } else {

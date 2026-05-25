@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormSelect, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
+import { toIsoWithLocalOffset } from "../../utils/formatters";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -31,7 +32,7 @@ export default function DiaperForm({ childId, entry, onDone, onClose, preset }) 
     setError("");
     setSaving(true);
     try {
-      const data = { wet, solid, time: `${time}:00` };
+      const data = { wet, solid, time: toIsoWithLocalOffset(time) };
       if (color) data.color = color;
       if (notes.trim()) data.notes = notes.trim();
       if (isEdit) {
