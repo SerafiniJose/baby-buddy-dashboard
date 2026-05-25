@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { timeAgo, formatTimeWithDay } from "./formatters";
-import { toLocalISODate } from "./formatters";
+import { timeAgo, formatTimeWithDay, toLocalISODate } from "./formatters";
 
 const now = Date.now();
 const ago = (ms) => new Date(now - ms).toISOString();
