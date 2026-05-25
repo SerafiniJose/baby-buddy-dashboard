@@ -42,6 +42,12 @@ export default function FeedingForm({ childId, timerId, entry, onDone, onClose }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (isEdit || !timerId) {
+      const hours = (new Date(`${end}:00`).getTime() - new Date(`${start}:00`).getTime()) / 3_600_000;
+      if (hours > 6 && !window.confirm("This entry is over 6 hours long. Save anyway?")) {
+        return;
+      }
+    }
     setSaving(true);
     try {
       const data = { type, method };
