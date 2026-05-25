@@ -271,6 +271,8 @@ export function dailySleepTotals(entries, numDays = 30) {
 
 export const BATH_TAG = "bath";
 export const EVENT_TAG = "event";
+export const REMINDER_TAG = "reminder";
+export const REMINDER_DONE_TAG = "reminder-done";
 
 export function noteHasTag(note, tag) {
   const tags = note?.tags;
@@ -285,13 +287,17 @@ export function noteHasTag(note, tag) {
 export function splitNotesByTag(notes) {
   const baths = [];
   const events = [];
+  const reminders = [];
+  const reminderDones = [];
   const plain = [];
   (notes || []).forEach((n) => {
     if (noteHasTag(n, BATH_TAG)) baths.push(n);
     else if (noteHasTag(n, EVENT_TAG)) events.push(n);
+    else if (noteHasTag(n, REMINDER_TAG)) reminders.push(n);
+    else if (noteHasTag(n, REMINDER_DONE_TAG)) reminderDones.push(n);
     else plain.push(n);
   });
-  return { baths, events, plain };
+  return { baths, events, reminders, reminderDones, plain };
 }
 
 export function toBathTimeline(baths) {
