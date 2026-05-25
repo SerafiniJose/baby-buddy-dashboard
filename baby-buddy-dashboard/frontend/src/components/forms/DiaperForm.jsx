@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormSelect, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormSelect, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 
 function toLocalDatetime(date) {
@@ -24,9 +24,11 @@ export default function DiaperForm({ childId, entry, onDone, onClose, preset }) 
   const [color, setColor] = useState(entry?.color || "");
   const [notes, setNotes] = useState(entry?.notes || "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setSaving(true);
     try {
       const data = { wet, solid, time: `${time}:00` };
@@ -40,6 +42,7 @@ export default function DiaperForm({ childId, entry, onDone, onClose, preset }) 
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -94,6 +97,7 @@ export default function DiaperForm({ childId, entry, onDone, onClose, preset }) 
             placeholder="Optional"
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.diaper} disabled={saving || (!wet && !solid)}>
           {saving ? "Saving..." : isEdit ? "Update Change" : "Save Change"}
         </FormButton>

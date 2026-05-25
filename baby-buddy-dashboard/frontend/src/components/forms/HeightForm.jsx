@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
 
@@ -16,10 +16,12 @@ export default function HeightForm({ childId, entry, onDone, onClose }) {
   const [height, setHeight] = useState(entry?.height ? String(entry.height) : "");
   const [date, setDate] = useState(entry?.date ? toLocalDate(entry.date) : toLocalDate(new Date()));
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!height) return;
+    setError("");
     setSaving(true);
     try {
       const data = {
@@ -34,6 +36,7 @@ export default function HeightForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -62,6 +65,7 @@ export default function HeightForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.height} disabled={saving || !height}>
           {saving ? "Saving..." : isEdit ? "Update Height" : "Save Height"}
         </FormButton>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 
 import { colors } from "../../utils/colors";
 
@@ -17,9 +17,11 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
   const [end, setEnd] = useState(entry?.end ? toLocalDatetime(new Date(entry.end)) : toLocalDatetime(now));
   const [notes, setNotes] = useState(entry?.notes || "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setSaving(true);
     try {
       if (isEdit) {
@@ -42,6 +44,7 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -81,6 +84,7 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
             placeholder="Optional"
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.sleep} disabled={saving}>
           {saving ? "Saving..." : isEdit ? "Update Sleep" : "Save Sleep"}
         </FormButton>

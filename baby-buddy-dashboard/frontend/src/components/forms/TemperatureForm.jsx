@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
 
@@ -8,10 +8,12 @@ export default function TemperatureForm({ childId, onDone, onClose }) {
   const units = useUnits();
   const [temp, setTemp] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!temp) return;
+    setError("");
     setSaving(true);
     try {
       await api.createTemperature({
@@ -20,6 +22,7 @@ export default function TemperatureForm({ childId, onDone, onClose }) {
       });
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -39,6 +42,7 @@ export default function TemperatureForm({ childId, onDone, onClose }) {
             autoFocus
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.temp} disabled={saving || !temp}>
           {saving ? "Saving..." : "Save Temperature"}
         </FormButton>

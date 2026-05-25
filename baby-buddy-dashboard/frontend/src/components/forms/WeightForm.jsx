@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
 
@@ -16,10 +16,12 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
   const [weight, setWeight] = useState(entry?.weight ? String(entry.weight) : "");
   const [date, setDate] = useState(entry?.date ? toLocalDate(entry.date) : toLocalDate(new Date()));
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!weight) return;
+    setError("");
     setSaving(true);
     try {
       const data = {
@@ -34,6 +36,7 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -62,6 +65,7 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.growth} disabled={saving || !weight}>
           {saving ? "Saving..." : isEdit ? "Update Weight" : "Save Weight"}
         </FormButton>

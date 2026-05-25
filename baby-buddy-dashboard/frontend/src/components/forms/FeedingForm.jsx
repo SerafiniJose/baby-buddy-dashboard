@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormSelect, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormSelect, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
 
@@ -37,9 +37,11 @@ export default function FeedingForm({ childId, timerId, entry, onDone, onClose }
   const [end, setEnd] = useState(entry?.end ? toLocalDatetime(new Date(entry.end)) : toLocalDatetime(now));
   const [notes, setNotes] = useState(entry?.notes || "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setSaving(true);
     try {
       const data = { type, method };
@@ -61,6 +63,7 @@ export default function FeedingForm({ childId, timerId, entry, onDone, onClose }
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -105,6 +108,7 @@ export default function FeedingForm({ childId, timerId, entry, onDone, onClose }
             placeholder="Optional"
           />
         </FormField>
+        {error && <FormError>{error}</FormError>}
         <FormButton color={colors.feeding} disabled={saving}>
           {saving ? "Saving..." : isEdit ? "Update Feeding" : "Save Feeding"}
         </FormButton>
