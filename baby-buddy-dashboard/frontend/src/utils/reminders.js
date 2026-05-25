@@ -1,3 +1,5 @@
+import { toLocalISODate } from "./formatters";
+
 export function parseReminderBody(body) {
   let parsed;
   try {
@@ -39,4 +41,32 @@ export function parseCompletionBody(body) {
 
 export function serializeCompletionBody(reminderId) {
   return JSON.stringify({ reminder_id: reminderId });
+}
+
+export function isActiveToday(reminder, todayISO) {
+  if (reminder.start > todayISO) return false;
+  if (reminder.end !== null && reminder.end !== undefined && todayISO > reminder.end) return false;
+  return true;
+}
+
+export function isDoneToday(reminderId, completions, todayISO) {
+  return (completions || []).some((c) => {
+    const parsed = parseCompletionBody(c.note);
+    if (!parsed || parsed.reminder_id !== reminderId) return false;
+    return toLocalISODate(new Date(c.time)) === todayISO;
+  });
+}
+
+export function pendingReminders(reminders, completions, todayISO, childId) {
+  if (childId === undefined || childId === null) return [];
+  const result = [];
+  (reminders || []).forEach((r) => {
+    if (r.child !== childId) return;
+    const parsed = parseReminderBody(r.note);
+    if (!parsed) return;
+    if (!isActiveToday(parsed, todayISO)) return;
+    if (isDoneToday(r.id, completions, todayISO)) return;
+    result.push({ id: r.id, ...parsed });
+  });
+  return result;
 }
