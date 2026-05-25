@@ -35,6 +35,8 @@ export function useBabyData() {
   const [notes, setNotes] = useState([]);
   const [baths, setBaths] = useState([]);
   const [events, setEvents] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const [reminderDones, setReminderDones] = useState([]);
   const [timers, setTimers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -119,6 +121,8 @@ export function useBabyData() {
         setNotes(split.plain);
         setBaths(split.baths);
         setEvents(split.events);
+        setReminders(split.reminders);
+        setReminderDones(split.reminderDones);
       }
       setMonthlyFeedings(monthlyFeedingsRes.results || []);
       setMonthlySleep(monthlySleepRes.results || []);
@@ -185,6 +189,8 @@ export function useBabyData() {
       setNotes(split.plain);
       setBaths(split.baths);
       setEvents(split.events);
+      setReminders(split.reminders);
+      setReminderDones(split.reminderDones);
     }
     setMonthlyFeedings(mock.monthlyFeedings);
     setMonthlySleep(mock.monthlySleep);
@@ -217,6 +223,8 @@ export function useBabyData() {
         setNotes(split.plain);
         setBaths(split.baths);
         setEvents(split.events);
+        setReminders(split.reminders);
+        setReminderDones(split.reminderDones);
       }
       setMonthlyFeedings(mock.monthlyFeedings);
       setMonthlySleep(mock.monthlySleep);
@@ -273,6 +281,8 @@ export function useBabyData() {
     notes,
     baths,
     events,
+    reminders,
+    reminderDones,
     timers,
     loading,
     error,
