@@ -4,7 +4,9 @@ import { useTimers } from "./hooks/useTimers";
 import { UnitContext } from "./utils/units";
 import { Icons } from "./components/Icons";
 import { colors } from "./utils/colors";
-import { getAge, formatElapsed, timeAgo } from "./utils/formatters";
+import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
+import { api } from "./api";
+import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
@@ -110,6 +112,24 @@ export default function App() {
     const key = `diaper-${lastChange.id}`;
     if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastChange.time)} since last diaper change` });
   }
+
+  const today = toLocalISODate(new Date());
+  pendingReminders(data.reminders, data.reminderDones, today, data.child?.id).forEach((r) => {
+    alertMessages.push({
+      key: `reminder-${r.id}-${today}`,
+      text: r.title,
+      actionLabel: "Done",
+      onAction: async () => {
+        await api.createNote({
+          child: data.child.id,
+          note: serializeCompletionBody(r.id),
+          tags: [REMINDER_DONE_TAG],
+          time: new Date().toISOString(),
+        });
+        await data.refetch();
+      },
+    });
+  });
 
   if (data.loading) {
     return (
