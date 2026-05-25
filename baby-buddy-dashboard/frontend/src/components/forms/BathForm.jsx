@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton } from "../Modal";
+import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { BATH_TAG } from "../../utils/formatters";
 
@@ -14,9 +14,25 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
   const [time, setTime] = useState(entry?.time ? toLocalDatetime(new Date(entry.time)) : toLocalDatetime(new Date()));
   const [note, setNote] = useState(entry?.note || "");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this bath?")) return;
+    setError("");
+    setDeleting(true);
+    try {
+      await api.deleteNote(entry.id);
+      onDone();
+    } catch {
+      setError("Couldn't delete. Try again.");
+      setDeleting(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setSaving(true);
     try {
       const data = { note: note.trim(), time: `${time}:00`, tags: [BATH_TAG] };
@@ -28,6 +44,7 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
+      setError("Couldn't save. Try again.");
       setSaving(false);
     }
   };
@@ -52,9 +69,21 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
             }}
           />
         </FormField>
-        <FormButton color={colors.bath} disabled={saving}>
+        {error && <FormError>{error}</FormError>}
+        <FormButton color={colors.bath} disabled={saving || deleting}>
           {saving ? "Saving..." : isEdit ? "Update Bath" : "Save Bath"}
         </FormButton>
+        {isEdit && (
+          <FormButton
+            type="button"
+            color="#EF4444"
+            disabled={saving || deleting}
+            onClick={handleDelete}
+            style={{ marginTop: 10, color: "#fff" }}
+          >
+            {deleting ? "Deleting..." : "Delete Bath"}
+          </FormButton>
+        )}
       </form>
     </Modal>
   );
