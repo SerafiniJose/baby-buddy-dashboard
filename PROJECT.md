@@ -27,20 +27,26 @@ remote retained.
 
 ## Where it was left
 
-2026-05-20 — Published to GitHub as a fork of mbentancour/baby-buddy-dashboard
-under `SerafiniJose/baby-buddy-dashboard`. Local `main` is the canonical branch;
-`upstream` remote retained for future merges from the original repo. Pre-publish
-cleanup: untracked `.claude/settings.json` (upstream maintainer's machine paths)
-and `docs/superpowers/` (internal plan/spec); both now gitignored.
-
-Implementation reference: all 14 planned tasks merged on `feature/dashboard-plus`,
-18 Vitest tests pass (`npm test` in `baby-buddy-dashboard/frontend`), build
-succeeds (`npm run build`) with only the pre-existing chunk-size warning.
+2026-05-25 — Spec A (form polish + bath fix) merged on `feature/form-polish-and-bath-fix`,
+9 commits ahead of `main`. Delete buttons added to Bath and Event forms (mirroring the
+existing NoteForm pattern). All form silent-catch blocks now surface failures via a new
+inline `<FormError>` component exported from `Modal.jsx`. Tummy time and feeding entries
+longer than 6 hours prompt for confirmation before saving. The bath-records-don't-show-up
+bug was diagnosed as a timezone double-conversion (the original tag-mismatch hypothesis
+was wrong): the frontend was sending naive `YYYY-MM-DDTHH:MM:00` payloads, Baby Buddy
+stored them as UTC, and the dashboard rendered them shifted by the local offset. Fix
+adds a `toIsoWithLocalOffset` helper and wires it into all 7 forms that send time
+payloads (Bath, Event, Note, Diaper, Feeding, Sleep, TummyTime). Verified end-to-end
+via curl against the live Baby Buddy: old payload reproduces the +2h drift, new payload
+renders with zero delta. 25 unit tests pass (21 prior + 4 new TZ-helper tests). Build clean.
 
 **Deferred to a follow-up**
 
-- Delete buttons for `BathForm` and `EventForm` were not added (out of plan scope).
-  Reuse the existing `api.deleteNote` helper to implement them when needed.
-- Silent error catch (`catch {}`) and the timezone double-conversion in form `time`
-  payloads are pre-existing app-wide patterns inherited from upstream; they were not
-  addressed in this fork and remain as-is.
+- Spec B: daily reminders with start/end date that persist in the upper banner until
+  marked done.
+- Silent catch in `useBabyData.js:16` left as-is (intentional URL-parse fallback with
+  inline comment).
+- The 9 historical entries already in Baby Buddy that were stored at the wrong UTC
+  instant by the old payload — NOT migrated. New entries are correct from here on.
+- Manual browser/Playwright verification of the new FormError visuals, delete-button
+  flows, and >6h confirm UX (code paths verified; rendered UI not yet observed).
