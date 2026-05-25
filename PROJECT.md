@@ -27,26 +27,29 @@ remote retained.
 
 ## Where it was left
 
-2026-05-25 — Spec A (form polish + bath fix) merged on `feature/form-polish-and-bath-fix`,
-9 commits ahead of `main`. Delete buttons added to Bath and Event forms (mirroring the
-existing NoteForm pattern). All form silent-catch blocks now surface failures via a new
-inline `<FormError>` component exported from `Modal.jsx`. Tummy time and feeding entries
-longer than 6 hours prompt for confirmation before saving. The bath-records-don't-show-up
-bug was diagnosed as a timezone double-conversion (the original tag-mismatch hypothesis
-was wrong): the frontend was sending naive `YYYY-MM-DDTHH:MM:00` payloads, Baby Buddy
-stored them as UTC, and the dashboard rendered them shifted by the local offset. Fix
-adds a `toIsoWithLocalOffset` helper and wires it into all 7 forms that send time
-payloads (Bath, Event, Note, Diaper, Feeding, Sleep, TummyTime). Verified end-to-end
-via curl against the live Baby Buddy: old payload reproduces the +2h drift, new payload
-renders with zero delta. 25 unit tests pass (21 prior + 4 new TZ-helper tests). Build clean.
+2026-05-25 — Spec B (daily reminders) implemented on `feature/daily-reminders`, stacked
+on top of `feature/form-polish-and-bath-fix` (Spec A, not yet merged to `main`). New
+`Reminders` tab lists per-child reminders with start/end dates and status badges
+(`pending today` / `done today` / `not active`). The existing upper `AlertBanner` now
+also shows each pending reminder with a "Done" button that creates a `reminder-done`
+Baby Buddy note for today; the reminder re-appears tomorrow until the end date passes.
+Reminders and completions are stored as tagged Baby Buddy notes (`reminder` /
+`reminder-done` tags) with JSON bodies — backend stays a stateless proxy. Pure helpers
+in `utils/reminders.js` cover body parsing, the active-window check, the done-today
+check, and the `pendingReminders` selector, all covered by Vitest tests. 56 unit tests
+pass (27 prior post-Spec-A + 18 new reminder selector tests + 11 in the same file
+including body parsers). Build clean.
 
 **Deferred to a follow-up**
 
-- Spec B: daily reminders with start/end date that persist in the upper banner until
-  marked done.
+- Manual browser verification of the new Reminders tab UX, the banner "Done" button
+  Saving…/error flow, and the cross-device sync behavior (code paths verified; rendered
+  UI not yet observed).
+- Spec A push + merge to `main` (still local-only on `feature/form-polish-and-bath-fix`).
+  Spec B currently stacks on top — once Spec A merges, rebase Spec B onto main.
 - Silent catch in `useBabyData.js:16` left as-is (intentional URL-parse fallback with
   inline comment).
 - The 9 historical entries already in Baby Buddy that were stored at the wrong UTC
-  instant by the old payload — NOT migrated. New entries are correct from here on.
-- Manual browser/Playwright verification of the new FormError visuals, delete-button
-  flows, and >6h confirm UX (code paths verified; rendered UI not yet observed).
+  instant by the pre-Spec-A payload — NOT migrated. New entries are correct.
+- Spec A's manual UI verification of FormError visuals, delete-button flows, and >6h
+  confirm UX.
