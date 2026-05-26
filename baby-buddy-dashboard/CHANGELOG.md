@@ -4,6 +4,20 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-05-26
+### Added
+- **Daily Reminders** tab with list view, status badges, sort, and quick-add button
+- Reminder create/edit/delete modal (`ReminderForm`)
+- Pending reminders surfaced in the alert banner with a "Done" action button
+- Active-window, done-today, and `pendingReminders` selectors
+- `reminder` and `reminder-done` note tags + parse/serialize helpers
+- Sample reminders and a done-today completion in demo mode
+
+### Changed
+- Split `useBabyData` to expose `reminders` and `reminderDones`
+- Alert banner now supports per-message action button variant with a Saving state
+- Extracted `toLocalISODate` from `useBabyData` into a shared helper
+
 ## [1.3.1] - 2026-05-26
 ### Added
 - `FormError` component for inline error display inside modal forms
