@@ -4,6 +4,17 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-05-26
+### Added
+- `FormError` component for inline error display inside modal forms
+- Delete buttons on Bath, Event, and Note forms with inline error surfacing
+- Confirmation dialog before saving tummy or feeding entries longer than 6 hours
+- `toIsoWithLocalOffset` helper for sending local datetime to the API
+
+### Fixed
+- Forms now send local datetime with the correct TZ offset so Baby Buddy stores the right instant (previously drifted in non-UTC timezones)
+- Replaced silent `catch` blocks across forms with inline `FormError` messages
+
 ## [1.3.0] - 2026-05-26
 
 First release of the **Baby Dashboard Plus** fork, branched from upstream `baby-buddy-dashboard` 1.2.8.
