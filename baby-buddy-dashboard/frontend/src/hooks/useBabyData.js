@@ -42,6 +42,7 @@ export function useBabyData() {
   const [error, setError] = useState(null);
   const [lastSync, setLastSync] = useState(null);
   const [unitSystem, setUnitSystem] = useState("metric");
+  const [theme, setTheme] = useState(null);
   const [alertConfig, setAlertConfig] = useState({ feeding_alert_hours: 3, diaper_alert_hours: 3 });
   const intervalRef = useRef(null);
   const childIdRef = useRef(null);
@@ -239,6 +240,7 @@ export function useBabyData() {
       .getConfig()
       .then((cfg) => {
         if (cfg.unit_system) setUnitSystem(cfg.unit_system);
+        if (cfg.theme) setTheme(cfg.theme);
         setAlertConfig({
           feeding_alert_hours: cfg.feeding_alert_hours ?? 3,
           diaper_alert_hours: cfg.diaper_alert_hours ?? 3,
@@ -288,6 +290,7 @@ export function useBabyData() {
     error,
     lastSync,
     unitSystem,
+    theme,
     alertConfig,
     refetch: fetchAll,
   };

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useBabyData } from "./hooks/useBabyData";
 import { useTimers } from "./hooks/useTimers";
 import { UnitContext } from "./utils/units";
 import { Icons } from "./components/Icons";
 import { colors } from "./utils/colors";
+import { applyTheme } from "./utils/theme";
 import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
 import { api } from "./api";
 import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
@@ -84,6 +85,11 @@ function timerNameToType(name) {
 export default function App() {
   const data = useBabyData();
   const timer = useTimers(data.timers, data.child?.id);
+
+  useEffect(() => {
+    if (data.theme) applyTheme(data.theme);
+  }, [data.theme]);
+
   const [activeTab, setActiveTab] = useState("overview");
   const [modal, setModal] = useState(null);
   const [showActions, setShowActions] = useState(false);
@@ -391,7 +397,7 @@ export default function App() {
         />
         <button
           className="fab-btn"
-          style={{ background: showActions ? "var(--text-muted)" : colors.feeding }}
+          style={{ background: showActions ? "var(--text-muted)" : "var(--accent)" }}
           onClick={() => { setShowActions(!showActions); setShowTimerPicker(false); setExpandedGroup("Track"); }}
         >
           <span style={{ transform: showActions ? "rotate(45deg)" : "none", transition: "transform 0.2s", display: "flex" }}>
