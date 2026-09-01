@@ -1,6 +1,27 @@
 const API_BASE = "./api/baby-buddy";
 const CONFIG_PATH = "./api/config";
 
+const REQUEST_TIMEOUT_MS = 15000;
+
+// Plain fetch() never settles on its own if the connection just stalls (flaky wifi, a
+// backgrounded mobile tab, an ingress proxy that drops the response) - without an explicit
+// deadline, a hung request here means the caller's promise chain never resolves, which for
+// the very first config fetch means the app's loading spinner never clears.
+async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error(`Request timed out after ${timeoutMs / 1000}s: ${url}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}/${endpoint}`;
   const config = {
@@ -8,7 +29,7 @@ async function request(endpoint, options = {}) {
     ...options,
   };
 
-  const response = await fetch(url, config);
+  const response = await fetchWithTimeout(url, config);
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
@@ -103,5 +124,5 @@ export const api = {
   deleteTimer: (id) => request(`timers/${id}/`, { method: "DELETE" }),
 
   // Config (our backend, not Baby Buddy)
-  getConfig: () => fetch(CONFIG_PATH).then((r) => r.json()),
+  getConfig: () => fetchWithTimeout(CONFIG_PATH).then((r) => r.json()),
 };
