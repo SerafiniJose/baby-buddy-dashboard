@@ -11,6 +11,118 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import httpx
 
+# --- Custom theme (add-on options) ---
+
+# camelCase API field -> snake_case suffix used in both env var names (THEME_{MODE}_{SUFFIX})
+# and add-on option keys (theme_{mode}_{suffix}).
+THEME_FIELDS = [
+    ("bg", "bg"),
+    ("cardBg", "card_bg"),
+    ("border", "border"),
+    ("text", "text"),
+    ("textMuted", "text_muted"),
+    ("textDim", "text_dim"),
+    ("accent", "accent"),
+]
+
+
+def sanitize_theme_value(value):
+    """bashio::config returns the literal string 'null' (not '') for an unset optional
+    field on some Supervisor versions - treat that the same as genuinely empty, otherwise
+    it leaks through as an invalid CSS custom property value (e.g. `--card-bg: null;`),
+    which browsers resolve to transparent instead of falling back to the default theme."""
+    return value if value and value != "null" else ""
+
+
+def read_theme_mode_from_env(mode):
+    return {
+        camel: sanitize_theme_value(os.environ.get(f"THEME_{mode.upper()}_{suffix.upper()}", ""))
+        for camel, suffix in THEME_FIELDS
+    }
+
+
+def fill_theme_mode_from_options(mode, current, opts):
+    for camel, suffix in THEME_FIELDS:
+        if not current.get(camel):
+            current[camel] = sanitize_theme_value(opts.get(f"theme_{mode}_{suffix}") or "")
+    return current
+
+
+# Built-in color schemes a user can pick by name instead of filling in all 14 theme_*
+# fields by hand. Individual theme_* fields, if set, always win over the preset's value
+# for that field - the preset only fills gaps, same precedence as the options.json fallback.
+THEME_PRESETS = {
+    "teal_terracotta": {
+        "light": {
+            "bg": "#F5F2EA", "cardBg": "#FDFCF8", "border": "rgba(40, 30, 16, 0.08)",
+            "text": "#1B1812", "textMuted": "#6B6557", "textDim": "#A8A294", "accent": "#2A9D8F",
+        },
+        "dark": {
+            "bg": "#14110C", "cardBg": "#1C1814", "border": "rgba(245, 242, 234, 0.08)",
+            "text": "#F2EFE6", "textMuted": "#A8A294", "textDim": "#6B6557", "accent": "#3FB8A9",
+        },
+    },
+}
+
+
+def sanitize_color_preset(value):
+    return value if value in THEME_PRESETS else ""
+
+
+def fill_theme_mode_from_preset(current, preset_mode):
+    for camel, _ in THEME_FIELDS:
+        if not current.get(camel):
+            current[camel] = preset_mode.get(camel, "")
+    return current
+
+
+THEME_CSS_VAR_NAMES = {
+    "bg": "--bg", "cardBg": "--card-bg", "border": "--border", "text": "--text",
+    "textMuted": "--text-muted", "textDim": "--text-dim", "accent": "--accent",
+}
+
+
+def _theme_mode_is_complete(mode):
+    return bool(mode) and all(mode.get(camel) for camel, _ in THEME_FIELDS)
+
+
+def _theme_mode_css_block(mode):
+    declarations = "\n".join(f"      {THEME_CSS_VAR_NAMES[camel]}: {mode[camel]};" for camel, _ in THEME_FIELDS)
+    return f"  :root {{\n{declarations}\n  }}"
+
+
+def build_theme_css(theme):
+    """Python port of frontend/src/utils/theme.js's buildThemeCss (same all-or-nothing
+    per-mode validation). Used to inline the resolved theme directly into index.html's
+    <head> on every request, so the correct light/dark colors are present at first paint.
+    The client-side applyTheme() (theme.js) still runs after mount too - it's idempotent
+    against identical values - but without this server-side copy the page briefly renders
+    with the built-in dark default while waiting on the client's /api/config round trip."""
+    blocks = []
+    light = theme.get("light")
+    dark = theme.get("dark")
+    if _theme_mode_is_complete(light):
+        blocks.append(f"@media (prefers-color-scheme: light) {{\n{_theme_mode_css_block(light)}\n}}")
+    if _theme_mode_is_complete(dark):
+        blocks.append(f"@media (prefers-color-scheme: dark) {{\n{_theme_mode_css_block(dark)}\n}}")
+    return "\n\n".join(blocks)
+
+
+def inject_theme_css(html, theme):
+    """Inline the resolved theme into an index.html string, right before </head>.
+
+    Position matters: the built stylesheet's <link> (also in <head>) declares the base,
+    unthemed `:root` variables unconditionally, at the same specificity as this override's
+    `@media (...) { :root { ... } }` block. For equal specificity the LAST declaration in
+    the document wins, media query or not. Injecting before the stylesheet link (e.g. right
+    after <head>) would put this override first, so the base variables would always win the
+    cascade and silently discard it, regardless of which prefers-color-scheme matches."""
+    css = build_theme_css(theme)
+    if not css:
+        return html
+    return html.replace("</head>", f'<style id="custom-theme-overrides">{css}</style></head>', 1)
+
+
 # --- Configuration ---
 
 BABY_BUDDY_URL = os.environ.get("BABY_BUDDY_URL", "").rstrip("/")
@@ -23,6 +135,8 @@ DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS", "3"))
 HA_NOTIFY_SERVICE = os.environ.get("HA_NOTIFY_SERVICE", "persistent_notification")
 SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
 HA_API_BASE = "http://supervisor/core/api"
+COLOR_PRESET = sanitize_color_preset(os.environ.get("COLOR_PRESET", ""))
+THEME = {"light": read_theme_mode_from_env("light"), "dark": read_theme_mode_from_env("dark")}
 
 # Fallback: read from HA add-on options.json
 if not BABY_BUDDY_URL:
@@ -37,6 +151,13 @@ if not BABY_BUDDY_URL:
         FEEDING_ALERT_HOURS = float(opts.get("feeding_alert_hours", FEEDING_ALERT_HOURS))
         DIAPER_ALERT_HOURS = float(opts.get("diaper_alert_hours", DIAPER_ALERT_HOURS))
         HA_NOTIFY_SERVICE = opts.get("ha_notify_service", HA_NOTIFY_SERVICE)
+        COLOR_PRESET = COLOR_PRESET or sanitize_color_preset(opts.get("color_preset", ""))
+        THEME["light"] = fill_theme_mode_from_options("light", THEME["light"], opts)
+        THEME["dark"] = fill_theme_mode_from_options("dark", THEME["dark"], opts)
+
+if COLOR_PRESET:
+    THEME["light"] = fill_theme_mode_from_preset(THEME["light"], THEME_PRESETS[COLOR_PRESET]["light"])
+    THEME["dark"] = fill_theme_mode_from_preset(THEME["dark"], THEME_PRESETS[COLOR_PRESET]["dark"])
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -143,6 +264,7 @@ async def get_config():
         "unit_system": UNIT_SYSTEM,
         "feeding_alert_hours": FEEDING_ALERT_HOURS,
         "diaper_alert_hours": DIAPER_ALERT_HOURS,
+        "theme": THEME,
     }
 
 
@@ -236,6 +358,8 @@ if STATIC_DIR.exists():
         if ingress_path:
             base_href = ingress_path.rstrip("/") + "/"
             index_html = index_html.replace("<head>", f'<head><base href="{base_href}">', 1)
+
+        index_html = inject_theme_css(index_html, THEME)
 
         return Response(
             content=index_html,
