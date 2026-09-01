@@ -18,7 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No flash of the default dark theme before a configured light theme applies: the resolved theme is inlined into `<head>` server-side, and the anti-FOUC rule uses `var(--bg, #0F1117)`
 - An unset optional add-on option arriving as the literal string `"null"` no longer leaks into CSS as `--card-bg: null` (which browsers resolve to transparent)
 
+### Fixed (light theme)
+- Alert banner text and its action button no longer use dark-only colors (previously 1.46:1 contrast under a light theme)
+- Diaper badges, Wet/Solid counts, tummy-time average and the active child chip now stay legible on a light background
+- Chart tooltips and row hover states follow the active theme instead of assuming a dark surface
+
 ### Notes
+- Verified in headless Chromium with `prefers-color-scheme` emulation: unthemed, themed dark and themed light all now report the same 23 remaining WCAG AA shortfalls, all from `--text-dim` (timestamps, inactive tabs, "Show N more") — a pre-existing base-palette choice, not a theming bug
 - Upstream fixes for `timeAgo()` truncation and naive-string datetimes were **not** adopted — this fork already fixed both independently (1.3.1's `toIsoWithLocalOffset`, and hours+minutes in `timeAgo`)
 - Upstream's i18n system and medication tracking remain unadopted; see PROJECT.md
 
