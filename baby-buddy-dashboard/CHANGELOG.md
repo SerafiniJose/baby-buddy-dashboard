@@ -4,6 +4,24 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-02
+### Added
+- **Custom theme colors**: 14 optional `theme_*` add-on options (background, card background, border, text, muted text, dim text, accent — each for light and dark), following the device's own `prefers-color-scheme`
+- Optional `color_preset` option (`teal_terracotta`) as an alternative to filling in all 14 fields; individual fields still override the preset
+- `--accent` CSS variable for generic UI chrome, distinct from the fixed per-category colors
+- WHO growth-standard percentile data and helpers (`ageInWeeks`, `hasWhoStandard`, `buildWhoBandSeries`, `toAgeWeekSeries`) — data layer only, not yet drawn on the growth charts
+- Add-on option descriptions for `feeding_alert_hours`, `diaper_alert_hours` and `ha_notify_service`, which previously had no labels in the Home Assistant UI
+
+### Fixed
+- Requests now time out after 15s instead of hanging forever, so a stalled connection can no longer leave the app stuck on "Loading..." (adopted from upstream)
+- Static file serving resolves paths and checks containment instead of substring-matching for `".."` (adopted from upstream)
+- No flash of the default dark theme before a configured light theme applies: the resolved theme is inlined into `<head>` server-side, and the anti-FOUC rule uses `var(--bg, #0F1117)`
+- An unset optional add-on option arriving as the literal string `"null"` no longer leaks into CSS as `--card-bg: null` (which browsers resolve to transparent)
+
+### Notes
+- Upstream fixes for `timeAgo()` truncation and naive-string datetimes were **not** adopted — this fork already fixed both independently (1.3.1's `toIsoWithLocalOffset`, and hours+minutes in `timeAgo`)
+- Upstream's i18n system and medication tracking remain unadopted; see PROJECT.md
+
 ## [1.4.0] - 2026-05-26
 ### Added
 - **Daily Reminders** tab with list view, status badges, sort, and quick-add button
