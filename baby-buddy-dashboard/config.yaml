@@ -1,5 +1,5 @@
 name: "Baby Buddy Dashboard"
-version: "1.4.0"
+version: "1.5.0"
 slug: "baby-buddy-dashboard"
 description: "Modern dashboard for Baby Buddy with charts, timers, and quick-log actions.
               Supports running as a standalone web app or as a Home Assistant add-on.
@@ -39,3 +39,18 @@ schema:
   feeding_alert_hours: "float(0.5,48)"
   diaper_alert_hours: "float(0.5,48)"
   ha_notify_service: str
+  color_preset: "list(teal_terracotta)?"
+  theme_light_bg: "str?"
+  theme_light_card_bg: "str?"
+  theme_light_border: "str?"
+  theme_light_text: "str?"
+  theme_light_text_muted: "str?"
+  theme_light_text_dim: "str?"
+  theme_light_accent: "str?"
+  theme_dark_bg: "str?"
+  theme_dark_card_bg: "str?"
+  theme_dark_border: "str?"
+  theme_dark_text: "str?"
+  theme_dark_text_muted: "str?"
+  theme_dark_text_dim: "str?"
+  theme_dark_accent: "str?"
