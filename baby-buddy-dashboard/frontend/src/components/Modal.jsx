@@ -135,7 +135,7 @@ export function FormButton({ children, color, ...props }) {
         padding: "12px 20px",
         borderRadius: 12,
         border: "none",
-        background: color || "#F59E0B",
+        background: color || "var(--accent)",
         color: "#000",
         fontSize: 14,
         fontWeight: 700,
