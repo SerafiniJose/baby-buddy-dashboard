@@ -222,10 +222,12 @@ if STATIC_DIR.exists():
             "/assets", StaticFiles(directory=str(assets_dir)), name="assets"
         )
 
+    static_root = STATIC_DIR.resolve()
+
     @app.get("/{path:path}")
     async def serve_spa(path: str, request: Request):
-        file_path = STATIC_DIR / path
-        if file_path.is_file() and ".." not in path:
+        file_path = (STATIC_DIR / path).resolve()
+        if file_path.is_relative_to(static_root) and file_path.is_file():
             return FileResponse(file_path)
 
         # Inject <base> tag with ingress path so relative URLs resolve correctly
