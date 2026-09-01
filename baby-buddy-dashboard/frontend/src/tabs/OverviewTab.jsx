@@ -16,7 +16,7 @@ import CustomTooltip from "../components/CustomTooltip";
 import ChartDetailBar from "../components/ChartDetailBar";
 import DayActivitiesModal from "../components/DayActivitiesModal";
 import { Icons } from "../components/Icons";
-import { colors } from "../utils/colors";
+import { colors, onSurface } from "../utils/colors";
 import {
   toFeedingTimeline,
   toDiaperTimeline,
@@ -297,12 +297,12 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                   }}
                 >
                   <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: "#3B82F6" }}>{wetCount}</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: onSurface("#3B82F6") }}>{wetCount}</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Wet</div>
                   </div>
                   <div style={{ width: 1, background: "var(--border)" }} />
                   <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: "#D97706" }}>{solidCount}</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: onSurface("#D97706") }}>{solidCount}</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Solid</div>
                   </div>
                   <div style={{ width: 1, background: "var(--border)" }} />
@@ -361,7 +361,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                     <Icons.TrendUp />
                     <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
                       Avg{" "}
-                      <strong style={{ color: colors.tummy }}>{Math.round(avgTummy)} min</strong>{" "}
+                      <strong style={{ color: onSurface(colors.tummy) }}>{Math.round(avgTummy)} min</strong>{" "}
                       per session
                     </span>
                   </div>

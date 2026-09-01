@@ -20,8 +20,8 @@ function ActionMessage({ message }) {
       style={{
         display: "flex", flexDirection: "column", gap: 4,
         padding: "10px 14px", borderRadius: 12,
-        background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.4)",
-        color: "#FCA5A5", fontSize: 13, fontWeight: 500,
+        background: "var(--danger-surface)", border: "1px solid var(--danger-border)",
+        color: "var(--danger-text)", fontSize: 13, fontWeight: 500,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -30,8 +30,8 @@ function ActionMessage({ message }) {
           onClick={handleClick}
           disabled={busy}
           style={{
-            background: "rgba(255,255,255,0.12)",
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: "var(--overlay-hover)",
+            border: "1px solid var(--overlay-border)",
             color: "inherit", cursor: busy ? "default" : "pointer",
             fontSize: 12, fontWeight: 600,
             padding: "4px 10px", borderRadius: 8,
@@ -42,7 +42,7 @@ function ActionMessage({ message }) {
         </button>
       </div>
       {error && (
-        <div role="alert" style={{ color: "#FCA5A5", fontSize: 12 }}>{error}</div>
+        <div role="alert" style={{ color: "var(--danger-text)", fontSize: 12 }}>{error}</div>
       )}
     </div>
   );
@@ -54,8 +54,8 @@ function DismissMessage({ message, onDismiss }) {
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 12, padding: "10px 14px", borderRadius: 12,
-        background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.4)",
-        color: "#FCA5A5", fontSize: 13, fontWeight: 500,
+        background: "var(--danger-surface)", border: "1px solid var(--danger-border)",
+        color: "var(--danger-text)", fontSize: 13, fontWeight: 500,
       }}
     >
       <span>⚠ {message.text}</span>

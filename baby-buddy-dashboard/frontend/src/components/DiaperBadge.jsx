@@ -1,3 +1,5 @@
+import { onSurface } from "../utils/colors";
+
 export default function DiaperBadge({ type }) {
   const bg =
     type === "solid" ? "#D97706" : type === "both" ? "#8B5CF6" : "#3B82F6";
@@ -10,7 +12,7 @@ export default function DiaperBadge({ type }) {
         padding: "2px 8px",
         borderRadius: 6,
         background: `${bg}18`,
-        color: bg,
+        color: onSurface(bg),
         textTransform: "uppercase",
         letterSpacing: "0.04em",
       }}

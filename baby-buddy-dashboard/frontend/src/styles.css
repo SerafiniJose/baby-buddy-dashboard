@@ -5,7 +5,18 @@
   --text: #E4E7F1;
   --text-muted: #8F96B0;
   --text-dim: #5A6178;
-  --tooltip-bg: #1C1F2Eee;
+  /* Derived from the themed vars above, so they follow a custom light/dark theme
+     automatically instead of assuming a dark background. Mixing toward var(--text)
+     is what makes them mode-agnostic: --text is near-white on a dark theme and
+     near-black on a light one, so each of these lands on the readable side either way. */
+  --tooltip-bg: color-mix(in srgb, var(--card-bg) 93%, transparent);
+  --overlay-hover: color-mix(in srgb, var(--text) 4%, transparent);
+  --overlay-subtle: color-mix(in srgb, var(--text) 3%, transparent);
+  --overlay-border: color-mix(in srgb, var(--text) 20%, transparent);
+  --danger: #EF4444;
+  --danger-text: color-mix(in srgb, var(--danger) 60%, var(--text));
+  --danger-surface: color-mix(in srgb, var(--danger) 12%, transparent);
+  --danger-border: color-mix(in srgb, var(--danger) 40%, transparent);
   --mono: "JetBrains Mono", monospace;
   --font: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 
@@ -157,11 +168,11 @@ body {
 }
 .child-chip-active {
   background: var(--accent-09);
-  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 68%, var(--text));
   border-color: var(--accent-40);
 }
 .child-chip-active:hover {
-  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 68%, var(--text));
   border-color: var(--accent-40);
 }
 
@@ -245,7 +256,7 @@ body {
 }
 
 .entry-clickable:hover {
-  background: #ffffff08;
+  background: var(--overlay-hover);
 }
 
 /* Tab navigation */
@@ -483,7 +494,7 @@ body {
 
 .expand-toggle:hover {
   color: var(--text-muted);
-  background: #ffffff06;
+  background: var(--overlay-subtle);
 }
 
 /* Animations */

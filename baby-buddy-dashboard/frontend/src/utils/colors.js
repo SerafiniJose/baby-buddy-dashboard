@@ -10,3 +10,9 @@ export const colors = {
   bath: "#06B6D4",
   event: "#A855F7",
 };
+
+// The per-category colors above are tuned as fills/icons on the built-in dark theme.
+// Used as small text they get too pale on a light theme (and are already marginal on
+// dark). Pulling them toward var(--text) keeps the hue recognizable while landing the
+// luminance on the readable side of whatever background the active theme provides.
+export const onSurface = (c) => `color-mix(in srgb, ${c} 68%, var(--text))`;
