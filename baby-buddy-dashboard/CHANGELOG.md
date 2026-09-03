@@ -4,6 +4,25 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-09-04
+### Added
+- **Reports tab** for feeding and diaper data over a selectable 7/14/30-day range
+  - Feeding and diaper **rhythm heatmaps** (day × hour) — shows the daily routine and how it drifts; no Baby Buddy equivalent
+  - Daily feeding amounts with a mean reference line
+  - Feeding **session-length histogram**
+  - Feeding **type mix** with legend and direct percentage labels
+  - Diaper changes **stacked by type** — the stack total is the daily count, replacing Baby Buddy's two separate charts
+  - A KPI row of headline figures (feeds/day, volume/day, avg feed, changes/day)
+- Each feeding's **duration** on the Recent Feedings rows (e.g. "120 mL bottle · 15m"), which matters most for breast feeds that carry no mL
+- A monthly diaper-change fetch, so reports have a full window to work with
+
+### Fixed
+- **Weight is now converted between kg and grams at the API boundary.** A value entered as kg was sent unconverted into a field this instance keeps in grams, so 3.45 kg was stored meaning 3.45 g; reading back had the mirror problem, rendering 3450 g as "3450 kg"
+- Demo mode showed the birth measurement as current: mock weights and heights were generated oldest-first while the app fetches them newest-first
+
+### Notes
+- Report colours were validated with a CVD/contrast checker rather than chosen by eye; a first pick for the feeding types was rejected for being indistinguishable under deuteranopia
+
 ## [1.5.0] - 2026-09-02
 ### Added
 - **Custom theme colors**: 14 optional `theme_*` add-on options (background, card background, border, text, muted text, dim text, accent — each for light and dark), following the device's own `prefers-color-scheme`
