@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { timeAgo, formatTimeWithDay, toLocalISODate } from "./formatters";
+import { timeAgo, formatTimeWithDay, toLocalISODate, formatDurationShort, toFeedingTimeline } from "./formatters";
 
 const now = Date.now();
 const ago = (ms) => new Date(now - ms).toISOString();
@@ -57,5 +57,66 @@ describe("toLocalISODate", () => {
   it("pads single-digit months and days", () => {
     const d = new Date(2026, 0, 3, 0, 0, 0); // Jan 3
     expect(toLocalISODate(d)).toBe("2026-01-03");
+  });
+});
+
+describe("formatDurationShort", () => {
+  it("renders sub-hour durations as whole minutes", () => {
+    expect(formatDurationShort(15 * 60 * 1000)).toBe("15m");
+  });
+  it("renders an exact hour without a minute part", () => {
+    expect(formatDurationShort(60 * 60 * 1000)).toBe("1h");
+  });
+  it("renders hours and minutes past an hour", () => {
+    expect(formatDurationShort(85 * 60 * 1000)).toBe("1h 25m");
+  });
+  it("renders sub-minute durations as <1m rather than 0m", () => {
+    expect(formatDurationShort(20 * 1000)).toBe("<1m");
+  });
+  it("returns null for missing or non-positive input", () => {
+    expect(formatDurationShort(null)).toBeNull();
+    expect(formatDurationShort(0)).toBeNull();
+    expect(formatDurationShort(-5)).toBeNull();
+  });
+});
+
+describe("toFeedingTimeline duration", () => {
+  const at = (h, m = 0) => new Date(2026, 0, 2, h, m).toISOString();
+
+  it("appends the duration from the API duration field", () => {
+    const [row] = toFeedingTimeline([
+      { start: at(9), end: at(9, 15), amount: 120, method: "bottle", duration: "00:15:00" },
+    ]);
+    expect(row.label).toBe("120 mL bottle · 15m");
+  });
+  it("falls back to end - start when duration is absent", () => {
+    const [row] = toFeedingTimeline([
+      { start: at(9), end: at(9, 20), amount: 90, method: "bottle" },
+    ]);
+    expect(row.label).toBe("90 mL bottle · 20m");
+  });
+  it("shows duration for a breast feed that has no amount", () => {
+    const [row] = toFeedingTimeline([
+      { start: at(9), end: at(9, 20), amount: null, method: "left breast", duration: "00:20:00" },
+    ]);
+    expect(row.label).toBe("left breast · 20m");
+  });
+  it("omits the suffix when there is no duration to show", () => {
+    const [row] = toFeedingTimeline([
+      { start: at(9), amount: 100, method: "bottle" },
+    ]);
+    expect(row.label).toBe("100 mL bottle");
+  });
+  it("omits the suffix for a zero-length entry", () => {
+    const [row] = toFeedingTimeline([
+      { start: at(9), end: at(9), amount: 100, method: "bottle", duration: "00:00:00" },
+    ]);
+    expect(row.label).toBe("100 mL bottle");
+  });
+  it("exposes durationMs so callers can aggregate it", () => {
+    const [row] = toFeedingTimeline([
+      { start: at(9), end: at(9, 15), duration: "00:15:00" },
+    ]);
+    expect(row.durationMs).toBe(15 * 60 * 1000);
   });
 });

@@ -89,16 +89,48 @@ export function formatDuration(durationStr) {
   return `${hours.toFixed(1)}h`;
 }
 
+// Compact duration for inline use next to a label ("15m", "1h 25m"). Returns null rather
+// than "0m" when there is nothing worth showing, so callers can omit the suffix entirely.
+export function formatDurationShort(ms) {
+  if (!ms || ms <= 0) return null;
+  const totalMins = Math.round(ms / 60000);
+  if (totalMins < 1) return "<1m";
+  if (totalMins < 60) return `${totalMins}m`;
+  const hours = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
+  return mins ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+// Baby Buddy sends a "HH:MM:SS" duration on feedings, but it is absent on entries that
+// were never given an end (a quick-logged bottle, say), so fall back to end - start.
+export function feedingDurationMs(f) {
+  if (f?.duration) {
+    const hours = parseDuration(f.duration);
+    if (hours > 0) return hours * 3_600_000;
+  }
+  if (f?.start && f?.end) {
+    const ms = new Date(f.end).getTime() - new Date(f.start).getTime();
+    if (Number.isFinite(ms) && ms > 0) return ms;
+  }
+  return null;
+}
+
 export function toFeedingTimeline(feedings, volumeUnit = "mL") {
-  return feedings.map((f) => ({
-    time: formatTimeWithDay(f.end || f.start),
-    label: `${f.amount ? f.amount + " " + volumeUnit : ""} ${f.method || f.type || ""}`.trim() || "Feeding",
-    detail: timeAgo(f.end || f.start),
-    amount: f.amount || 0,
-    type: f.type,
-    method: f.method,
-    entry: f,
-  }));
+  return feedings.map((f) => {
+    const durationMs = feedingDurationMs(f);
+    const duration = formatDurationShort(durationMs);
+    const base = `${f.amount ? f.amount + " " + volumeUnit : ""} ${f.method || f.type || ""}`.trim() || "Feeding";
+    return {
+      time: formatTimeWithDay(f.end || f.start),
+      label: duration ? `${base} \u00b7 ${duration}` : base,
+      detail: timeAgo(f.end || f.start),
+      amount: f.amount || 0,
+      durationMs,
+      type: f.type,
+      method: f.method,
+      entry: f,
+    };
+  });
 }
 
 export function toDiaperTimeline(changes) {
