@@ -71,8 +71,10 @@ function emmaWeeklyFeedings() {
       entries.push({
         id: 100 + d * 10 + f, child: 1,
         start: isoLocal(start), end: isoLocal(end),
-        type: "breast milk", method: f % 2 === 0 ? "bottle" : "left breast",
-        amount: f % 2 === 0 ? perFeeding : null, duration: duration(0, 15),
+        type: f === 0 ? "formula" : f % 3 === 0 ? "fortified breast milk" : "breast milk",
+        method: f % 2 === 0 ? "bottle" : "left breast",
+        amount: f % 2 === 0 ? perFeeding : null,
+        duration: duration(0, 8 + Math.floor(Math.random() * 18)),
       });
     }
   }
@@ -136,6 +138,32 @@ function emmaWeeklyTummy() {
   return entries;
 }
 
+// Diaper changes across the last 30 days, for the Reports tab. Times cluster around
+// waking and feeds rather than being uniform, so the rhythm heatmap shows real structure.
+function monthlyChanges(childId, idBase, perDay) {
+  const entries = [];
+  const clockHours = [7, 9, 11, 13, 15, 17, 19, 22];
+  for (let d = 0; d < 30; d++) {
+    const base = daysAgo(d);
+    const count = perDay + Math.floor(Math.random() * 2);
+    for (let i = 0; i < count; i++) {
+      const t = new Date(base);
+      t.setHours(clockHours[i % clockHours.length], Math.floor(Math.random() * 45), 0, 0);
+      // roughly: mostly wet, a solid most days, an occasional both
+      const roll = Math.random();
+      const solid = roll > 0.72;
+      const wet = !solid || roll > 0.92;
+      entries.push({
+        id: idBase + d * 20 + i, child: childId,
+        time: isoLocal(t), wet, solid,
+        color: solid ? (Math.random() > 0.5 ? "yellow" : "brown") : "",
+        amount: null,
+      });
+    }
+  }
+  return entries;
+}
+
 function emmaMonthlyFeedings() {
   const entries = [];
   for (let d = 0; d < 30; d++) {
@@ -150,8 +178,10 @@ function emmaMonthlyFeedings() {
       entries.push({
         id: 500 + d * 10 + f, child: 1,
         start: isoLocal(start), end: isoLocal(end),
-        type: "breast milk", method: f % 2 === 0 ? "bottle" : "left breast",
-        amount: f % 2 === 0 ? perFeeding : null, duration: duration(0, 15),
+        type: f === 0 ? "formula" : f % 3 === 0 ? "fortified breast milk" : "breast milk",
+        method: f % 2 === 0 ? "bottle" : "left breast",
+        amount: f % 2 === 0 ? perFeeding : null,
+        duration: duration(0, 8 + Math.floor(Math.random() * 18)),
       });
     }
   }
@@ -344,6 +374,7 @@ function emmaData() {
     ],
     monthlyFeedings: emmaMonthlyFeedings(),
     monthlySleep: emmaMonthlySleep(),
+    monthlyChanges: monthlyChanges(1, 3000, 5),
     timers: [],
   };
 }
@@ -379,6 +410,7 @@ function liamData() {
     ],
     monthlyFeedings: liamMonthlyFeedings(),
     monthlySleep: liamMonthlySleep(),
+    monthlyChanges: monthlyChanges(2, 6000, 3),
     timers: [],
   };
 }
