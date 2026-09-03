@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -16,15 +16,23 @@ import ChartDetailBar from "../components/ChartDetailBar";
 import DayActivitiesModal from "../components/DayActivitiesModal";
 import { Icons } from "../components/Icons";
 import { colors } from "../utils/colors";
-import { useUnits } from "../utils/units";
+import { weightFromGrams, formatWeightValue } from "../utils/weight";
+import { useUnits, useUnitSystem } from "../utils/units";
 import { toGrowthSeries, formatGrowthTick, dailyFeedingByMetric, dailySleepTotals, getEntriesForDate } from "../utils/formatters";
 
 export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySleep, onEditEntry }) {
   const units = useUnits();
+  const unitSystem = useUnitSystem();
   const [dayModal, setDayModal] = useState(null);
   const [selectedBar, setSelectedBar] = useState(null);
   const [feedMetric, setFeedMetric] = useState("count");
-  const weightSeries = toGrowthSeries(weights, "weight");
+  // Baby Buddy stores weight in grams; convert once here so the series, the stat card and
+  // the entry handed to the edit form all speak the display unit (see utils/weight.js).
+  const weightsInUnit = useMemo(
+    () => (weights || []).map((w) => ({ ...w, weight: weightFromGrams(w.weight, unitSystem) })),
+    [weights, unitSystem]
+  );
+  const weightSeries = toGrowthSeries(weightsInUnit, "weight");
   const heightSeries = toGrowthSeries(heights, "height");
   const feedingSeries = dailyFeedingByMetric(monthlyFeedings, feedMetric);
   const feedMetricMeta = {
@@ -34,7 +42,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
   }[feedMetric];
   const sleepSeries = dailySleepTotals(monthlySleep);
 
-  const latestWeight = weights[0];
+  const latestWeight = weightsInUnit[0];
   const latestHeight = heights[0];
 
   // Compute averages for stat cards
@@ -107,7 +115,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
               </span>
             </div>
             <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
-              {latestWeight ? `${latestWeight.weight} ${units.weight}` : "—"}
+              {latestWeight?.weight != null ? `${formatWeightValue(latestWeight.weight)} ${units.weight}` : "—"}
             </div>
             {latestWeight && (
               <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>

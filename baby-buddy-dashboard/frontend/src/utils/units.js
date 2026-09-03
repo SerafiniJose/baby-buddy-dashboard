@@ -7,6 +7,10 @@ const labels = {
 
 export const UnitContext = createContext("metric");
 
+export function useUnitSystem() {
+  return useContext(UnitContext) || "metric";
+}
+
 export function useUnits() {
   const system = useContext(UnitContext);
   return labels[system] || labels.metric;

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
-import { useUnits } from "../../utils/units";
+import { useUnits, useUnitSystem } from "../../utils/units";
+import { weightToGrams } from "../../utils/weight";
 
 function toLocalDate(date) {
   const d = new Date(date);
@@ -12,6 +13,7 @@ function toLocalDate(date) {
 
 export default function WeightForm({ childId, entry, onDone, onClose }) {
   const units = useUnits();
+  const unitSystem = useUnitSystem();
   const isEdit = !!entry;
   const [weight, setWeight] = useState(entry?.weight ? String(entry.weight) : "");
   const [date, setDate] = useState(entry?.date ? toLocalDate(entry.date) : toLocalDate(new Date()));
@@ -25,7 +27,8 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
     setSaving(true);
     try {
       const data = {
-        weight: parseFloat(weight),
+        // the form is in kg (or lb); Baby Buddy's field is grams
+        weight: weightToGrams(weight, unitSystem),
         date,
       };
       if (isEdit) {
