@@ -13,6 +13,7 @@ import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
 import CalendarTab from "./tabs/CalendarTab";
 import RemindersTab from "./tabs/RemindersTab";
+import ReportsTab from "./tabs/ReportsTab";
 import FeedingForm from "./components/forms/FeedingForm";
 import SleepForm from "./components/forms/SleepForm";
 import DiaperForm from "./components/forms/DiaperForm";
@@ -34,6 +35,7 @@ const TABS = [
   { id: "notes", label: "Notes", icon: <Icons.StickyNote /> },
   { id: "calendar", label: "Calendar", icon: <Icons.Calendar /> },
   { id: "reminders", label: "Reminders", icon: <Icons.Clock /> },
+  { id: "reports", label: "Reports", icon: <Icons.TrendUp /> },
 ];
 
 const ACTION_GROUPS = [
@@ -318,6 +320,12 @@ export default function App() {
             reminderDones={data.reminderDones}
             onAddReminder={() => setModal({ type: "reminder" })}
             onEditEntry={(type, entry) => setModal({ type, entry })}
+          />
+        )}
+        {activeTab === "reports" && (
+          <ReportsTab
+            monthlyFeedings={data.monthlyFeedings}
+            monthlyChanges={data.monthlyChanges}
           />
         )}
       </main>
