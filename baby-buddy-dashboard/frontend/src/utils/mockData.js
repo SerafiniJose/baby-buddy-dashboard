@@ -311,16 +311,17 @@ function emmaData() {
     tummyTimes: emmaTummyTimes(),
     weeklyTummyTimes: emmaWeeklyTummy(),
     temperatures: generateTemperatures(1),
-    // Emma: 4 months, ~3.2–7kg over 12 measurements
+    // Emma: 4 months, ~3.2–7kg over 12 measurements (stored in grams)
+    // newest first, matching the API's ordering: "-date"
     weights: Array.from({ length: 12 }, (_, i) => ({
       id: i + 1, child: 1, date: isoDate(daysAgo((11 - i) * 10)),
-      weight: (3.2 + i * 0.35).toFixed(2),
-    })),
+      weight: Math.round(3200 + i * 350), // grams, as Baby Buddy stores it
+    })).reverse(),
     // Emma: 4 months, ~49–59cm over 8 measurements
     heights: Array.from({ length: 8 }, (_, i) => ({
       id: i + 1, child: 1, date: isoDate(daysAgo((7 - i) * 15)),
       height: (49 + i * 1.5).toFixed(1),
-    })),
+    })).reverse(),
     notes: [
       { id: 1, child: 1, note: "Emma smiled for the first time today!", time: isoLocal(hoursAgo(3)) },
       { id: 2, child: 1, note: "Started showing interest in colorful toys during tummy time", time: isoLocal(hoursAgo(8)) },
@@ -360,13 +361,13 @@ function liamData() {
     // Liam: 2 years, ~11–12.5kg over 10 measurements
     weights: Array.from({ length: 10 }, (_, i) => ({
       id: i + 1, child: 2, date: isoDate(daysAgo((9 - i) * 14)),
-      weight: (11.0 + i * 0.16).toFixed(2),
-    })),
+      weight: Math.round(11000 + i * 160), // grams, as Baby Buddy stores it
+    })).reverse(),
     // Liam: 2 years, ~84–88cm over 6 measurements
     heights: Array.from({ length: 6 }, (_, i) => ({
       id: i + 1, child: 2, date: isoDate(daysAgo((5 - i) * 21)),
       height: (84.0 + i * 0.8).toFixed(1),
-    })),
+    })).reverse(),
     notes: [
       { id: 4, child: 2, note: "Liam said 'banana' clearly for the first time", time: isoLocal(hoursAgo(5)) },
       { id: 5, child: 2, note: "Loves playing with building blocks, stacked 5 high today", time: isoLocal(hoursAgo(28)) },
