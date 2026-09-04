@@ -4,6 +4,20 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-09-04
+### Added
+- **"Did you know" card on the Overview tab** — a different fact featured each day, with the full set grouped beneath it:
+  - *Records* — longest feeding, biggest single feed, longest sleep stretch, most feeds in a day
+  - *Daily totals* — time spent feeding per day, average feed length, feeds per day, sleep per day
+  - *Time since* — the last poop (with the usual gap alongside it), the last bath, the last tummy time
+  - *Trends* — weight change, this week vs last, best run of consecutive nights with a 6h+ stretch
+- All of it is derived from the 30-day windows already fetched for Reports, so the card costs no extra API calls
+
+### Notes
+- A fact only appears when it can be computed from real entries, so a household a few days in sees the handful of facts it has earned rather than a grid of dashes
+- The daily highlight is keyed off the local date, not random: it holds still all day and turns over at midnight. It is scored per fact rather than indexed into the list, so a fact appearing mid-day (the first bath ever logged, say) does not swap the highlight out
+- Records are labelled "across N days" because 30 days is the fetch window — they are not all-time bests
+
 ## [1.7.0] - 2026-09-04
 ### Added
 - **Theme toggle in the header** — Auto / Light / Dark, remembered per browser. "Auto" follows the device and keeps following it if the device flips light/dark while the app is open

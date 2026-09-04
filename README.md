@@ -260,6 +260,10 @@ This repository is a personal fork of the upstream project. All upstream functio
 
 - The Daily Feeding chart on the Growth tab now has a **Volume / Count / Duration** toggle so you can switch between the three metrics without leaving the page.
 
+**Daily facts**
+
+- A **"Did you know"** card on the Overview tab surfaces a different fact each day — longest feeding, longest sleep stretch, time since the last poop, weight change, best run of long nights, and others — with the full set grouped underneath. Facts are computed from the 30-day window the dashboard already holds, so records read "across N days" rather than claiming all-time bests.
+
 **Theme selector and desktop layout**
 
 - An **Auto / Light / Dark** toggle sits in the header. The choice is remembered per browser; **Auto** follows the device's `prefers-color-scheme` and keeps following it if the device switches while the app is open.
