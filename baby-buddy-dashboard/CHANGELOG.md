@@ -4,6 +4,19 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-04
+### Added
+- **Theme toggle in the header** — Auto / Light / Dark, remembered per browser. "Auto" follows the device and keeps following it if the device flips light/dark while the app is open
+- **A built-in light theme.** Previously light colours only existed if all seven `theme_light_*` add-on options were filled in or a `color_preset` was picked; without that the app was dark on every device
+- Wider content column on desktop (960px → 1280px), so the tab grids reflow to three columns and the Reports heatmap gets real width. The FAB and Timer now sit inside the content column instead of floating in the empty margin of a wide screen
+
+### Changed
+- **Theme CSS is now gated on `<html data-mode>` rather than `prefers-color-scheme`.** A media query cannot be overridden from the UI, so the switch would have been unable to beat the device setting. Configured `theme_*` colours and `color_preset` still win over the built-in palettes, unchanged
+- **An install on a light-preference device now starts in light mode**, where it previously stayed dark regardless. Picking Dark in the header pins it back
+
+### Notes
+- The light palette's colours were computed rather than chosen by eye: the amber accent scores 2.2:1 on white, so it darkens to #B45309 (5.0:1) at the same hue. A contrast audit of every tab in light mode reports zero text below WCAG AA — the dark theme's 24 `--text-dim` failures are pre-existing and untouched
+
 ## [1.6.0] - 2026-09-04
 ### Added
 - **Reports tab** for feeding and diaper data over a selectable 7/14/30-day range

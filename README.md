@@ -260,6 +260,12 @@ This repository is a personal fork of the upstream project. All upstream functio
 
 - The Daily Feeding chart on the Growth tab now has a **Volume / Count / Duration** toggle so you can switch between the three metrics without leaving the page.
 
+**Theme selector and desktop layout**
+
+- An **Auto / Light / Dark** toggle sits in the header. The choice is remembered per browser; **Auto** follows the device's `prefers-color-scheme` and keeps following it if the device switches while the app is open.
+- A **built-in light theme** ships with the app. The optional `theme_*` options and `color_preset` still override it — they now supply colours for whichever mode the toggle resolves to, instead of being gated on the device setting.
+- On wide screens the content column widens to 1280px and the floating action buttons anchor to that column rather than the viewport corner.
+
 **Threshold alerts**
 
 - An in-app dismissible banner fires when the time since the last feeding or diaper change exceeds a configurable threshold (default 3 h for each).
