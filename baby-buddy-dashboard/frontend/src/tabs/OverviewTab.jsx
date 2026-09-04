@@ -15,7 +15,6 @@ import DiaperBadge from "../components/DiaperBadge";
 import CustomTooltip from "../components/CustomTooltip";
 import ChartDetailBar from "../components/ChartDetailBar";
 import DayActivitiesModal from "../components/DayActivitiesModal";
-import FactsCard from "../components/FactsCard";
 import { Icons } from "../components/Icons";
 import { colors, onSurface } from "../utils/colors";
 import {
@@ -29,13 +28,12 @@ import {
   parseDuration,
   toBathTimeline,
 } from "../utils/formatters";
-import { useUnits, useUnitSystem } from "../utils/units";
+import { useUnits } from "../utils/units";
 
 const COLLAPSED_COUNT = 2;
 
-export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, recentChanges, tummyTimes, weeklyTummyTimes, baths, monthlyFeedings, monthlySleep, monthlyChanges, weights, onEditEntry }) {
+export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, recentChanges, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
   const units = useUnits();
-  const unitSystem = useUnitSystem();
   const [expanded, setExpanded] = useState({});
   const [dayModal, setDayModal] = useState(null);
   const [selectedBar, setSelectedBar] = useState(null);
@@ -132,20 +130,6 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             color={colors.tummy}
           />
         </div>
-      </div>
-
-      {/* Daily facts */}
-      <div className="fade-in fade-in-4" style={{ marginBottom: 20 }}>
-        <FactsCard
-          feedings={monthlyFeedings}
-          sleep={monthlySleep}
-          changes={monthlyChanges}
-          baths={baths}
-          tummyTimes={weeklyTummyTimes}
-          weights={weights}
-          units={units}
-          unitSystem={unitSystem}
-        />
       </div>
 
       {/* Main Grid */}

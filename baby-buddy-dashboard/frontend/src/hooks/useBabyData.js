@@ -44,6 +44,7 @@ export function useBabyData() {
   const [unitSystem, setUnitSystem] = useState("metric");
   const [monthlyChanges, setMonthlyChanges] = useState([]);
   const [theme, setTheme] = useState(null);
+  const [allTime, setAllTime] = useState({ feedings: [], sleep: [], changes: [] });
   const [alertConfig, setAlertConfig] = useState({ feeding_alert_hours: 3, diaper_alert_hours: 3 });
   const intervalRef = useRef(null);
   const childIdRef = useRef(null);
@@ -269,6 +270,39 @@ export function useBabyData() {
     return () => clearInterval(intervalRef.current);
   }, [fetchAll, loadMock]);
 
+  // All-time history, for the daily fact card only. Kept out of the main load on
+  // purpose: on a long history this is several paged requests per endpoint, and nothing
+  // on screen should wait for it. If it fails, the card just doesn't appear.
+  useEffect(() => {
+    const id = child?.id;
+    if (!id) return undefined;
+    if (demoRef.current) {
+      const mock = getMockData(id);
+      setAllTime({
+        feedings: mock.monthlyFeedings || [],
+        sleep: mock.monthlySleep || [],
+        changes: mock.monthlyChanges || [],
+      });
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const [feedingsAll, sleepAll, changesAll] = await Promise.all([
+          api.getAllFeedings({ child: id, ordering: "-start" }),
+          api.getAllSleep({ child: id, ordering: "-start" }),
+          api.getAllChanges({ child: id, ordering: "-time" }),
+        ]);
+        if (!cancelled) setAllTime({ feedings: feedingsAll, sleep: sleepAll, changes: changesAll });
+      } catch {
+        // the fact card is the only consumer; leave it empty and it renders nothing
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [child?.id]);
+
   return {
     children,
     child,
@@ -288,6 +322,7 @@ export function useBabyData() {
     monthlyFeedings,
     monthlySleep,
     monthlyChanges,
+    allTime,
     notes,
     baths,
     events,

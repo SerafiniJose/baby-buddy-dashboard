@@ -29,6 +29,7 @@ import HeightForm from "./components/forms/HeightForm";
 import ThemeToggle from "./components/ThemeToggle";
 import TimerButton from "./components/TimerButton";
 import AlertBanner from "./components/AlertBanner";
+import DailyFactCard from "./components/DailyFactCard";
 import "./styles.css";
 
 const TABS = [
@@ -299,6 +300,14 @@ export default function App() {
       {/* Tab Content */}
       <main className="tab-content">
         <AlertBanner messages={alertMessages} onDismiss={(k) => setDismissedAlerts((p) => ({ ...p, [k]: true }))} />
+        <DailyFactCard
+          feedings={data.allTime.feedings}
+          sleep={data.allTime.sleep}
+          changes={data.allTime.changes}
+          baths={data.baths}
+          tummyTimes={data.weeklyTummyTimes}
+          weights={data.weights}
+        />
         {activeTab === "overview" && (
           <OverviewTab
             feedings={data.feedings}
@@ -311,10 +320,6 @@ export default function App() {
             tummyTimes={data.tummyTimes}
             weeklyTummyTimes={data.weeklyTummyTimes}
             baths={data.baths}
-            monthlyFeedings={data.monthlyFeedings}
-            monthlySleep={data.monthlySleep}
-            monthlyChanges={data.monthlyChanges}
-            weights={data.weights}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
