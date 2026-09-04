@@ -15,6 +15,10 @@
   --overlay-border: color-mix(in srgb, var(--text) 20%, transparent);
   --danger: #EF4444;
   --danger-text: color-mix(in srgb, var(--danger) 60%, var(--text));
+  --success: #22C55E;
+  --success-text: color-mix(in srgb, var(--success) 60%, var(--text));
+  --success-surface: color-mix(in srgb, var(--success) 12%, transparent);
+  --success-border: color-mix(in srgb, var(--success) 40%, transparent);
   --danger-surface: color-mix(in srgb, var(--danger) 12%, transparent);
   --danger-border: color-mix(in srgb, var(--danger) 40%, transparent);
   --mono: "JetBrains Mono", monospace;
@@ -33,6 +37,30 @@
   --accent-25: color-mix(in srgb, var(--accent) 25%, transparent);
   --accent-40: color-mix(in srgb, var(--accent) 40%, transparent);
   --accent-60: color-mix(in srgb, var(--accent) 60%, transparent);
+  /* Ink laid ON an accent-filled surface (the FAB). Black reads best on the bright
+     amber above; the light palette's darker accent needs white instead. */
+  --accent-ink: #000;
+}
+
+/* Built-in light palette, applied when the header's theme toggle resolves to light -
+   either explicitly or, on Auto, because the device asks for it. utils/themeMode.js
+   resolves the mode and index.html's inline script sets the attribute before first
+   paint. Values are picked for contrast, not by eye: every one of the three text steps
+   clears WCAG AA for small text against both surfaces - 16.6:1 / 7.5:1 / 5.0:1 on the
+   card, 15.3:1 / 6.9:1 / 4.6:1 on the page behind it - and the accent is darkened from
+   #F59E0B (2.2:1 on white, unreadable) to #B45309 (5.0:1), keeping the amber hue.
+   The add-on's theme_* options / color_preset override this block; their injected
+   <style> lands later in <head> and so wins at equal specificity (see server.py's
+   inject_theme_css). */
+:root[data-mode="light"] {
+  --bg: #F4F5F8;
+  --card-bg: #FFFFFF;
+  --border: #E2E5ED;
+  --text: #1B1E28;
+  --text-muted: #4E5468;
+  --text-dim: #686F82;
+  --accent: #B45309;
+  --accent-ink: #FFF;
 }
 
 body {
@@ -115,7 +143,7 @@ body {
 
 .sync-error {
   font-size: 11px;
-  color: #EF4444;
+  color: var(--danger-text);
   font-weight: 500;
 }
 
@@ -218,9 +246,9 @@ body {
 .timer-save-btn {
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid #22C55E40;
-  background: #22C55E15;
-  color: #22C55E;
+  border: 1px solid var(--success-border);
+  background: var(--success-surface);
+  color: var(--success-text);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -229,7 +257,7 @@ body {
 }
 
 .timer-save-btn:hover {
-  background: #22C55E25;
+  background: color-mix(in srgb, var(--success) 22%, transparent);
 }
 
 .timer-discard-btn {
@@ -237,15 +265,15 @@ body {
   align-items: center;
   padding: 5px;
   border-radius: 8px;
-  border: 1px solid #EF444440;
-  background: #EF444415;
-  color: #EF4444;
+  border: 1px solid var(--danger-border);
+  background: var(--danger-surface);
+  color: var(--danger-text);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .timer-discard-btn:hover {
-  background: #EF444425;
+  background: color-mix(in srgb, var(--danger) 22%, transparent);
 }
 
 /* Clickable entries */
@@ -321,18 +349,18 @@ body {
   height: 56px;
   border-radius: 16px;
   border: none;
-  color: #000;
+  color: var(--accent-ink);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 30%, transparent);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .fab-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .fab-menu {
