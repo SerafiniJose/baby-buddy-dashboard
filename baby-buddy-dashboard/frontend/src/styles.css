@@ -21,6 +21,9 @@
   --success-border: color-mix(in srgb, var(--success) 40%, transparent);
   --danger-surface: color-mix(in srgb, var(--danger) 12%, transparent);
   --danger-border: color-mix(in srgb, var(--danger) 40%, transparent);
+  /* Content column width. The auto-fit grids in the tabs reflow against it on their
+     own, and the FAB anchors to its right edge instead of the viewport corner. */
+  --app-max: 1280px;
   --mono: "JetBrains Mono", monospace;
   --font: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 
@@ -72,7 +75,7 @@ body {
 
 /* App layout */
 .app {
-  max-width: 960px;
+  max-width: var(--app-max);
   margin: 0 auto;
   padding: 20px 16px 100px;
   min-height: 100vh;
@@ -377,7 +380,9 @@ body {
 .fab-container {
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  /* Sit 24px inside the content column's right edge, not the viewport's: on a wide
+     screen the two are hundreds of pixels apart and the buttons float in dead space. */
+  right: max(24px, calc((100vw - var(--app-max)) / 2 + 24px));
   display: flex;
   flex-direction: column;
   align-items: flex-end;
