@@ -86,9 +86,9 @@ def _theme_mode_is_complete(mode):
     return bool(mode) and all(mode.get(camel) for camel, _ in THEME_FIELDS)
 
 
-def _theme_mode_css_block(mode):
-    declarations = "\n".join(f"      {THEME_CSS_VAR_NAMES[camel]}: {mode[camel]};" for camel, _ in THEME_FIELDS)
-    return f"  :root {{\n{declarations}\n  }}"
+def _theme_mode_css_block(name, mode):
+    declarations = "\n".join(f"  {THEME_CSS_VAR_NAMES[camel]}: {mode[camel]};" for camel, _ in THEME_FIELDS)
+    return f':root[data-mode="{name}"] {{\n{declarations}\n}}'
 
 
 def build_theme_css(theme):
@@ -97,14 +97,19 @@ def build_theme_css(theme):
     <head> on every request, so the correct light/dark colors are present at first paint.
     The client-side applyTheme() (theme.js) still runs after mount too - it's idempotent
     against identical values - but without this server-side copy the page briefly renders
-    with the built-in dark default while waiting on the client's /api/config round trip."""
+    with the built-in dark default while waiting on the client's /api/config round trip.
+
+    Both modes are emitted unconditionally and gated on <html data-mode>, which the
+    inline script in index.html sets before first paint (see utils/themeMode.js). Keying
+    on prefers-color-scheme instead would leave a configured theme unable to follow the
+    user's own light/dark choice in the header."""
     blocks = []
     light = theme.get("light")
     dark = theme.get("dark")
     if _theme_mode_is_complete(light):
-        blocks.append(f"@media (prefers-color-scheme: light) {{\n{_theme_mode_css_block(light)}\n}}")
+        blocks.append(_theme_mode_css_block("light", light))
     if _theme_mode_is_complete(dark):
-        blocks.append(f"@media (prefers-color-scheme: dark) {{\n{_theme_mode_css_block(dark)}\n}}")
+        blocks.append(_theme_mode_css_block("dark", dark))
     return "\n\n".join(blocks)
 
 
@@ -112,11 +117,11 @@ def inject_theme_css(html, theme):
     """Inline the resolved theme into an index.html string, right before </head>.
 
     Position matters: the built stylesheet's <link> (also in <head>) declares the base,
-    unthemed `:root` variables unconditionally, at the same specificity as this override's
-    `@media (...) { :root { ... } }` block. For equal specificity the LAST declaration in
-    the document wins, media query or not. Injecting before the stylesheet link (e.g. right
-    after <head>) would put this override first, so the base variables would always win the
-    cascade and silently discard it, regardless of which prefers-color-scheme matches."""
+    unthemed `:root` variables and the built-in light palette, the latter at the same
+    `:root[data-mode="light"]` specificity as this override. For equal specificity the LAST
+    declaration in the document wins. Injecting before the stylesheet link (e.g. right after
+    <head>) would put this override first, so the built-in palette would always win the
+    cascade and silently discard the configured colors."""
     css = build_theme_css(theme)
     if not css:
         return html

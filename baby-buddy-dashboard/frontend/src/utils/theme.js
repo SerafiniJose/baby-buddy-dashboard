@@ -13,9 +13,9 @@ function isComplete(mode) {
   return !!mode && KEYS.every((k) => !!mode[k]);
 }
 
-function modeBlock(mode) {
-  const declarations = KEYS.map((k) => `      ${VAR_NAMES[k]}: ${mode[k]};`).join("\n");
-  return `  :root {\n${declarations}\n  }`;
+function modeBlock(name, mode) {
+  const declarations = KEYS.map((k) => `  ${VAR_NAMES[k]}: ${mode[k]};`).join("\n");
+  return `:root[data-mode="${name}"] {\n${declarations}\n}`;
 }
 
 /**
@@ -23,15 +23,15 @@ function modeBlock(mode) {
  * light/dark mode, from user-supplied colors (add-on config). A mode is only applied
  * if every field for it is set - a partial override risks unreadable combinations
  * (e.g. light background with the default light-on-dark text color).
+ *
+ * Gated on <html data-mode> rather than prefers-color-scheme: the theme toggle can
+ * override the device preference, and a media query cannot be overridden from the UI.
+ * The attribute holds the mode already resolved by utils/themeMode.js.
  */
 export function buildThemeCss({ light, dark } = {}) {
   const blocks = [];
-  if (isComplete(light)) {
-    blocks.push(`@media (prefers-color-scheme: light) {\n${modeBlock(light)}\n}`);
-  }
-  if (isComplete(dark)) {
-    blocks.push(`@media (prefers-color-scheme: dark) {\n${modeBlock(dark)}\n}`);
-  }
+  if (isComplete(light)) blocks.push(modeBlock("light", light));
+  if (isComplete(dark)) blocks.push(modeBlock("dark", dark));
   return blocks.join("\n\n");
 }
 

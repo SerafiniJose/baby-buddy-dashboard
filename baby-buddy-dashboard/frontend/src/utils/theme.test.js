@@ -27,26 +27,33 @@ describe("buildThemeCss", () => {
     expect(buildThemeCss({})).toBe("");
   });
 
-  it("emits only the light media block when only light is fully configured", () => {
+  it("emits only the light block when only light is fully configured", () => {
     const css = buildThemeCss({ light: FULL_LIGHT });
-    expect(css).toContain("prefers-color-scheme: light");
-    expect(css).not.toContain("prefers-color-scheme: dark");
+    expect(css).toContain(':root[data-mode="light"]');
+    expect(css).not.toContain(':root[data-mode="dark"]');
     expect(css).toContain("--bg: #F5F2EA;");
     expect(css).toContain("--accent: #2A9D8F;");
   });
 
-  it("emits both media blocks when both modes are fully configured", () => {
+  it("emits both blocks when both modes are fully configured", () => {
     const css = buildThemeCss({ light: FULL_LIGHT, dark: FULL_DARK });
-    expect(css).toContain("prefers-color-scheme: light");
-    expect(css).toContain("prefers-color-scheme: dark");
+    expect(css).toContain(':root[data-mode="light"]');
+    expect(css).toContain(':root[data-mode="dark"]');
     expect(css).toContain("--bg: #14110C;");
   });
 
   it("skips a mode entirely if even one field is missing, to avoid an unreadable partial theme", () => {
     const partialLight = { ...FULL_LIGHT, text: "" };
     const css = buildThemeCss({ light: partialLight, dark: FULL_DARK });
-    expect(css).not.toContain("prefers-color-scheme: light");
-    expect(css).toContain("prefers-color-scheme: dark");
+    expect(css).not.toContain(':root[data-mode="light"]');
+    expect(css).toContain(':root[data-mode="dark"]');
+  });
+
+  // The switch keys off the attribute alone, so a configured theme must not stay
+  // gated behind the device preference the user just overrode.
+  it("gates on the mode attribute rather than prefers-color-scheme", () => {
+    const css = buildThemeCss({ light: FULL_LIGHT, dark: FULL_DARK });
+    expect(css).not.toContain("prefers-color-scheme");
   });
 
   it("maps every app color token to its CSS custom property", () => {
