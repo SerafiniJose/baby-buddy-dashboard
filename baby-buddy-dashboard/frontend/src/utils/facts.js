@@ -9,7 +9,7 @@
 import { feedingDurationMs, toLocalISODate } from "./formatters";
 import { weightFromGrams, formatWeightValue } from "./weight";
 
-export const FACT_GROUPS = ["Records", "Daily totals", "Time since", "Trends"];
+export const FACT_GROUPS = ["Records", "All time", "Daily totals", "Time since", "Trends"];
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 24 * HOUR_MS;
@@ -43,6 +43,11 @@ export function formatSpan(ms) {
 
 function trimNumber(n, decimals = 2) {
   return String(Number(n.toFixed(decimals)));
+}
+
+/** Whole-number counts and hour totals get thousands separators - these run large. */
+function groupDigits(n) {
+  return Math.round(n).toLocaleString();
 }
 
 function dayLabel(value) {
@@ -160,6 +165,56 @@ function records(feedings, sleep, units) {
   if (busiest && busiest.value > 0) {
     out.push(fact("most-feeds-day", "Records", "Most feeds in a day",
       `${busiest.value} feeds`, dayLabel(`${busiest.item[0]}T12:00:00`)));
+  }
+
+  return out;
+}
+
+/**
+ * Totals over everything logged. These only mean anything against the all-time fetch
+ * (see api.js's requestAll) - over a rolling 30-day window "diapers changed" would be a
+ * number that silently stops growing.
+ */
+function allTime(feedings, sleep, changes, now) {
+  const out = [];
+  const since = (entries, dateKey) => {
+    let earliest = null;
+    for (const e of entries) {
+      const d = toDate(e?.[dateKey]);
+      if (d && (!earliest || d < earliest)) earliest = d;
+    }
+    return earliest ? `since ${dayLabel(earliest)}` : null;
+  };
+
+  if (feedings.length) {
+    out.push(fact("total-feeds", "All time", "Feeds logged",
+      groupDigits(feedings.length), since(feedings, "start")));
+  }
+  if (changes.length) {
+    out.push(fact("total-changes", "All time", "Diapers changed",
+      groupDigits(changes.length), since(changes, "time")));
+  }
+
+  const feedMs = timedDurations(feedings).reduce((s, x) => s + x.ms, 0);
+  if (feedMs > 0) {
+    out.push(fact("total-feeding-time", "All time", "Total time feeding",
+      `${groupDigits(feedMs / HOUR_MS)}h`, since(feedings, "start")));
+  }
+
+  const sleepMs = timedDurations(sleep).reduce((s, x) => s + x.ms, 0);
+  if (sleepMs > 0) {
+    out.push(fact("total-sleep", "All time", "Total sleep logged",
+      `${groupDigits(sleepMs / HOUR_MS)}h`, since(sleep, "start")));
+  }
+
+  const days = Math.max(
+    daysCovered(feedings, "start", now),
+    daysCovered(sleep, "start", now),
+    daysCovered(changes, "time", now)
+  );
+  if (days > 0) {
+    out.push(fact("days-tracked", "All time", "Days of data",
+      `${groupDigits(days)} days`, "of logged entries"));
   }
 
   return out;
@@ -312,6 +367,7 @@ export function buildFacts({
 } = {}) {
   return [
     ...records(feedings, sleep, units),
+    ...allTime(feedings, sleep, changes, now),
     ...dailyTotals(feedings, sleep, now),
     ...timeSince(changes, baths, tummyTimes, now),
     ...trends(feedings, sleep, weights, units, unitSystem, now),

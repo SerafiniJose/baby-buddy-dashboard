@@ -341,6 +341,58 @@ describe("trends and streaks", () => {
   });
 });
 
+describe("all-time totals", () => {
+  const data = {
+    feedings: [
+      feed(20, 9, { duration: "00:30:00" }),
+      feed(10, 9, { duration: "00:30:00" }),
+      feed(1, 9, { duration: "01:00:00" }),
+    ],
+    sleep: [nap(20, 22, "08:00:00"), nap(1, 22, "07:30:00")],
+    changes: [
+      { time: at(20, 7), wet: true, solid: false },
+      { time: at(10, 7), wet: true, solid: false },
+      { time: at(1, 7), wet: false, solid: true },
+      { time: at(0, 7), wet: true, solid: false },
+    ],
+  };
+
+  it("counts every feed logged", () => {
+    expect(fact(data, "total-feeds").value).toBe("3");
+  });
+
+  it("counts every diaper change logged", () => {
+    expect(fact(data, "total-changes").value).toBe("4");
+  });
+
+  it("totals the time spent feeding", () => {
+    expect(fact(data, "total-feeding-time").value).toBe("2h");
+  });
+
+  it("totals the sleep logged", () => {
+    expect(fact(data, "total-sleep").value).toBe("16h");
+  });
+
+  it("reports how many days of data there are, from the first entry", () => {
+    // 21 days back through today
+    expect(fact(data, "days-tracked").value).toBe("21 days");
+  });
+
+  it("groups large totals for readability", () => {
+    const many = Array.from({ length: 1200 }, (_, i) => feed(i % 25, 9));
+    expect(fact({ feedings: many }, "total-feeds").value).toBe((1200).toLocaleString());
+  });
+
+  it("omits totals for a category with nothing logged", () => {
+    expect(fact({ feedings: [feed(1, 9)] }, "total-changes")).toBeUndefined();
+    expect(fact({ changes: [{ time: at(1, 7), wet: true }] }, "total-feeds")).toBeUndefined();
+  });
+
+  it("omits the feeding-time total when no feed was ever timed", () => {
+    expect(fact({ feedings: [feed(1, 9, { amount: 100 })] }, "total-feeding-time")).toBeUndefined();
+  });
+});
+
 describe("units", () => {
   it("labels volumes and weights with the imperial units when configured", () => {
     const facts = byId(
