@@ -311,6 +311,10 @@ export default function App() {
             tummyTimes={data.tummyTimes}
             weeklyTummyTimes={data.weeklyTummyTimes}
             baths={data.baths}
+            monthlyFeedings={data.monthlyFeedings}
+            monthlySleep={data.monthlySleep}
+            monthlyChanges={data.monthlyChanges}
+            weights={data.weights}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
