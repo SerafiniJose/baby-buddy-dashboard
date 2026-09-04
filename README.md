@@ -262,7 +262,7 @@ This repository is a personal fork of the upstream project. All upstream functio
 
 **Daily facts**
 
-- A **"Did you know"** card on the Overview tab surfaces a different fact each day — longest feeding, longest sleep stretch, time since the last poop, weight change, best run of long nights, and others — with the full set grouped underneath. Facts are computed from the 30-day window the dashboard already holds, so records read "across N days" rather than claiming all-time bests.
+- A dismissable card surfaces one interesting fact a day, drawn from everything ever logged — longest feeding, diapers changed in total, time since the last poop, best run of long nights, and others. Dismissing it hides it until the next day. The all-time history is fetched in the background after the app has loaded, page by page and bounded by a page cap, so it never delays the UI.
 
 **Theme selector and desktop layout**
 

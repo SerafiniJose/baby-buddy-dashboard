@@ -6,17 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.0] - 2026-09-04
 ### Added
-- **"Did you know" card on the Overview tab** — a different fact featured each day, with the full set grouped beneath it:
+- **A daily fact card** — one interesting fact drawn from everything ever logged, shown with the alert banners and dismissable for the day:
   - *Records* — longest feeding, biggest single feed, longest sleep stretch, most feeds in a day
+  - *All time* — feeds logged, diapers changed, total time feeding, total sleep, days of data
   - *Daily totals* — time spent feeding per day, average feed length, feeds per day, sleep per day
   - *Time since* — the last poop (with the usual gap alongside it), the last bath, the last tummy time
   - *Trends* — weight change, this week vs last, best run of consecutive nights with a 6h+ stretch
-- All of it is derived from the 30-day windows already fetched for Reports, so the card costs no extra API calls
+- Paged all-time reads for the list endpoints, bounded by a page cap. The fetch runs after first paint and is never awaited by the main load, so a long history can't slow the app down or fire unbounded requests at your Baby Buddy
 
 ### Notes
+- Dismissing stores the date, so the card stays gone until the day rolls over and the next fact brings it back on its own
 - A fact only appears when it can be computed from real entries, so a household a few days in sees the handful of facts it has earned rather than a grid of dashes
-- The daily highlight is keyed off the local date, not random: it holds still all day and turns over at midnight. It is scored per fact rather than indexed into the list, so a fact appearing mid-day (the first bath ever logged, say) does not swap the highlight out
-- Records are labelled "across N days" because 30 days is the fetch window — they are not all-time bests
+- The daily choice is keyed off the local date, not random: it holds still all day. It is scored per fact rather than indexed into the list, so a fact appearing mid-day (the first bath ever logged, say) does not swap the highlight out
 
 ## [1.7.0] - 2026-09-04
 ### Added
