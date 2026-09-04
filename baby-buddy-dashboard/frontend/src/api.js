@@ -49,9 +49,35 @@ function qs(params) {
   return s ? `?${s}` : "";
 }
 
+// All-time reads (the daily fact card) page through the list endpoints. Baby Buddy is
+// DRF-paginated, and its `next` link points at the instance itself - which this app never
+// talks to directly, everything goes through the add-on's proxy - so the offset is walked
+// by hand instead of followed. MAX_PAGES bounds a long history: a toddler's worth of
+// feedings should not turn one page load into unbounded requests against the instance.
+export const PAGE_SIZE = 500;
+export const MAX_PAGES = 20;
+
+async function requestAll(endpoint, params = {}) {
+  const out = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const res = await request(
+      `${endpoint}${qs({ ...params, limit: PAGE_SIZE, offset: page * PAGE_SIZE })}`
+    );
+    const results = res?.results || [];
+    out.push(...results);
+    if (!res?.next || results.length === 0) break;
+  }
+  return out;
+}
+
 export const api = {
   // Children
   getChildren: () => request("children/"),
+
+  // All-time reads, paged
+  getAllFeedings: (params) => requestAll("feedings/", params),
+  getAllSleep: (params) => requestAll("sleep/", params),
+  getAllChanges: (params) => requestAll("changes/", params),
 
   // Feedings
   getFeedings: (params) => request(`feedings/${qs(params)}`),
