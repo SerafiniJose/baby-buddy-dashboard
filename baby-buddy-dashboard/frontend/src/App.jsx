@@ -5,6 +5,7 @@ import { UnitContext } from "./utils/units";
 import { Icons } from "./components/Icons";
 import { colors } from "./utils/colors";
 import { applyTheme } from "./utils/theme";
+import { readStoredMode, writeStoredMode, resolveMode } from "./utils/themeMode";
 import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
 import { api } from "./api";
 import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
@@ -25,6 +26,7 @@ import EventForm from "./components/forms/EventForm";
 import ReminderForm from "./components/forms/ReminderForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
+import ThemeToggle from "./components/ThemeToggle";
 import TimerButton from "./components/TimerButton";
 import AlertBanner from "./components/AlertBanner";
 import "./styles.css";
@@ -91,6 +93,26 @@ export default function App() {
   useEffect(() => {
     if (data.theme) applyTheme(data.theme);
   }, [data.theme]);
+
+  // index.html sets data-mode before first paint; this keeps it in sync afterwards -
+  // when the user picks a mode, and, while on auto, when the device flips light/dark
+  // under us (an OS scheduled dark mode, for instance).
+  const [themeMode, setThemeMode] = useState(readStoredMode);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => {
+      document.documentElement.setAttribute("data-mode", resolveMode(themeMode, media.matches));
+    };
+    apply();
+    if (themeMode !== "auto") return undefined;
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, [themeMode]);
+
+  const changeThemeMode = (mode) => {
+    writeStoredMode(mode);
+    setThemeMode(mode);
+  };
 
   const [activeTab, setActiveTab] = useState("overview");
   const [modal, setModal] = useState(null);
@@ -174,6 +196,7 @@ export default function App() {
           {data.error && (
             <span className="sync-error">Connection error</span>
           )}
+          <ThemeToggle mode={themeMode} onChange={changeThemeMode} />
           {data.lastSync && !data.error && (
             <span className="sync-time">
               {data.lastSync.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

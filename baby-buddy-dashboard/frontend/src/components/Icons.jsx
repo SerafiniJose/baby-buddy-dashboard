@@ -80,6 +80,13 @@ export const Icons = {
       <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
     </svg>
   ),
+  // Half-filled circle: the conventional "match device / auto" mark.
+  Contrast: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none" />
+    </svg>
+  ),
   Timer: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="13" r="8" />

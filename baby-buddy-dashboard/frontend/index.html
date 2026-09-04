@@ -18,6 +18,24 @@
          configured. */
       body { background: var(--bg, #0F1117); }
     </style>
+    <script>
+      /* Resolve the theme mode before first paint. Mirrors resolveMode() /
+         readStoredMode() in src/utils/themeMode.js - kept as a few inline lines rather
+         than an import so it runs ahead of the bundle, since every themed rule
+         (the built-in light palette in styles.css, and the add-on's overrides injected
+         by server.py) is gated on this attribute. Without it the page paints dark
+         first and snaps to light once React mounts. */
+      (function () {
+        var pref = null;
+        try { pref = localStorage.getItem("bbd-theme-mode"); } catch (e) { /* storage blocked */ }
+        if (pref !== "light" && pref !== "dark") {
+          pref = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+        document.documentElement.setAttribute("data-mode", pref);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
