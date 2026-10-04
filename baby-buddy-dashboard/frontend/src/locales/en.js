@@ -276,6 +276,8 @@ export default {
     logTitle: "Log Sleep",
     save: "Save Sleep",
     update: "Update Sleep",
+    invalidRange: "Enter valid sleep start and end times.",
+    endAfterStart: "Sleep end must be after start.",
   },
 
   diaperForm: {
@@ -479,6 +481,9 @@ export default {
 
   nanny: {
     title: "Nanny Mode",
+    enterMode: "Nanny mode",
+    exitMode: "Back to dashboard",
+    logSleep: "Log sleep",
     now: "Now",
     routine: "Routine",
     tasksTitle: "Tasks for {name}",

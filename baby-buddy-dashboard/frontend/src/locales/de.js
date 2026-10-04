@@ -266,6 +266,8 @@ const locale = {
     logTitle: "Schlaf erfassen",
     save: "Schlaf speichern",
     update: "Schlaf aktualisieren",
+    invalidRange: "Gültige Start- und Endzeiten für den Schlaf eingeben.",
+    endAfterStart: "Das Schlafende muss nach dem Beginn liegen.",
   },
 
   diaperForm: {
@@ -346,6 +348,12 @@ const locale = {
     logTitle: "Notiz hinzufügen",
     save: "Notiz speichern",
     update: "Notiz aktualisieren",
+  },
+
+  nanny: {
+    enterMode: "Nanny-Modus",
+    exitMode: "Zurück zum Dashboard",
+    logSleep: "Schlaf erfassen",
   },
 
   time: {

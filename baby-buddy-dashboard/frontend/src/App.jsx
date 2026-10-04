@@ -6,6 +6,7 @@ import { Icons } from "./components/Icons";
 import { colors } from "./utils/colors";
 import { applyTheme } from "./utils/theme";
 import { readStoredMode, writeStoredMode, resolveMode } from "./utils/themeMode";
+import { readStoredNannyMode, writeStoredNannyMode } from "./utils/nannyModePreference";
 import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
 import { api } from "./api";
 import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
@@ -38,7 +39,6 @@ import "./styles.css";
 
 const TABS = [
   { id: "overview", labelKey: "tab.overview", icon: <Icons.Activity /> },
-  { id: "nanny", labelKey: "tab.nanny", icon: <Icons.Baby /> },
   { id: "growth", labelKey: "tab.growth", icon: <Icons.TrendUp /> },
   { id: "notes", labelKey: "tab.notes", icon: <Icons.StickyNote /> },
   { id: "calendar", labelKey: "tab.calendar", icon: <Icons.Calendar /> },
@@ -125,6 +125,7 @@ export default function App() {
   };
 
   const [activeTab, setActiveTab] = useState("overview");
+  const [nannyMode, setNannyMode] = useState(readStoredNannyMode);
   const [modal, setModal] = useState(null);
   const [showActions, setShowActions] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState("track");
@@ -142,6 +143,26 @@ export default function App() {
     if (!data.child?.id) return;
     setModal({ type: "nannyTask" });
   };
+
+  const enterNannyMode = () => {
+    writeStoredNannyMode(true);
+    setNannyMode(true);
+    setShowActions(false);
+    setShowTimerPicker(false);
+  };
+
+  const exitNannyMode = () => {
+    writeStoredNannyMode(false);
+    setNannyMode(false);
+    closeModal();
+  };
+
+  const handleAddNannySleep = () => {
+    if (!data.child?.id) return;
+    setModal({ type: "nannySleep" });
+  };
+
+  const showNannyExperience = nannyMode;
 
   const alertMessages = [];
   const feedHrs = data.alertConfig?.feeding_alert_hours ?? 3;
@@ -213,6 +234,18 @@ export default function App() {
           )}
           <LanguageSelector />
           <ThemeToggle mode={themeMode} onChange={changeThemeMode} />
+          {!showNannyExperience && (
+            <button className="nanny-mode-toggle" onClick={enterNannyMode} aria-label={t("nanny.enterMode")}>
+              <Icons.Baby />
+              <span>{t("nanny.enterMode")}</span>
+            </button>
+          )}
+          {showNannyExperience && (
+            <button className="nanny-mode-toggle nanny-mode-toggle-exit" onClick={exitNannyMode} aria-label={t("nanny.exitMode")}>
+              <Icons.X />
+              <span>{t("nanny.exitMode")}</span>
+            </button>
+          )}
           {data.lastSync && !data.error && (
             <span className="sync-time">
               {data.lastSync.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -225,7 +258,7 @@ export default function App() {
       </header>
 
       {/* Child Switcher (only when 2+ children) */}
-      {data.children.length >= 2 && (
+      {!showNannyExperience && data.children.length >= 2 && (
         <div className="child-switcher fade-in">
           {data.children.map((c) => (
             <button
@@ -240,7 +273,7 @@ export default function App() {
       )}
 
       {/* Active Timer Bars */}
-      {timer.activeTimers.map((t) => (
+      {!showNannyExperience && timer.activeTimers.map((t) => (
         <div key={t.id} className="timer-bar fade-in">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span className="timer-pulse" />
@@ -299,6 +332,7 @@ export default function App() {
       ))}
 
       {/* Tab Navigation */}
+      {!showNannyExperience && (
       <nav className="tab-nav fade-in">
         {TABS.map((tab) => (
           <button
@@ -311,12 +345,25 @@ export default function App() {
           </button>
         ))}
       </nav>
+      )}
 
       {/* Tab Content */}
-      <main className="tab-content">
+      <main className={showNannyExperience ? "tab-content nanny-exclusive-content" : "tab-content"}>
+        {showNannyExperience ? (
+          <NannyTab
+            childId={data.child?.id}
+            nannyName={data.nannyName}
+            feedings={data.monthlyFeedings?.length ? data.monthlyFeedings : data.recentFeedings}
+            nannyTasks={data.nannyTasks}
+            nannyTaskDones={data.nannyTaskDones}
+            onTaskDone={data.refetch}
+            onAddTask={handleAddNannyTask}
+            onAddSleep={handleAddNannySleep}
+          />
+        ) : (
+          <>
         <AlertBanner messages={alertMessages} onDismiss={(k) => setDismissedAlerts((p) => ({ ...p, [k]: true }))} />
-        {activeTab !== "nanny" && (
-          <DailyFactCard
+        <DailyFactCard
             feedings={data.allTime.feedings}
             sleep={data.allTime.sleep}
             changes={data.allTime.changes}
@@ -324,7 +371,6 @@ export default function App() {
             tummyTimes={data.weeklyTummyTimes}
             weights={data.weights}
           />
-        )}
         {activeTab === "overview" && (
           <OverviewTab
             feedings={data.feedings}
@@ -338,17 +384,6 @@ export default function App() {
             weeklyTummyTimes={data.weeklyTummyTimes}
             baths={data.baths}
             onEditEntry={(type, entry) => setModal({ type, entry })}
-          />
-        )}
-        {activeTab === "nanny" && (
-          <NannyTab
-            childId={data.child?.id}
-            nannyName={data.nannyName}
-            feedings={data.monthlyFeedings?.length ? data.monthlyFeedings : data.recentFeedings}
-            nannyTasks={data.nannyTasks}
-            nannyTaskDones={data.nannyTaskDones}
-            onTaskDone={data.refetch}
-            onAddTask={handleAddNannyTask}
           />
         )}
         {activeTab === "growth" && (
@@ -388,9 +423,12 @@ export default function App() {
             monthlyChanges={data.monthlyChanges}
           />
         )}
+          </>
+        )}
       </main>
 
       {/* Quick Action FAB */}
+      {!showNannyExperience && (
       <div className="fab-container">
         {showActions && (
           <div className="fab-menu fade-in">
@@ -473,6 +511,7 @@ export default function App() {
           </span>
         </button>
       </div>
+      )}
 
       {/* Modals */}
       {modal?.type === "feeding" && (
@@ -484,7 +523,7 @@ export default function App() {
           onClose={closeModal}
         />
       )}
-      {modal?.type === "sleep" && (
+      {(modal?.type === "sleep" || modal?.type === "nannySleep") && (
         <SleepForm
           childId={data.child?.id}
           timerId={modal.timerId}

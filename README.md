@@ -15,7 +15,7 @@ A modern, responsive dashboard for [Baby Buddy](https://github.com/babybuddy/bab
 - **Overview dashboard** — daily stats, timelines, and charts for feedings, sleep, diapers, and tummy time
 - **Growth tracking** — 30-day feeding totals, sleep averages, weight, and height trend charts
 - **Quick logging** — grouped floating action button to quickly log feedings, sleep, diaper changes, tummy time, temperature, weight, height, and notes
-- **Modo Niñera** — caretaker view that matches the app's native card/timeline layout, with the next routine cue from the latest Baby Buddy feeding and standalone Nanny tasks stored as tagged notes
+- **Modo Niñera** — persistent, focused caretaker mode that hides the normal dashboard, shows the next routine cue, supports manual sleep logging, and keeps standalone caretaker tasks as tagged notes
 - **Internationalization** — dependency-free app i18n with English, Spanish, Italian, and German, browser-language detection, persisted language preference, and a header language selector
 - **Multiple timers** — run concurrent timers for overlapping activities (feeding, sleep, tummy time)
 - **Metric / Imperial** — configurable unit labels (kg/lb, cm/in, mL/oz, °C/°F) with no data conversion
@@ -160,7 +160,9 @@ On first load the app checks the saved browser preference, then `navigator.langu
 
 ### Modo Niñera
 
-Modo Niñera is a standalone caretaker view in the app. It uses the same native cards, stats, timeline rows, buttons, spacing, colors, and responsive grid as the rest of the dashboard. It does not read Home Assistant sensors: routine timing is derived from Baby Buddy feedings, using the end of the latest feeding as the anchor for elapsed time and care cues.
+Modo Niñera is a focused caretaker mode in the app. Enter it from the header: while active, the normal tab navigation, panels, alerts, timers, and quick-action controls are hidden so only the caretaker experience remains. The mode is stored in browser `localStorage`, survives a reload on that device, and always provides a clear **Back to dashboard** control in the header. It uses the same native cards, stats, timeline rows, buttons, spacing, colors, and responsive grid as the rest of the dashboard. It does not read Home Assistant sensors: routine timing is derived from Baby Buddy feedings, using the end of the latest feeding as the anchor for elapsed time and care cues.
+
+The caretaker can use **Log sleep** inside Modo Niñera to create a Baby Buddy sleep entry with explicit start and end times. The form rejects missing or invalid times and requires the end to be later than the start. Saving refreshes the data without leaving Modo Niñera.
 
 The caretaker name is configurable with the add-on option / environment variable `nanny_name` / `NANNY_NAME`; it defaults to `Nanny` for backwards compatibility and is used in the task heading and new-task form.
 
@@ -178,7 +180,7 @@ Routine cues are:
 - 1h30–3h: posible sueño
 - 3h+: posible hambre
 
-"Tareas para Nanny" are modeled as Baby Buddy notes so the dashboard works without Home Assistant. Active tasks use the `nanny-task` tag and a JSON note body:
+Caretaker tasks are modeled as Baby Buddy notes so the dashboard works without Home Assistant. Active tasks use the `nanny-task` tag and a JSON note body:
 
 ```json
 {"title":"Preparar biberón","detail":"120 ml","priority":"high"}

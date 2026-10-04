@@ -266,6 +266,8 @@ const locale = {
     logTitle: "Registra Sonno",
     save: "Salva Sonno",
     update: "Aggiorna Sonno",
+    invalidRange: "Inserisci orari validi di inizio e fine del sonno.",
+    endAfterStart: "La fine del sonno deve essere successiva all'inizio.",
   },
 
   diaperForm: {
@@ -346,6 +348,12 @@ const locale = {
     logTitle: "Aggiungi Nota",
     save: "Salva Nota",
     update: "Aggiorna Nota",
+  },
+
+  nanny: {
+    enterMode: "Modalità tata",
+    exitMode: "Torna alla dashboard",
+    logSleep: "Registra sonno",
   },
 
   time: {

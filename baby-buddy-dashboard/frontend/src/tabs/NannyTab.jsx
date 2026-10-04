@@ -24,7 +24,7 @@ function formatAmount(feeding, t) {
   return parts.join(" · ") || t("nanny.defaultFeeding");
 }
 
-export default function NannyTab({ childId, nannyName = "Nanny", feedings, nannyTasks, nannyTaskDones, onTaskDone, onAddTask }) {
+export default function NannyTab({ childId, nannyName = "Nanny", feedings, nannyTasks, nannyTaskDones, onTaskDone, onAddTask, onAddSleep }) {
   const t = useTranslation();
   const status = buildNannyStatus(feedings || []);
   const phaseKey = `nanny.phases.${status.phase.id}`;
@@ -58,6 +58,13 @@ export default function NannyTab({ childId, nannyName = "Nanny", feedings, nanny
           <span className="nanny-phase-badge">{t(`${phaseKey}.label`)}</span>
         </div>
       </SectionCard>
+
+      <div className="nanny-mode-actions">
+        <button className="nanny-primary-action" onClick={onAddSleep} disabled={!childId}>
+          <Icons.Moon />
+          <span>{t("nanny.logSleep")}</span>
+        </button>
+      </div>
 
       <div className="nanny-stat-grid">
         <StatCard

@@ -4,6 +4,7 @@ import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
+import { validateSleepRange } from "../../utils/sleepValidation";
 import { useTranslation } from "../../locales";
 
 function toLocalDatetime(date) {
@@ -25,6 +26,13 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (!timerId) {
+      const validationKey = validateSleepRange(start, end);
+      if (validationKey) {
+        setError(t(validationKey));
+        return;
+      }
+    }
     setSaving(true);
     try {
       if (isEdit) {
