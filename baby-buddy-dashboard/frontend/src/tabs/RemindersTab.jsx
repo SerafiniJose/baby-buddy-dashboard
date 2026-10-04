@@ -3,6 +3,7 @@ import { Icons } from "../components/Icons";
 import { colors } from "../utils/colors";
 import { parseReminderBody, isActiveToday, isDoneToday } from "../utils/reminders";
 import { toLocalISODate } from "../utils/formatters";
+import { useTranslation } from "../locales";
 
 function statusFor(parsed, reminderId, completions, todayISO) {
   if (!isActiveToday(parsed, todayISO)) return "inactive";
@@ -12,18 +13,19 @@ function statusFor(parsed, reminderId, completions, todayISO) {
 const STATUS_RANK = { pending: 0, done: 1, inactive: 2 };
 
 const STATUS_STYLES = {
-  pending: { label: "pending today", bg: "rgba(245,158,11,0.18)", color: "#F59E0B" },
-  done: { label: "done today", bg: "rgba(34,197,94,0.18)", color: "#22C55E" },
-  inactive: { label: "not active", bg: "rgba(148,163,184,0.18)", color: "#94A3B8" },
+  pending: { labelKey: "reminders.pending", bg: "rgba(245,158,11,0.18)", color: "#F59E0B" },
+  done: { labelKey: "reminders.done", bg: "rgba(34,197,94,0.18)", color: "#22C55E" },
+  inactive: { labelKey: "reminders.inactive", bg: "rgba(148,163,184,0.18)", color: "#94A3B8" },
 };
 
 export default function RemindersTab({ childId, reminders, reminderDones, onAddReminder, onEditEntry }) {
+  const t = useTranslation();
   if (!childId) {
     return (
       <div className="fade-in fade-in-1">
-        <SectionCard title="Reminders" icon={<Icons.Clock />} color={colors.note}>
+        <SectionCard title={t("reminders.title")} icon={<Icons.Clock />} color={colors.note}>
           <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 40 }}>
-            No child selected.
+            {t("reminders.noChild")}
           </div>
         </SectionCard>
       </div>
@@ -47,7 +49,7 @@ export default function RemindersTab({ childId, reminders, reminderDones, onAddR
 
   return (
     <div className="fade-in fade-in-1">
-      <SectionCard title="Reminders" icon={<Icons.Clock />} color={colors.note}>
+      <SectionCard title={t("reminders.title")} icon={<Icons.Clock />} color={colors.note}>
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
           <button
             onClick={onAddReminder}
@@ -57,12 +59,12 @@ export default function RemindersTab({ childId, reminders, reminderDones, onAddR
               cursor: "pointer",
             }}
           >
-            + New Reminder
+            {t("reminders.newReminder")}
           </button>
         </div>
         {rows.length === 0 ? (
           <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 40 }}>
-            No reminders yet. Add one to keep an eye on daily routines like vitamins.
+            {t("reminders.empty")}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -84,10 +86,10 @@ export default function RemindersTab({ childId, reminders, reminderDones, onAddR
                     <span style={{
                       background: s.bg, color: s.color,
                       padding: "3px 8px", borderRadius: 8, fontSize: 11, fontWeight: 600,
-                    }}>{s.label}</span>
+                    }}>{t(s.labelKey)}</span>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
-                    start {parsed.start} · {parsed.end ? `ends ${parsed.end}` : "ongoing"}
+                    {t("reminders.start", { date: parsed.start })} · {parsed.end ? t("reminders.ends", { date: parsed.end }) : t("reminders.ongoing")}
                   </span>
                 </div>
               );

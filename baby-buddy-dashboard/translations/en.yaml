@@ -23,6 +23,9 @@ configuration:
   ha_notify_service:
     name: Notify Service
     description: "Home Assistant notify service used for threshold alerts (e.g. persistent_notification, mobile_app_my_phone)"
+  nanny_name:
+    name: Nanny Name
+    description: "Name shown in Nanny Mode task labels and forms. Defaults to Nanny."
   color_preset:
     name: Color Preset
     description: "Optional - pick a built-in color scheme instead of filling in the 14 'Theme' fields below by hand. Currently available: teal_terracotta (warm cream/near-black with a teal accent, light and dark). Any individual 'Theme' field you also set below overrides the preset's value for that field only."

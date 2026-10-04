@@ -30,6 +30,7 @@ options:
   feeding_alert_hours: 3
   diaper_alert_hours: 3
   ha_notify_service: persistent_notification
+  nanny_name: Nanny
 schema:
   baby_buddy_url: url
   baby_buddy_api_key: password
@@ -39,6 +40,7 @@ schema:
   feeding_alert_hours: "float(0.5,48)"
   diaper_alert_hours: "float(0.5,48)"
   ha_notify_service: str
+  nanny_name: str
   color_preset: "list(teal_terracotta)?"
   theme_light_bg: "str?"
   theme_light_card_bg: "str?"

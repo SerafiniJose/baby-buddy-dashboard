@@ -138,27 +138,28 @@ UNIT_SYSTEM = os.environ.get("UNIT_SYSTEM", "metric").lower()
 FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS", "3"))
 DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS", "3"))
 HA_NOTIFY_SERVICE = os.environ.get("HA_NOTIFY_SERVICE", "persistent_notification")
+NANNY_NAME = (os.environ.get("NANNY_NAME", "Nanny").strip() or "Nanny")
 SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
 HA_API_BASE = "http://supervisor/core/api"
 COLOR_PRESET = sanitize_color_preset(os.environ.get("COLOR_PRESET", ""))
 THEME = {"light": read_theme_mode_from_env("light"), "dark": read_theme_mode_from_env("dark")}
 
-# Fallback: read from HA add-on options.json
-if not BABY_BUDDY_URL:
-    options_path = Path("/data/options.json")
-    if options_path.exists():
-        opts = json.loads(options_path.read_text())
-        BABY_BUDDY_URL = opts.get("baby_buddy_url", "").rstrip("/")
-        BABY_BUDDY_API_KEY = opts.get("baby_buddy_api_key", "")
-        REFRESH_INTERVAL = opts.get("refresh_interval", 30)
-        DEMO_MODE = DEMO_MODE or opts.get("demo_mode", False)
-        UNIT_SYSTEM = opts.get("unit_system", UNIT_SYSTEM)
-        FEEDING_ALERT_HOURS = float(opts.get("feeding_alert_hours", FEEDING_ALERT_HOURS))
-        DIAPER_ALERT_HOURS = float(opts.get("diaper_alert_hours", DIAPER_ALERT_HOURS))
-        HA_NOTIFY_SERVICE = opts.get("ha_notify_service", HA_NOTIFY_SERVICE)
-        COLOR_PRESET = COLOR_PRESET or sanitize_color_preset(opts.get("color_preset", ""))
-        THEME["light"] = fill_theme_mode_from_options("light", THEME["light"], opts)
-        THEME["dark"] = fill_theme_mode_from_options("dark", THEME["dark"], opts)
+# Fallback: read from HA add-on options.json. Env vars still win when set; options fill gaps.
+options_path = Path("/data/options.json")
+if options_path.exists():
+    opts = json.loads(options_path.read_text())
+    BABY_BUDDY_URL = BABY_BUDDY_URL or opts.get("baby_buddy_url", "").rstrip("/")
+    BABY_BUDDY_API_KEY = BABY_BUDDY_API_KEY or opts.get("baby_buddy_api_key", "")
+    REFRESH_INTERVAL = REFRESH_INTERVAL if os.environ.get("REFRESH_INTERVAL") else opts.get("refresh_interval", REFRESH_INTERVAL)
+    DEMO_MODE = DEMO_MODE or opts.get("demo_mode", False)
+    UNIT_SYSTEM = UNIT_SYSTEM if os.environ.get("UNIT_SYSTEM") else opts.get("unit_system", UNIT_SYSTEM)
+    FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS") or opts.get("feeding_alert_hours") or FEEDING_ALERT_HOURS)
+    DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS") or opts.get("diaper_alert_hours") or DIAPER_ALERT_HOURS)
+    HA_NOTIFY_SERVICE = HA_NOTIFY_SERVICE if os.environ.get("HA_NOTIFY_SERVICE") else opts.get("ha_notify_service", HA_NOTIFY_SERVICE)
+    NANNY_NAME = (os.environ.get("NANNY_NAME") or opts.get("nanny_name") or NANNY_NAME or "Nanny").strip() or "Nanny"
+    COLOR_PRESET = COLOR_PRESET or sanitize_color_preset(opts.get("color_preset", ""))
+    THEME["light"] = fill_theme_mode_from_options("light", THEME["light"], opts)
+    THEME["dark"] = fill_theme_mode_from_options("dark", THEME["dark"], opts)
 
 if COLOR_PRESET:
     THEME["light"] = fill_theme_mode_from_preset(THEME["light"], THEME_PRESETS[COLOR_PRESET]["light"])
@@ -269,6 +270,7 @@ async def get_config():
         "unit_system": UNIT_SYSTEM,
         "feeding_alert_hours": FEEDING_ALERT_HOURS,
         "diaper_alert_hours": DIAPER_ALERT_HOURS,
+        "nanny_name": NANNY_NAME,
         "theme": THEME,
     }
 

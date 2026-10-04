@@ -1,9 +1,18 @@
 import { useUnits } from "../utils/units";
+import { useTranslation } from "../locales";
 
 export default function CustomTooltip({ active, payload, label, labelFormatter }) {
   const units = useUnits();
+  const t = useTranslation();
   if (!active || !payload?.length) return null;
   const formattedLabel = labelFormatter ? labelFormatter(label) : label;
+  const unitFor = (name) => (
+    name === "amount" ? ` ${units.volume}`
+      : name === "minutes" ? ` ${t("common.min")}`
+      : name === "weight" ? ` ${units.weight}`
+      : name === "height" ? ` ${units.length}`
+      : ""
+  );
   return (
     <div
       style={{
@@ -19,26 +28,9 @@ export default function CustomTooltip({ active, payload, label, labelFormatter }
     >
       <div style={{ fontWeight: 600, marginBottom: 4 }}>{formattedLabel}</div>
       {payload.map((p, i) => (
-        <div
-          key={i}
-          style={{
-            color: p.color,
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-          }}
-        >
-          <span
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: p.color,
-              display: "inline-block",
-            }}
-          />
-          {p.name}: {p.value}
-          {p.name === "amount" ? ` ${units.volume}` : p.name === "minutes" ? " min" : p.name === "weight" ? ` ${units.weight}` : p.name === "height" ? ` ${units.length}` : ""}
+        <div key={i} style={{ color: p.color, display: "flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, display: "inline-block" }} />
+          {t(`chartMetric.${p.name}`)}: {p.value}{unitFor(p.name)}
         </div>
       ))}
     </div>

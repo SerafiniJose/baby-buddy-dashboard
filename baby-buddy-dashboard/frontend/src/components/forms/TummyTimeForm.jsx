@@ -3,6 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
+import { useTranslation } from "../../locales";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -10,6 +11,7 @@ function toLocalDatetime(date) {
 }
 
 export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const isEdit = !!entry;
   const now = new Date();
   const tenMinsAgo = new Date(now.getTime() - 10 * 60 * 1000);
@@ -24,7 +26,7 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
     setError("");
     if (isEdit || !timerId) {
       const hours = (new Date(`${end}:00`).getTime() - new Date(`${start}:00`).getTime()) / 3_600_000;
-      if (hours > 6 && !window.confirm("This entry is over 6 hours long. Save anyway?")) {
+      if (hours > 6 && !window.confirm(t("form.longEntryConfirm"))) {
         return;
       }
     }
@@ -47,22 +49,22 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
       }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Tummy Time" : "Log Tummy Time"} onClose={onClose}>
+    <Modal title={isEdit ? t("tummyForm.editTitle") : t("tummyForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
         {!isEdit && timerId ? (
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
-            The timer's start and end times will be used for this tummy time entry.
+            {t("form.timerNote", { type: t("action.tummyTime").toLowerCase() })}
           </p>
         ) : null}
         {(isEdit || !timerId) && (
           <>
-            <FormField label="Start">
+            <FormField label={t("common.start")}>
               <FormInput
                 type="datetime-local"
                 value={start}
@@ -70,7 +72,7 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
                 required
               />
             </FormField>
-            <FormField label="End">
+            <FormField label={t("common.end")}>
               <FormInput
                 type="datetime-local"
                 value={end}
@@ -80,16 +82,16 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
             </FormField>
           </>
         )}
-        <FormField label="Milestone (optional)">
+        <FormField label={t("form.milestoneOptional")}>
           <FormInput
             value={milestone}
             onChange={(e) => setMilestone(e.target.value)}
-            placeholder="e.g., Lifted head"
+            placeholder={t("form.milestonePlaceholder")}
           />
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.tummy} disabled={saving}>
-          {saving ? "Saving..." : isEdit ? "Update Tummy Time" : "Save Tummy Time"}
+          {saving ? t("common.saving") : isEdit ? t("tummyForm.update") : t("tummyForm.save")}
         </FormButton>
       </form>
     </Modal>

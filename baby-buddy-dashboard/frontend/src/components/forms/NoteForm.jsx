@@ -3,6 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
+import { useTranslation } from "../../locales";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -10,6 +11,7 @@ function toLocalDatetime(date) {
 }
 
 export default function NoteForm({ childId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const isEdit = !!entry;
   const [time, setTime] = useState(entry?.time ? toLocalDatetime(new Date(entry.time)) : toLocalDatetime(new Date()));
   const [note, setNote] = useState(entry?.note || "");
@@ -18,14 +20,14 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this note?")) return;
+    if (!window.confirm(t("common.deleteThisEntry"))) return;
     setError("");
     setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
-      setError("Couldn't delete. Try again.");
+      setError(t("common.deleteFailed"));
       setDeleting(false);
     }
   };
@@ -45,15 +47,15 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Note" : "Add Note"} onClose={onClose}>
+    <Modal title={isEdit ? t("noteForm.editTitle") : t("noteForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label="Time">
+        <FormField label={t("common.time")}>
           <FormInput
             type="datetime-local"
             value={time}
@@ -61,29 +63,18 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
-        <FormField label="Note">
+        <FormField label={t("form.note")}>
           <textarea
+            className="form-control"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             autoFocus
-            style={{
-              width: "100%",
-              padding: "10px 12px",
-              borderRadius: 10,
-              border: "1px solid var(--border)",
-              background: "var(--bg)",
-              color: "var(--text)",
-              fontSize: 14,
-              fontFamily: "inherit",
-              outline: "none",
-              resize: "vertical",
-            }}
           />
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.note} disabled={saving || deleting || !note.trim()}>
-          {saving ? "Saving..." : isEdit ? "Update Note" : "Save Note"}
+          {saving ? t("common.saving") : isEdit ? t("noteForm.update") : t("noteForm.save")}
         </FormButton>
         {isEdit && (
           <FormButton
@@ -93,7 +84,7 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
             onClick={handleDelete}
             style={{ marginTop: 10, color: "#fff" }}
           >
-            {deleting ? "Deleting..." : "Delete Note"}
+            {deleting ? t("common.deleting") : t("common.delete")}
           </FormButton>
         )}
       </form>

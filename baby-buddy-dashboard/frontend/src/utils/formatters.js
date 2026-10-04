@@ -305,6 +305,8 @@ export const BATH_TAG = "bath";
 export const EVENT_TAG = "event";
 export const REMINDER_TAG = "reminder";
 export const REMINDER_DONE_TAG = "reminder-done";
+export const NANNY_TASK_TAG = "nanny-task";
+export const NANNY_TASK_DONE_TAG = "nanny-task-done";
 
 export function noteHasTag(note, tag) {
   const tags = note?.tags;
@@ -321,15 +323,19 @@ export function splitNotesByTag(notes) {
   const events = [];
   const reminders = [];
   const reminderDones = [];
+  const nannyTasks = [];
+  const nannyTaskDones = [];
   const plain = [];
   (notes || []).forEach((n) => {
     if (noteHasTag(n, BATH_TAG)) baths.push(n);
     else if (noteHasTag(n, EVENT_TAG)) events.push(n);
     else if (noteHasTag(n, REMINDER_TAG)) reminders.push(n);
     else if (noteHasTag(n, REMINDER_DONE_TAG)) reminderDones.push(n);
+    else if (noteHasTag(n, NANNY_TASK_TAG)) nannyTasks.push(n);
+    else if (noteHasTag(n, NANNY_TASK_DONE_TAG)) nannyTaskDones.push(n);
     else plain.push(n);
   });
-  return { baths, events, reminders, reminderDones, plain };
+  return { baths, events, reminders, reminderDones, nannyTasks, nannyTaskDones, plain };
 }
 
 export function toBathTimeline(baths) {

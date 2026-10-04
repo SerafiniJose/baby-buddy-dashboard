@@ -29,11 +29,13 @@ import {
   toBathTimeline,
 } from "../utils/formatters";
 import { useUnits } from "../utils/units";
+import { useTranslation } from "../locales";
 
 const COLLAPSED_COUNT = 2;
 
 export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, recentChanges, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
   const units = useUnits();
+  const t = useTranslation();
   const [expanded, setExpanded] = useState({});
   const [dayModal, setDayModal] = useState(null);
   const [selectedBar, setSelectedBar] = useState(null);
@@ -97,36 +99,36 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
         <div className="fade-in fade-in-1">
           <StatCard
             icon={<Icons.Bottle />}
-            label="Feedings"
+            label={t("overview.feedings")}
             value={totalFeeding > 0 ? `${Math.round(totalFeeding)} ${units.volume}` : `${feedings.length}`}
-            sub={`${feedings.length} feeding${feedings.length !== 1 ? "s" : ""}, last 24h`}
+            sub={t("overview.feedingsLast24h", { count: feedings.length })}
             color={colors.feeding}
           />
         </div>
         <div className="fade-in fade-in-2">
           <StatCard
             icon={<Icons.Moon />}
-            label="Sleep"
+            label={t("overview.sleep")}
             value={`${totalSleep.toFixed(1)}h`}
-            sub="Last 24 hours"
+            sub={t("overview.last24Hours")}
             color={colors.sleep}
           />
         </div>
         <div className="fade-in fade-in-3">
           <StatCard
             icon={<Icons.Droplet />}
-            label="Diapers"
+            label={t("overview.diapers")}
             value={totalDiapers}
-            sub={`${wetCount} wet · ${solidCount} solid · ${bothCount} both`}
+            sub={t("overview.wetSolidBoth", { wet: wetCount, solid: solidCount, both: bothCount })}
             color={colors.diaper}
           />
         </div>
         <div className="fade-in fade-in-4">
           <StatCard
             icon={<Icons.Sun />}
-            label="Tummy Time"
+            label={t("overview.tummyTime")}
             value={`${Math.round(avgTummy)}m`}
-            sub={`${tummyTimes.length} session${tummyTimes.length !== 1 ? "s" : ""}, last 24h`}
+            sub={t("overview.sessionsLast24h", { count: tummyTimes.length })}
             color={colors.tummy}
           />
         </div>
@@ -142,7 +144,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
       >
         {/* Feeding Timeline */}
         <div className="fade-in fade-in-3">
-          <SectionCard title="Recent Feedings" icon={<Icons.Bottle />} color={colors.feeding}>
+          <SectionCard title={t("overview.recentFeedings")} icon={<Icons.Bottle />} color={colors.feeding}>
             {feedingTimeline.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {(expanded.feedings ? feedingTimeline : feedingTimeline.slice(0, COLLAPSED_COUNT)).map((f, i, arr) => (
@@ -158,13 +160,13 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                 ))}
                 {feedingTimeline.length > COLLAPSED_COUNT && (
                   <button className="expand-toggle" onClick={() => toggle("feedings")}>
-                    {expanded.feedings ? "Show less" : `Show ${feedingTimeline.length - COLLAPSED_COUNT} more`}
+                    {expanded.feedings ? t("common.showLess") : t("common.showMore", { count: feedingTimeline.length - COLLAPSED_COUNT })}
                   </button>
                 )}
               </div>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No feedings recorded yet
+                {t("overview.noFeedingsToday")}
               </div>
             )}
             {weeklyFeedings.some((d) => d.amount > 0) && (
@@ -197,15 +199,15 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
 
         {/* Sleep */}
         <div className="fade-in fade-in-4">
-          <SectionCard title="Sleep Pattern" icon={<Icons.Moon />} color={colors.sleep}>
+          <SectionCard title={t("overview.sleepPattern")} icon={<Icons.Moon />} color={colors.sleep}>
             {sleepBlocks.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {(expanded.sleep ? sleepBlocks : sleepBlocks.slice(0, COLLAPSED_COUNT)).map((s, i, arr) => (
                   <div key={i} className="entry-clickable" onClick={() => onEditEntry?.("sleep", s.entry)}>
                     <TimelineItem
                       time={`${s.start}–${s.end}`}
-                      label={`${s.duration.toFixed(1)}h${s.nap ? " · Nap" : ""}`}
-                      detail={`${s.start} to ${s.end}`}
+                      label={`${s.duration.toFixed(1)}h${s.nap ? ` · ${t("common.nap")}` : ""}`}
+                      detail={`${s.start} ${t("common.to")} ${s.end}`}
                       color={colors.sleep}
                       isLast={i === arr.length - 1}
                     />
@@ -213,13 +215,13 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                 ))}
                 {sleepBlocks.length > COLLAPSED_COUNT && (
                   <button className="expand-toggle" onClick={() => toggle("sleep")}>
-                    {expanded.sleep ? "Show less" : `Show ${sleepBlocks.length - COLLAPSED_COUNT} more`}
+                    {expanded.sleep ? t("common.showLess") : t("common.showMore", { count: sleepBlocks.length - COLLAPSED_COUNT })}
                   </button>
                 )}
               </div>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No sleep recorded
+                {t("overview.noSleepRecorded")}
               </div>
             )}
             {sleepByDay.some((d) => d.hours > 0) && (
@@ -252,7 +254,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
 
         {/* Diapers */}
         <div className="fade-in fade-in-5">
-          <SectionCard title="Diaper Changes" icon={<Icons.Droplet />} color={colors.diaper}>
+          <SectionCard title={t("overview.diaperChanges")} icon={<Icons.Droplet />} color={colors.diaper}>
             {diaperTimeline.length > 0 ? (
               <>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -281,7 +283,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                   ))}
                   {diaperTimeline.length > COLLAPSED_COUNT && (
                     <button className="expand-toggle" onClick={() => toggle("diapers")}>
-                      {expanded.diapers ? "Show less" : `Show ${diaperTimeline.length - COLLAPSED_COUNT} more`}
+                      {expanded.diapers ? t("common.showLess") : t("common.showMore", { count: diaperTimeline.length - COLLAPSED_COUNT })}
                     </button>
                   )}
                 </div>
@@ -298,23 +300,23 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                 >
                   <div style={{ flex: 1, textAlign: "center" }}>
                     <div style={{ fontSize: 20, fontWeight: 700, color: onSurface("#3B82F6") }}>{wetCount}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Wet</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{t("diaper.wet")}</div>
                   </div>
                   <div style={{ width: 1, background: "var(--border)" }} />
                   <div style={{ flex: 1, textAlign: "center" }}>
                     <div style={{ fontSize: 20, fontWeight: 700, color: onSurface("#D97706") }}>{solidCount}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Solid</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{t("diaper.solid")}</div>
                   </div>
                   <div style={{ width: 1, background: "var(--border)" }} />
                   <div style={{ flex: 1, textAlign: "center" }}>
                     <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text)" }}>{totalDiapers}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Total</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{t("common.total")}</div>
                   </div>
                 </div>
               </>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No diaper changes recorded yet
+                {t("overview.noDiaperChangesToday")}
               </div>
             )}
           </SectionCard>
@@ -322,7 +324,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
 
         {/* Tummy Time */}
         <div className="fade-in fade-in-6">
-          <SectionCard title="Tummy Time" icon={<Icons.Sun />} color={colors.tummy}>
+          <SectionCard title={t("overview.tummyTimeTitle")} icon={<Icons.Sun />} color={colors.tummy}>
             {tummyByDay.some((d) => d.minutes > 0) ? (
               <>
                 <div style={{ height: 140 }}>
@@ -340,7 +342,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                   <ChartDetailBar
                     label={selectedBar.label}
                     value={selectedBar.value}
-                    unit="min"
+                    unit={t("common.min")}
                     color={colors.tummy}
                     onViewEntries={() => openDayModal(selectedBar.label, "tummy")}
                     onDismiss={() => setSelectedBar(null)}
@@ -360,16 +362,16 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                   >
                     <Icons.TrendUp />
                     <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                      Avg{" "}
-                      <strong style={{ color: onSurface(colors.tummy) }}>{Math.round(avgTummy)} min</strong>{" "}
-                      per session
+                      {t("common.avg")}{" "}
+                      <strong style={{ color: onSurface(colors.tummy) }}>{Math.round(avgTummy)} {t("common.min")}</strong>{" "}
+                      {t("overview.perSession")}
                     </span>
                   </div>
                 )}
               </>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No tummy time recorded today
+                {t("overview.noTummyTimeToday")}
               </div>
             )}
           </SectionCard>
@@ -377,7 +379,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
 
         {/* Baths */}
         <div className="fade-in fade-in-7">
-          <SectionCard title="Baths" icon={<Icons.Bath />} color={colors.bath}>
+          <SectionCard title={t("overview.baths")} icon={<Icons.Bath />} color={colors.bath}>
             {bathTimeline.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {(expanded.baths ? bathTimeline : bathTimeline.slice(0, COLLAPSED_COUNT)).map((b, i, arr) => (
@@ -393,16 +395,16 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
                 ))}
                 {bathTimeline.length > COLLAPSED_COUNT && (
                   <button className="expand-toggle" onClick={() => toggle("baths")}>
-                    {expanded.baths ? "Show less" : `Show ${bathTimeline.length - COLLAPSED_COUNT} more`}
+                    {expanded.baths ? t("common.showLess") : t("common.showMore", { count: bathTimeline.length - COLLAPSED_COUNT })}
                   </button>
                 )}
                 <div style={{ marginTop: 12, fontSize: 12, color: "var(--text-muted)" }}>
-                  Last bath <strong style={{ color: colors.bath }}>{bathTimeline[0].ago}</strong>
+                  {t("overview.lastBath")} <strong style={{ color: colors.bath }}>{bathTimeline[0].ago}</strong>
                 </div>
               </div>
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-                No baths recorded yet — tap + to add one
+                {t("overview.noBathsYet")}
               </div>
             )}
           </SectionCard>

@@ -371,6 +371,21 @@ function emmaData() {
         note: '{"reminder_id":101}',
         time: isoLocal(hoursAgo(2)),
       },
+      {
+        id: 110, child: 1, tags: ["nanny-task"],
+        note: '{"title":"Preparar biberón","detail":"120 ml si pide antes de que vuelvan mamá/papá","priority":"high"}',
+        time: isoLocal(hoursAgo(6)),
+      },
+      {
+        id: 111, child: 1, tags: ["nanny-task"],
+        note: '{"title":"Revisar bolsa del pañal","detail":"Dejar 2 pañales y body limpio listos","priority":"normal"}',
+        time: isoLocal(hoursAgo(5)),
+      },
+      {
+        id: 112, child: 1, tags: ["nanny-task"],
+        note: "Mandar foto a Jose si se duerme",
+        time: isoLocal(hoursAgo(4)),
+      },
     ],
     monthlyFeedings: emmaMonthlyFeedings(),
     monthlySleep: emmaMonthlySleep(),

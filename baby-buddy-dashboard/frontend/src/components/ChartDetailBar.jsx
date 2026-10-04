@@ -1,4 +1,7 @@
-export default function ChartDetailBar({ label, value, unit, color, onViewEntries, onDismiss, actionLabel = "View entries" }) {
+import { useTranslation } from "../locales";
+
+export default function ChartDetailBar({ label, value, unit, color, onViewEntries, onDismiss, actionLabel }) {
+  const t = useTranslation();
   if (!label) return null;
   return (
     <div
@@ -34,7 +37,7 @@ export default function ChartDetailBar({ label, value, unit, color, onViewEntrie
             whiteSpace: "nowrap",
           }}
         >
-          {actionLabel}
+          {actionLabel || t("common.viewEntries")}
         </button>
         <button
           onClick={onDismiss}
@@ -46,7 +49,7 @@ export default function ChartDetailBar({ label, value, unit, color, onViewEntrie
             border: "none",
             cursor: "pointer",
           }}
-          aria-label="Dismiss"
+          aria-label={t("common.dismiss")}
         >
           ✕
         </button>

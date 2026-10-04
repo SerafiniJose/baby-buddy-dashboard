@@ -4,6 +4,7 @@ import { colors } from "../utils/colors";
 import { useUnits, useUnitSystem } from "../utils/units";
 import { buildFacts, pickDailyFact } from "../utils/facts";
 import { isFactDismissed, dismissFactForToday } from "../utils/factDismissal";
+import { useTranslation } from "../locales";
 
 /**
  * One fact a day, dismissable like a reminder. Sits with the alert banners rather than
@@ -11,6 +12,7 @@ import { isFactDismissed, dismissFactForToday } from "../utils/factDismissal";
  * section - and dismissing it gets the space back until tomorrow.
  */
 export default function DailyFactCard({ feedings, sleep, changes, baths, tummyTimes, weights }) {
+  const t = useTranslation();
   const units = useUnits();
   const unitSystem = useUnitSystem();
   const [dismissed, setDismissed] = useState(() => isFactDismissed());
@@ -84,8 +86,8 @@ export default function DailyFactCard({ feedings, sleep, changes, baths, tummyTi
           dismissFactForToday();
           setDismissed(true);
         }}
-        aria-label="Dismiss until tomorrow"
-        title="Dismiss until tomorrow"
+        aria-label={t("dailyFact.dismissUntilTomorrow")}
+        title={t("dailyFact.dismissUntilTomorrow")}
         style={{
           background: "none",
           border: "none",

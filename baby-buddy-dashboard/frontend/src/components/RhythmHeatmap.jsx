@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "../locales";
 
 // Day x hour occupancy. The job is magnitude on a grid, so the encoding is sequential:
 // a single hue, more-is-darker, never a rainbow. Intensity is alpha over the card surface
@@ -22,6 +23,7 @@ function cellStyle(level, hue) {
 const HOUR_TICKS = [0, 6, 12, 18];
 
 export default function RhythmHeatmap({ grid, hue, unitLabel = "entries" }) {
+  const t = useTranslation();
   const [hover, setHover] = useState(null);
 
   // Show every day in the selected range: capping the rows here while the bar charts
@@ -37,7 +39,7 @@ export default function RhythmHeatmap({ grid, hue, unitLabel = "entries" }) {
   if (!grid.max) {
     return (
       <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 20 }}>
-        Nothing logged in this range yet
+        {t("reports.nothingLoggedInRange")}
       </div>
     );
   }
@@ -101,16 +103,16 @@ export default function RhythmHeatmap({ grid, hue, unitLabel = "entries" }) {
           {hover
             ? `${hover.row.label} · ${String(hover.h).padStart(2, "0")}:00 — ${hover.value} ${unitLabel}`
             : occupancyOnly
-              ? `${total} ${unitLabel} across ${rows.length} days`
-              : `Busiest hour: ${grid.max} ${unitLabel}`}
+              ? t("reports.totalAcrossDays", { count: total, unit: unitLabel, days: rows.length })
+              : t("reports.busiestHour", { count: grid.max, unit: unitLabel })}
         </div>
         {!occupancyOnly && (
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontSize: 10, color: "var(--text-dim)" }}>less</span>
+            <span style={{ fontSize: 10, color: "var(--text-dim)" }}>{t("reports.less")}</span>
             {Array.from({ length: LEVELS + 1 }, (_, l) => (
               <div key={l} style={{ width: 10, height: 10, borderRadius: 2, ...cellStyle(l, hue) }} />
             ))}
-            <span style={{ fontSize: 10, color: "var(--text-dim)" }}>more</span>
+            <span style={{ fontSize: 10, color: "var(--text-dim)" }}>{t("reports.more")}</span>
           </div>
         )}
       </div>

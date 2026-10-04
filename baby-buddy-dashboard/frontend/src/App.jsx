@@ -9,12 +9,14 @@ import { readStoredMode, writeStoredMode, resolveMode } from "./utils/themeMode"
 import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
 import { api } from "./api";
 import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
+import { useTranslation } from "./locales";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
 import NotesTab from "./tabs/NotesTab";
 import CalendarTab from "./tabs/CalendarTab";
 import RemindersTab from "./tabs/RemindersTab";
 import ReportsTab from "./tabs/ReportsTab";
+import NannyTab from "./tabs/NannyTab";
 import FeedingForm from "./components/forms/FeedingForm";
 import SleepForm from "./components/forms/SleepForm";
 import DiaperForm from "./components/forms/DiaperForm";
@@ -27,51 +29,57 @@ import ReminderForm from "./components/forms/ReminderForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import ThemeToggle from "./components/ThemeToggle";
+import LanguageSelector from "./components/LanguageSelector";
 import TimerButton from "./components/TimerButton";
 import AlertBanner from "./components/AlertBanner";
 import DailyFactCard from "./components/DailyFactCard";
+import NannyTaskForm from "./components/forms/NannyTaskForm";
 import "./styles.css";
 
 const TABS = [
-  { id: "overview", label: "Overview", icon: <Icons.Activity /> },
-  { id: "growth", label: "Growth", icon: <Icons.TrendUp /> },
-  { id: "notes", label: "Notes", icon: <Icons.StickyNote /> },
-  { id: "calendar", label: "Calendar", icon: <Icons.Calendar /> },
-  { id: "reminders", label: "Reminders", icon: <Icons.Clock /> },
-  { id: "reports", label: "Reports", icon: <Icons.TrendUp /> },
+  { id: "overview", labelKey: "tab.overview", icon: <Icons.Activity /> },
+  { id: "nanny", labelKey: "tab.nanny", icon: <Icons.Baby /> },
+  { id: "growth", labelKey: "tab.growth", icon: <Icons.TrendUp /> },
+  { id: "notes", labelKey: "tab.notes", icon: <Icons.StickyNote /> },
+  { id: "calendar", labelKey: "tab.calendar", icon: <Icons.Calendar /> },
+  { id: "reminders", labelKey: "tab.reminders", icon: <Icons.Clock /> },
+  { id: "reports", labelKey: "tab.reports", icon: <Icons.TrendUp /> },
 ];
 
 const ACTION_GROUPS = [
   {
-    label: "Track",
+    id: "track",
+    labelKey: "group.track",
     actions: [
-      { id: "feeding", label: "Feeding", icon: <Icons.Bottle />, color: colors.feeding },
-      { id: "sleep", label: "Sleep", icon: <Icons.Moon />, color: colors.sleep },
-      { id: "diaper", label: "Diaper", icon: <Icons.Droplet />, color: colors.diaper },
-      { id: "tummy", label: "Tummy", icon: <Icons.Sun />, color: colors.tummy },
-      { id: "bath", label: "Bath", icon: <Icons.Bath />, color: colors.bath },
+      { id: "feeding", labelKey: "action.feeding", icon: <Icons.Bottle />, color: colors.feeding },
+      { id: "sleep", labelKey: "action.sleep", icon: <Icons.Moon />, color: colors.sleep },
+      { id: "diaper", labelKey: "action.diaper", icon: <Icons.Droplet />, color: colors.diaper },
+      { id: "tummy", labelKey: "action.tummy", icon: <Icons.Sun />, color: colors.tummy },
+      { id: "bath", labelKey: "bathForm.logTitle", icon: <Icons.Bath />, color: colors.bath },
     ],
   },
   {
-    label: "Measure",
+    id: "measure",
+    labelKey: "group.measure",
     actions: [
-      { id: "temp", label: "Temp", icon: <Icons.Temp />, color: colors.temp },
-      { id: "weight", label: "Weight", icon: <Icons.Weight />, color: colors.growth },
-      { id: "height", label: "Height", icon: <Icons.Ruler />, color: colors.height },
+      { id: "temp", labelKey: "action.temp", icon: <Icons.Temp />, color: colors.temp },
+      { id: "weight", labelKey: "action.weight", icon: <Icons.Weight />, color: colors.growth },
+      { id: "height", labelKey: "action.height", icon: <Icons.Ruler />, color: colors.height },
     ],
   },
   {
-    label: "Note",
+    id: "note",
+    labelKey: "group.note",
     actions: [
-      { id: "note", label: "Note", icon: <Icons.StickyNote />, color: colors.note },
+      { id: "note", labelKey: "action.note", icon: <Icons.StickyNote />, color: colors.note },
     ],
   },
 ];
 
 const TIMER_TYPES = [
-  { id: "feeding", label: "Feeding", icon: <Icons.Bottle />, color: colors.feeding },
-  { id: "sleep", label: "Sleep", icon: <Icons.Moon />, color: colors.sleep },
-  { id: "tummy", label: "Tummy Time", icon: <Icons.Sun />, color: colors.tummy },
+  { id: "feeding", labelKey: "action.feeding", icon: <Icons.Bottle />, color: colors.feeding },
+  { id: "sleep", labelKey: "action.sleep", icon: <Icons.Moon />, color: colors.sleep },
+  { id: "tummy", labelKey: "action.tummyTime", icon: <Icons.Sun />, color: colors.tummy },
 ];
 
 function toLocalDatetime(date) {
@@ -88,6 +96,7 @@ function timerNameToType(name) {
 }
 
 export default function App() {
+  const t = useTranslation();
   const data = useBabyData();
   const timer = useTimers(data.timers, data.child?.id);
 
@@ -118,7 +127,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("overview");
   const [modal, setModal] = useState(null);
   const [showActions, setShowActions] = useState(false);
-  const [expandedGroup, setExpandedGroup] = useState("Track");
+  const [expandedGroup, setExpandedGroup] = useState("track");
   const [showTimerPicker, setShowTimerPicker] = useState(false);
   const [editingTimerId, setEditingTimerId] = useState(null);
   const [dismissedAlerts, setDismissedAlerts] = useState({});
@@ -129,6 +138,11 @@ export default function App() {
     data.refetch();
   };
 
+  const handleAddNannyTask = () => {
+    if (!data.child?.id) return;
+    setModal({ type: "nannyTask" });
+  };
+
   const alertMessages = [];
   const feedHrs = data.alertConfig?.feeding_alert_hours ?? 3;
   const diaperHrs = data.alertConfig?.diaper_alert_hours ?? 3;
@@ -137,11 +151,11 @@ export default function App() {
   const hoursSince = (t) => (Date.now() - new Date(t).getTime()) / 3600000;
   if (lastFeed && hoursSince(lastFeed.end || lastFeed.start) >= feedHrs) {
     const key = `feed-${lastFeed.id}`;
-    if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastFeed.end || lastFeed.start)} since last feeding` });
+    if (!dismissedAlerts[key]) alertMessages.push({ key, text: t("alert.sinceLastFeeding", { elapsed: timeAgo(lastFeed.end || lastFeed.start) }) });
   }
   if (lastChange && hoursSince(lastChange.time) >= diaperHrs) {
     const key = `diaper-${lastChange.id}`;
-    if (!dismissedAlerts[key]) alertMessages.push({ key, text: `${timeAgo(lastChange.time)} since last diaper change` });
+    if (!dismissedAlerts[key]) alertMessages.push({ key, text: t("alert.sinceLastDiaper", { elapsed: timeAgo(lastChange.time) }) });
   }
 
   const today = toLocalISODate(new Date());
@@ -149,7 +163,7 @@ export default function App() {
     alertMessages.push({
       key: `reminder-${r.id}-${today}`,
       text: r.title,
-      actionLabel: "Done",
+      actionLabel: t("reminders.done"),
       onAction: async () => {
         await api.createNote({
           child: data.child.id,
@@ -166,7 +180,7 @@ export default function App() {
     return (
       <div className="app-loading">
         <div className="loading-spinner" />
-        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>Loading...</span>
+        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>{t("common.loading")}</span>
       </div>
     );
   }
@@ -186,7 +200,7 @@ export default function App() {
           </div>
           <div>
             <h1 className="baby-name">
-              {data.child?.first_name || "Baby"}
+              {data.child?.first_name || t("header.defaultBabyName")}
             </h1>
             {data.child?.birth_date && (
               <span className="baby-age">{getAge(data.child.birth_date)}</span>
@@ -195,15 +209,16 @@ export default function App() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {data.error && (
-            <span className="sync-error">Connection error</span>
+            <span className="sync-error">{t("header.connectionError")}</span>
           )}
+          <LanguageSelector />
           <ThemeToggle mode={themeMode} onChange={changeThemeMode} />
           {data.lastSync && !data.error && (
             <span className="sync-time">
               {data.lastSync.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
           )}
-          <button className="refresh-btn" onClick={data.refetch} title="Refresh">
+          <button className="refresh-btn" onClick={data.refetch} title={t("settings.refreshNow")} aria-label={t("settings.refreshNow")}>
             <Icons.Activity />
           </button>
         </div>
@@ -256,7 +271,7 @@ export default function App() {
               <span
                 className="timer-elapsed"
                 style={{ cursor: "pointer" }}
-                title="Click to edit start time"
+                title={t("header.timerEditHint")}
                 onClick={() => setEditingTimerId(t.id)}
               >
                 {formatElapsed(timer.elapsedMap[t.id] || 0)}
@@ -271,7 +286,7 @@ export default function App() {
                 }
               }}
             >
-              Save
+              {t("header.timerSave")}
             </button>
             <button
               className="timer-discard-btn"
@@ -292,7 +307,7 @@ export default function App() {
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.icon}
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </nav>
@@ -300,14 +315,16 @@ export default function App() {
       {/* Tab Content */}
       <main className="tab-content">
         <AlertBanner messages={alertMessages} onDismiss={(k) => setDismissedAlerts((p) => ({ ...p, [k]: true }))} />
-        <DailyFactCard
-          feedings={data.allTime.feedings}
-          sleep={data.allTime.sleep}
-          changes={data.allTime.changes}
-          baths={data.baths}
-          tummyTimes={data.weeklyTummyTimes}
-          weights={data.weights}
-        />
+        {activeTab !== "nanny" && (
+          <DailyFactCard
+            feedings={data.allTime.feedings}
+            sleep={data.allTime.sleep}
+            changes={data.allTime.changes}
+            baths={data.baths}
+            tummyTimes={data.weeklyTummyTimes}
+            weights={data.weights}
+          />
+        )}
         {activeTab === "overview" && (
           <OverviewTab
             feedings={data.feedings}
@@ -321,6 +338,17 @@ export default function App() {
             weeklyTummyTimes={data.weeklyTummyTimes}
             baths={data.baths}
             onEditEntry={(type, entry) => setModal({ type, entry })}
+          />
+        )}
+        {activeTab === "nanny" && (
+          <NannyTab
+            childId={data.child?.id}
+            nannyName={data.nannyName}
+            feedings={data.monthlyFeedings?.length ? data.monthlyFeedings : data.recentFeedings}
+            nannyTasks={data.nannyTasks}
+            nannyTaskDones={data.nannyTaskDones}
+            onTaskDone={data.refetch}
+            onAddTask={handleAddNannyTask}
           />
         )}
         {activeTab === "growth" && (
@@ -367,14 +395,14 @@ export default function App() {
         {showActions && (
           <div className="fab-menu fade-in">
             {ACTION_GROUPS.map((group) => {
-              const isOpen = expandedGroup === group.label;
+              const isOpen = expandedGroup === group.id;
               return (
-                <div key={group.label} className="fab-group">
+                <div key={group.id} className="fab-group">
                   <button
                     className={`fab-group-label${isOpen ? " fab-group-label-active" : ""}`}
-                    onClick={() => setExpandedGroup(isOpen ? null : group.label)}
+                    onClick={() => setExpandedGroup(isOpen ? null : group.id)}
                   >
-                    {group.label}
+                    {t(group.labelKey)}
                   </button>
                   {isOpen && (
                     <div className="fab-group-items">
@@ -393,7 +421,7 @@ export default function App() {
                           >
                             {action.icon}
                           </span>
-                          <span className="fab-action-label">{action.label}</span>
+                          <span className="fab-action-label">{t(action.labelKey)}</span>
                         </button>
                       ))}
                     </div>
@@ -405,28 +433,28 @@ export default function App() {
         )}
         {showTimerPicker && (
           <div className="fab-menu fade-in" style={{ right: 76 }}>
-            {TIMER_TYPES.map((t) => (
+            {TIMER_TYPES.map((timerType) => (
               <button
-                key={t.id}
+                key={timerType.id}
                 className="fab-action"
                 onClick={() => {
-                  timer.startTimer(t.id);
+                  timer.startTimer(timerType.id);
                   setShowTimerPicker(false);
                 }}
               >
                 <span
                   className="fab-action-icon"
-                  style={{ background: `${t.color}18`, color: t.color }}
+                  style={{ background: `${timerType.color}18`, color: timerType.color }}
                 >
-                  {t.icon}
+                  {timerType.icon}
                 </span>
-                <span className="fab-action-label">{t.label}</span>
+                <span className="fab-action-label">{t(timerType.labelKey)}</span>
               </button>
             ))}
           </div>
         )}
         <TimerButton
-          label="Timer"
+          label={t("header.timer")}
           icon={<Icons.Timer />}
           color={colors.feeding}
           active={false}
@@ -438,7 +466,7 @@ export default function App() {
         <button
           className="fab-btn"
           style={{ background: showActions ? "var(--text-muted)" : "var(--accent)" }}
-          onClick={() => { setShowActions(!showActions); setShowTimerPicker(false); setExpandedGroup("Track"); }}
+          onClick={() => { setShowActions(!showActions); setShowTimerPicker(false); setExpandedGroup("track"); }}
         >
           <span style={{ transform: showActions ? "rotate(45deg)" : "none", transition: "transform 0.2s", display: "flex" }}>
             <Icons.Plus />
@@ -534,6 +562,14 @@ export default function App() {
         <ReminderForm
           childId={data.child?.id}
           entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "nannyTask" && (
+        <NannyTaskForm
+          childId={data.child?.id}
+          nannyName={data.nannyName}
           onDone={handleFormDone}
           onClose={closeModal}
         />

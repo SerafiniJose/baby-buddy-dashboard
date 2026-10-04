@@ -37,6 +37,8 @@ export function useBabyData() {
   const [events, setEvents] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [reminderDones, setReminderDones] = useState([]);
+  const [nannyTasks, setNannyTasks] = useState([]);
+  const [nannyTaskDones, setNannyTaskDones] = useState([]);
   const [timers, setTimers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,6 +48,7 @@ export function useBabyData() {
   const [theme, setTheme] = useState(null);
   const [allTime, setAllTime] = useState({ feedings: [], sleep: [], changes: [] });
   const [alertConfig, setAlertConfig] = useState({ feeding_alert_hours: 3, diaper_alert_hours: 3 });
+  const [nannyName, setNannyName] = useState("Nanny");
   const intervalRef = useRef(null);
   const childIdRef = useRef(null);
 
@@ -129,6 +132,8 @@ export function useBabyData() {
         setEvents(split.events);
         setReminders(split.reminders);
         setReminderDones(split.reminderDones);
+        setNannyTasks(split.nannyTasks);
+        setNannyTaskDones(split.nannyTaskDones);
       }
       setMonthlyFeedings(monthlyFeedingsRes.results || []);
       setMonthlySleep(monthlySleepRes.results || []);
@@ -198,6 +203,8 @@ export function useBabyData() {
       setEvents(split.events);
       setReminders(split.reminders);
       setReminderDones(split.reminderDones);
+      setNannyTasks(split.nannyTasks);
+      setNannyTaskDones(split.nannyTaskDones);
     }
     setMonthlyFeedings(mock.monthlyFeedings);
     setMonthlySleep(mock.monthlySleep);
@@ -233,6 +240,8 @@ export function useBabyData() {
         setEvents(split.events);
         setReminders(split.reminders);
         setReminderDones(split.reminderDones);
+        setNannyTasks(split.nannyTasks);
+        setNannyTaskDones(split.nannyTaskDones);
       }
       setMonthlyFeedings(mock.monthlyFeedings);
       setMonthlySleep(mock.monthlySleep);
@@ -249,6 +258,7 @@ export function useBabyData() {
       .then((cfg) => {
         if (cfg.unit_system) setUnitSystem(cfg.unit_system);
         if (cfg.theme) setTheme(cfg.theme);
+        setNannyName((cfg.nanny_name || "Nanny").trim() || "Nanny");
         setAlertConfig({
           feeding_alert_hours: cfg.feeding_alert_hours ?? 3,
           diaper_alert_hours: cfg.diaper_alert_hours ?? 3,
@@ -328,6 +338,8 @@ export function useBabyData() {
     events,
     reminders,
     reminderDones,
+    nannyTasks,
+    nannyTaskDones,
     timers,
     loading,
     error,
@@ -335,6 +347,7 @@ export function useBabyData() {
     unitSystem,
     theme,
     alertConfig,
+    nannyName,
     refetch: fetchAll,
   };
 }

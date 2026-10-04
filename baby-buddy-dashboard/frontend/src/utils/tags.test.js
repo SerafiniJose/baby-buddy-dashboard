@@ -17,6 +17,18 @@ const reminderDoneNote = {
   time: "2026-05-25T11:00:00",
   tags: ["reminder-done"],
 };
+const nannyTaskNote = {
+  id: 12,
+  note: '{"title":"Preparar biberón","detail":"120 ml","priority":"high"}',
+  time: "2026-05-25T12:00:00",
+  tags: ["nanny-task"],
+};
+const nannyTaskDoneNote = {
+  id: 13,
+  note: '{"task_id":12}',
+  time: "2026-05-25T13:00:00",
+  tags: ["nanny-task-done"],
+};
 
 describe("noteHasTag", () => {
   it("matches string tags case-insensitively", () => {
@@ -33,12 +45,14 @@ describe("noteHasTag", () => {
 });
 
 describe("splitNotesByTag", () => {
-  it("partitions into baths, events, reminders, reminderDones, and plain notes", () => {
-    const r = splitNotesByTag([strNote, objNote, plainNote, noTagsField, reminderNote, reminderDoneNote]);
+  it("partitions into baths, events, reminders, reminderDones, nannyTasks, nannyTaskDones, and plain notes", () => {
+    const r = splitNotesByTag([strNote, objNote, plainNote, noTagsField, reminderNote, reminderDoneNote, nannyTaskNote, nannyTaskDoneNote]);
     expect(r.baths.map((n) => n.id)).toEqual([1]);
     expect(r.events.map((n) => n.id)).toEqual([2]);
     expect(r.reminders.map((n) => n.id)).toEqual([10]);
     expect(r.reminderDones.map((n) => n.id)).toEqual([11]);
+    expect(r.nannyTasks.map((n) => n.id)).toEqual([12]);
+    expect(r.nannyTaskDones.map((n) => n.id)).toEqual([13]);
     expect(r.plain.map((n) => n.id).sort()).toEqual([3, 4]);
   });
 });

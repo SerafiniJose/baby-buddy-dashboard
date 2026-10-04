@@ -15,6 +15,8 @@ A modern, responsive dashboard for [Baby Buddy](https://github.com/babybuddy/bab
 - **Overview dashboard** — daily stats, timelines, and charts for feedings, sleep, diapers, and tummy time
 - **Growth tracking** — 30-day feeding totals, sleep averages, weight, and height trend charts
 - **Quick logging** — grouped floating action button to quickly log feedings, sleep, diaper changes, tummy time, temperature, weight, height, and notes
+- **Modo Niñera** — caretaker view that matches the app's native card/timeline layout, with the next routine cue from the latest Baby Buddy feeding and standalone Nanny tasks stored as tagged notes
+- **Internationalization** — dependency-free app i18n with English, Spanish, Italian, and German, browser-language detection, persisted language preference, and a header language selector
 - **Multiple timers** — run concurrent timers for overlapping activities (feeding, sleep, tummy time)
 - **Metric / Imperial** — configurable unit labels (kg/lb, cm/in, mL/oz, °C/°F) with no data conversion
 - **Demo mode** — built-in mock data to preview the dashboard without a Baby Buddy instance
@@ -145,6 +147,49 @@ npm run build
 
 The built files are output to `baby-buddy-dashboard/frontend/dist/`.
 
+### Language selection
+
+The frontend uses the upstream dependency-free i18n design in `frontend/src/locales/`. Supported app languages are:
+
+- English (`en`)
+- Spanish (`es`)
+- Italian (`it`)
+- German (`de`)
+
+On first load the app checks the saved browser preference, then `navigator.languages` / `navigator.language`, and safely falls back to English. The header language selector is accessible by label and stores the chosen language in `localStorage` so each browser keeps its own preference. The i18n tests verify locale resolution, persistence, English fallback, interpolation, plural forms, and that literal `t("...")` keys used in the UI exist in the base catalog.
+
+### Modo Niñera
+
+Modo Niñera is a standalone caretaker view in the app. It uses the same native cards, stats, timeline rows, buttons, spacing, colors, and responsive grid as the rest of the dashboard. It does not read Home Assistant sensors: routine timing is derived from Baby Buddy feedings, using the end of the latest feeding as the anchor for elapsed time and care cues.
+
+The caretaker name is configurable with the add-on option / environment variable `nanny_name` / `NANNY_NAME`; it defaults to `Nanny` for backwards compatibility and is used in the task heading and new-task form.
+
+Expected feeding interval:
+
+- The app looks at Baby Buddy feeding records from the last 15 days.
+- It uses all feeding records returned by the Baby Buddy `feedings` API, not only breast methods. This is intentional: bottle, formula, fortified milk, and breast sessions all represent real feeding cadence in Baby Buddy data, while method labels vary by instance and would make the estimate less reliable.
+- It sorts valid `start` timestamps ascending and averages positive intervals between consecutive records inside that exact window.
+- If fewer than two valid records are available, it falls back to the previous behavior: next feeding is estimated 3 hours after the latest feeding end.
+
+Routine cues are:
+
+- 0–10 minutes after the feeding ends: revisar pañal
+- 10 minutes–1h30: juego tranquilo
+- 1h30–3h: posible sueño
+- 3h+: posible hambre
+
+"Tareas para Nanny" are modeled as Baby Buddy notes so the dashboard works without Home Assistant. Active tasks use the `nanny-task` tag and a JSON note body:
+
+```json
+{"title":"Preparar biberón","detail":"120 ml","priority":"high"}
+```
+
+`detail` is optional and `priority` may be `low`, `normal`, or `high`. For compatibility with manually-created notes, a plain text note tagged `nanny-task` is treated as a normal-priority task title. Completing a task creates another note tagged `nanny-task-done` with:
+
+```json
+{"task_id":123}
+```
+
 ## Project Structure
 
 This repository follows the [Home Assistant add-on repository](https://developers.home-assistant.io/docs/add-ons/repository/) layout — each add-on lives in its own subdirectory.
@@ -219,6 +264,7 @@ baby-buddy-dashboard/               # ← repository root
 | `baby_buddy_api_key` | Baby Buddy API token | — |
 | `refresh_interval` | Polling interval in seconds (5–300) | 30 |
 | `unit_system` | Unit labels: `metric` (kg, cm, mL, °C) or `imperial` (lb, in, oz, °F) | metric |
+| `nanny_name` | Name shown in Modo Niñera task headings/forms | Nanny |
 | `demo_mode` | Show mock data without connecting to Baby Buddy | false |
 
 ### Getting your API key

@@ -3,8 +3,10 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
+import { useTranslation } from "../../locales";
 
 export default function TemperatureForm({ childId, onDone, onClose }) {
+  const t = useTranslation();
   const units = useUnits();
   const [temp, setTemp] = useState("");
   const [saving, setSaving] = useState(false);
@@ -22,15 +24,15 @@ export default function TemperatureForm({ childId, onDone, onClose }) {
       });
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title="Log Temperature" onClose={onClose}>
+    <Modal title={t("temperatureForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label={`Temperature (${units.temp})`}>
+        <FormField label={t("temperatureForm.amount", { unit: units.temp })}>
           <FormInput
             type="number"
             value={temp}
@@ -44,7 +46,7 @@ export default function TemperatureForm({ childId, onDone, onClose }) {
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.temp} disabled={saving || !temp}>
-          {saving ? "Saving..." : "Save Temperature"}
+          {saving ? t("common.saving") : t("temperatureForm.save")}
         </FormButton>
       </form>
     </Modal>

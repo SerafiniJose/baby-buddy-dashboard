@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { api } from "../../api";
-import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import Modal, { FormField, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { BATH_TAG, toIsoWithLocalOffset } from "../../utils/formatters";
+import { useTranslation } from "../../locales";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -10,6 +11,7 @@ function toLocalDatetime(date) {
 }
 
 export default function BathForm({ childId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const isEdit = !!entry;
   const [time, setTime] = useState(entry?.time ? toLocalDatetime(new Date(entry.time)) : toLocalDatetime(new Date()));
   const [note, setNote] = useState(entry?.note || "");
@@ -18,14 +20,14 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this bath?")) return;
+    if (!window.confirm(t("common.deleteThisEntry"))) return;
     setError("");
     setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
-      setError("Couldn't delete. Try again.");
+      setError(t("common.deleteFailed"));
       setDeleting(false);
     }
   };
@@ -36,52 +38,31 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
     setSaving(true);
     try {
       const data = { note: note.trim(), time: toIsoWithLocalOffset(time), tags: [BATH_TAG] };
-      if (isEdit) {
-        await api.updateNote(entry.id, data);
-      } else {
-        data.child = childId;
-        await api.createNote(data);
-      }
+      if (isEdit) await api.updateNote(entry.id, data);
+      else { data.child = childId; await api.createNote(data); }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Bath" : "Add Bath"} onClose={onClose}>
+    <Modal title={isEdit ? t("bathForm.editTitle") : t("bathForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label="Time">
-          <FormInput type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} required />
+        <FormField label={t("common.time")}>
+          <input className="form-control" type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} required />
         </FormField>
-        <FormField label="Note (optional)">
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-            placeholder="e.g. evening bath, enjoyed it"
-            style={{
-              width: "100%", padding: "10px 12px", borderRadius: 10,
-              border: "1px solid var(--border)", background: "var(--bg)",
-              color: "var(--text)", fontSize: 14, fontFamily: "inherit",
-              outline: "none", resize: "vertical",
-            }}
-          />
+        <FormField label={t("form.note")}>
+          <textarea className="form-control" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.bath} disabled={saving || deleting}>
-          {saving ? "Saving..." : isEdit ? "Update Bath" : "Save Bath"}
+          {saving ? t("common.saving") : isEdit ? t("bathForm.update") : t("bathForm.save")}
         </FormButton>
         {isEdit && (
-          <FormButton
-            type="button"
-            color="#EF4444"
-            disabled={saving || deleting}
-            onClick={handleDelete}
-            style={{ marginTop: 10, color: "#fff" }}
-          >
-            {deleting ? "Deleting..." : "Delete Bath"}
+          <FormButton type="button" color="#EF4444" disabled={saving || deleting} onClick={handleDelete} style={{ marginTop: 10, color: "#fff" }}>
+            {deleting ? t("common.deleting") : t("common.delete")}
           </FormButton>
         )}
       </form>

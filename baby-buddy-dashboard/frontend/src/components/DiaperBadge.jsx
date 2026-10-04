@@ -1,8 +1,10 @@
 import { onSurface } from "../utils/colors";
+import { useTranslation } from "../locales";
 
 export default function DiaperBadge({ type }) {
-  const bg =
-    type === "solid" ? "#D97706" : type === "both" ? "#8B5CF6" : "#3B82F6";
+  const t = useTranslation();
+  const bg = type === "solid" ? "#D97706" : type === "both" ? "#8B5CF6" : "#3B82F6";
+  const key = ["wet", "solid", "both"].includes(type) ? type : "wet";
   return (
     <span
       style={{
@@ -17,7 +19,7 @@ export default function DiaperBadge({ type }) {
         letterSpacing: "0.04em",
       }}
     >
-      {type}
+      {t(`diaper.${key}`)}
     </span>
   );
 }

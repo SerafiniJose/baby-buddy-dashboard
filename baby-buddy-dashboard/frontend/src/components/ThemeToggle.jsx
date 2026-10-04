@@ -1,17 +1,17 @@
 import { Icons } from "./Icons";
-
-// Three explicit segments rather than one cycling button: the current mode is visible
-// without clicking, and each option gets its own label for screen readers.
-const OPTIONS = [
-  { mode: "auto", label: "Match device theme", icon: <Icons.Contrast /> },
-  { mode: "light", label: "Light theme", icon: <Icons.Sun /> },
-  { mode: "dark", label: "Dark theme", icon: <Icons.Moon /> },
-];
+import { useTranslation } from "../locales";
 
 export default function ThemeToggle({ mode, onChange }) {
+  const t = useTranslation();
+  const options = [
+    { mode: "auto", label: t("theme.auto"), icon: <Icons.Contrast /> },
+    { mode: "light", label: t("theme.light"), icon: <Icons.Sun /> },
+    { mode: "dark", label: t("theme.dark"), icon: <Icons.Moon /> },
+  ];
+
   return (
-    <div className="theme-toggle" role="group" aria-label="Theme">
-      {OPTIONS.map((option) => (
+    <div className="theme-toggle" role="group" aria-label={t("theme.label")}>
+      {options.map((option) => (
         <button
           key={option.mode}
           type="button"

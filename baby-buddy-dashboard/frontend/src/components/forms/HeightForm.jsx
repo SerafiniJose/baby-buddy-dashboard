@@ -3,6 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
+import { useTranslation } from "../../locales";
 
 function toLocalDate(date) {
   const d = new Date(date);
@@ -11,6 +12,7 @@ function toLocalDate(date) {
 }
 
 export default function HeightForm({ childId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const units = useUnits();
   const isEdit = !!entry;
   const [height, setHeight] = useState(entry?.height ? String(entry.height) : "");
@@ -36,15 +38,15 @@ export default function HeightForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Height" : "Log Height"} onClose={onClose}>
+    <Modal title={isEdit ? t("heightForm.editTitle") : t("heightForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label={`Height (${units.length})`}>
+        <FormField label={t("heightForm.amount", { unit: units.length })}>
           <FormInput
             type="number"
             value={height}
@@ -57,7 +59,7 @@ export default function HeightForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
-        <FormField label="Date">
+        <FormField label={t("common.date")}>
           <FormInput
             type="date"
             value={date}
@@ -67,7 +69,7 @@ export default function HeightForm({ childId, entry, onDone, onClose }) {
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.height} disabled={saving || !height}>
-          {saving ? "Saving..." : isEdit ? "Update Height" : "Save Height"}
+          {saving ? t("common.saving") : isEdit ? t("heightForm.update") : t("heightForm.save")}
         </FormButton>
       </form>
     </Modal>

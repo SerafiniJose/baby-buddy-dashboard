@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "../locales";
 
 function ActionMessage({ message }) {
+  const t = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -10,7 +12,7 @@ function ActionMessage({ message }) {
     try {
       await message.onAction();
     } catch {
-      setError("Couldn't mark done. Try again.");
+      setError(t("alert.actionFailed"));
       setBusy(false);
     }
   };
@@ -38,7 +40,7 @@ function ActionMessage({ message }) {
             opacity: busy ? 0.6 : 1,
           }}
         >
-          {busy ? "Saving…" : message.actionLabel}
+          {busy ? t("common.saving") : message.actionLabel}
         </button>
       </div>
       {error && (
@@ -49,6 +51,7 @@ function ActionMessage({ message }) {
 }
 
 function DismissMessage({ message, onDismiss }) {
+  const t = useTranslation();
   return (
     <div
       style={{
@@ -62,7 +65,7 @@ function DismissMessage({ message, onDismiss }) {
       <button
         onClick={() => onDismiss(message.key)}
         style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: 16, lineHeight: 1 }}
-        aria-label="Dismiss"
+        aria-label={t("common.dismiss")}
       >
         ×
       </button>

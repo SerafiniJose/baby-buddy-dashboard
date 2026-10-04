@@ -4,6 +4,7 @@ import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
+import { useTranslation } from "../../locales";
 
 function toLocalDatetime(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -11,6 +12,7 @@ function toLocalDatetime(date) {
 }
 
 export default function SleepForm({ childId, timerId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const isEdit = !!entry;
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -45,21 +47,21 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
       }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Sleep" : "Log Sleep"} onClose={onClose}>
+    <Modal title={isEdit ? t("sleepForm.editTitle") : t("sleepForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
         {!isEdit && timerId ? (
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
-            The timer's start and end times will be used for this sleep entry.
+            {t("form.timerNote", { type: t("action.sleep").toLowerCase() })}
           </p>
         ) : (
           <>
-            <FormField label="Start">
+            <FormField label={t("common.start")}>
               <FormInput
                 type="datetime-local"
                 value={start}
@@ -67,7 +69,7 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
                 required
               />
             </FormField>
-            <FormField label="End">
+            <FormField label={t("common.end")}>
               <FormInput
                 type="datetime-local"
                 value={end}
@@ -77,17 +79,17 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
             </FormField>
           </>
         )}
-        <FormField label="Notes">
+        <FormField label={t("common.notes")}>
           <FormInput
             type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optional"
+            placeholder={t("common.optional")}
           />
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.sleep} disabled={saving}>
-          {saving ? "Saving..." : isEdit ? "Update Sleep" : "Save Sleep"}
+          {saving ? t("common.saving") : isEdit ? t("sleepForm.update") : t("sleepForm.save")}
         </FormButton>
       </form>
     </Modal>

@@ -3,6 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import { colors } from "../../utils/colors";
 import { EVENT_TAG, toIsoWithLocalOffset } from "../../utils/formatters";
+import { useTranslation } from "../../locales";
 
 function defaultWhen(entry) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -13,6 +14,7 @@ function defaultWhen(entry) {
 }
 
 export default function EventForm({ childId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const isEdit = !!entry;
   const [time, setTime] = useState(defaultWhen(entry));
   const [title, setTitle] = useState(entry?.note || "");
@@ -21,14 +23,14 @@ export default function EventForm({ childId, entry, onDone, onClose }) {
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this event?")) return;
+    if (!window.confirm(t("common.deleteThisEntry"))) return;
     setError("");
     setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
-      setError("Couldn't delete. Try again.");
+      setError(t("common.deleteFailed"));
       setDeleting(false);
     }
   };
@@ -44,33 +46,27 @@ export default function EventForm({ childId, entry, onDone, onClose }) {
       else { data.child = childId; await api.createNote(data); }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("common.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Event" : "Add Event"} onClose={onClose}>
+    <Modal title={isEdit ? t("eventForm.editTitle") : t("eventForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label="When">
+        <FormField label={t("common.time")}>
           <FormInput type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} required />
         </FormField>
-        <FormField label="Title">
-          <FormInput type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Pediatrician appointment" required />
+        <FormField label={t("eventForm.title")}>
+          <FormInput type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
         </FormField>
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.event} disabled={saving || deleting || !title.trim()}>
-          {saving ? "Saving..." : isEdit ? "Update Event" : "Save Event"}
+          {saving ? t("common.saving") : isEdit ? t("eventForm.update") : t("eventForm.save")}
         </FormButton>
         {isEdit && (
-          <FormButton
-            type="button"
-            color="#EF4444"
-            disabled={saving || deleting}
-            onClick={handleDelete}
-            style={{ marginTop: 10, color: "#fff" }}
-          >
-            {deleting ? "Deleting..." : "Delete Event"}
+          <FormButton type="button" color="#EF4444" disabled={saving || deleting} onClick={handleDelete} style={{ marginTop: 10, color: "#fff" }}>
+            {deleting ? t("common.deleting") : t("common.delete")}
           </FormButton>
         )}
       </form>

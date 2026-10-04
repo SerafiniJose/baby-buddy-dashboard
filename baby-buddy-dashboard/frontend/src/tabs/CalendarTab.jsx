@@ -3,40 +3,41 @@ import SectionCard from "../components/SectionCard";
 import { Icons } from "../components/Icons";
 import { colors } from "../utils/colors";
 import { eventsForMonth, upcomingEvents } from "../utils/formatters";
-
-const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import { getLocale, useTranslation } from "../locales";
 
 export default function CalendarTab({ events, onAddEvent, onEditEntry }) {
+  const t = useTranslation();
   const today = new Date();
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
   const byDay = eventsForMonth(events || [], year, month);
   const upcoming = upcomingEvents(events || []).slice(0, 8);
+  const weekDays = t("calendar.weekDays");
 
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday=0
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells = [];
   for (let i = 0; i < firstDow; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const monthLabel = cursor.toLocaleDateString([], { month: "long", year: "numeric" });
+  const monthLabel = cursor.toLocaleDateString(getLocale(), { month: "long", year: "numeric" });
   const shift = (n) => setCursor(new Date(year, month + n, 1));
 
   return (
     <div className="fade-in fade-in-1">
-      <SectionCard title="Calendar" icon={<Icons.Calendar />} color={colors.event}>
+      <SectionCard title={t("calendar.title")} icon={<Icons.Calendar />} color={colors.event}>
         <div className="calendar-nav">
-          <button className="calendar-nav-btn" onClick={() => shift(-1)} aria-label="Previous month">‹</button>
+          <button className="calendar-nav-btn" onClick={() => shift(-1)} aria-label={t("calendar.previousMonth")}>‹</button>
           <div className="calendar-nav-label">{monthLabel}</div>
-          <button className="calendar-nav-btn" onClick={() => shift(1)} aria-label="Next month">›</button>
+          <button className="calendar-nav-btn" onClick={() => shift(1)} aria-label={t("calendar.nextMonth")}>›</button>
         </div>
         <div className="calendar-nav-actions">
-          <button className="calendar-nav-btn" onClick={() => setCursor(new Date(today.getFullYear(), today.getMonth(), 1))}>Today</button>
-          <button className="calendar-nav-btn calendar-nav-btn-accent" onClick={onAddEvent} style={{ color: colors.event }}>+ Add Event</button>
+          <button className="calendar-nav-btn" onClick={() => setCursor(new Date(today.getFullYear(), today.getMonth(), 1))}>{t("calendar.today")}</button>
+          <button className="calendar-nav-btn calendar-nav-btn-accent" onClick={onAddEvent} style={{ color: colors.event }}>{t("calendar.addEvent")}</button>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 4 }}>
-          {DOW.map((d) => (
+          {weekDays.map((d) => (
             <div key={d} style={{ fontSize: 11, color: "var(--text-dim)", textAlign: "center", padding: 4 }}>{d}</div>
           ))}
           {cells.map((d, i) => {
@@ -74,7 +75,7 @@ export default function CalendarTab({ events, onAddEvent, onEditEntry }) {
       </SectionCard>
 
       <div style={{ marginTop: 16 }}>
-        <SectionCard title="Upcoming" icon={<Icons.Calendar />} color={colors.event}>
+        <SectionCard title={t("calendar.upcoming")} icon={<Icons.Calendar />} color={colors.event}>
           {upcoming.length ? (
             upcoming.map((ev) => (
               <div
@@ -85,13 +86,13 @@ export default function CalendarTab({ events, onAddEvent, onEditEntry }) {
               >
                 <span>{ev.note}</span>
                 <span style={{ color: "var(--text-dim)" }}>
-                  {new Date(ev.time).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  {new Date(ev.time).toLocaleString(getLocale(), { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
             ))
           ) : (
             <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 30 }}>
-              No upcoming events — tap "+ Add Event"
+              {t("calendar.emptyUpcoming")}
             </div>
           )}
         </SectionCard>
