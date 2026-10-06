@@ -157,6 +157,14 @@ export const api = {
     request(`head-circumference/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteHeadCircumference: (id) => request(`head-circumference/${id}/`, { method: "DELETE" }),
 
+  // BMI
+  getBmi: (params) => request(`bmi/${qs(params)}`),
+  createBmi: (data) =>
+    request("bmi/", { method: "POST", body: JSON.stringify(data) }),
+  updateBmi: (id, data) =>
+    request(`bmi/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteBmi: (id) => request(`bmi/${id}/`, { method: "DELETE" }),
+
   // Pumping
   getPumping: (params) => request(`pumping/${qs(params)}`),
   createPumping: (data) =>

@@ -29,6 +29,7 @@ import ReminderForm from "./components/forms/ReminderForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import HeadCircumferenceForm from "./components/forms/HeadCircumferenceForm";
+import BmiForm from "./components/forms/BmiForm";
 import ThemeToggle from "./components/ThemeToggle";
 import LanguageSelector from "./components/LanguageSelector";
 import AlertBanner from "./components/AlertBanner";
@@ -76,6 +77,7 @@ const ACTION_GROUPS = [
       { id: "weight", labelKey: "action.weight", icon: <Icons.Weight />, color: colors.growth },
       { id: "height", labelKey: "action.height", icon: <Icons.Ruler />, color: colors.height },
       { id: "headCircumference", labelKey: "action.headCircumference", icon: <Icons.Ruler />, color: colors.headCircumference },
+      { id: "bmi", labelKey: "action.bmi", icon: <Icons.Gauge />, color: colors.bmi },
     ],
   },
   {
@@ -407,6 +409,9 @@ export default function App() {
             weights={data.weights}
             heights={data.heights}
             headCircumferences={data.headCircumferences}
+            bmis={data.bmis}
+            birthDate={data.child?.birth_date}
+            childSex={data.childSex}
             monthlyFeedings={data.monthlyFeedings}
             monthlySleep={data.monthlySleep}
             onEditEntry={(type, entry) => setModal({ type, entry })}
@@ -528,6 +533,9 @@ export default function App() {
         <WeightForm
           childId={data.child?.id}
           entry={modal.entry}
+          heights={data.heights}
+          bmis={data.bmis}
+          unitSystem={data.unitSystem}
           onDone={handleFormDone}
           onClose={closeModal}
         />
@@ -536,12 +544,23 @@ export default function App() {
         <HeightForm
           childId={data.child?.id}
           entry={modal.entry}
+          weights={data.weights}
+          bmis={data.bmis}
+          unitSystem={data.unitSystem}
           onDone={handleFormDone}
           onClose={closeModal}
         />
       )}
       {modal?.type === "headCircumference" && (
         <HeadCircumferenceForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "bmi" && (
+        <BmiForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}

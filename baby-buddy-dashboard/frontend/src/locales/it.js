@@ -147,6 +147,11 @@ const locale = {
     noHeightData: "Nessun dato sull'altezza ancora registrato",
     noHeadCircumferenceData: "Nessun dato sulla circonferenza cranica ancora registrato",
     noBmiData: "Nessun dato sul BMI ancora registrato",
+    whoPercentiles: "Percentili WHO",
+    weekShort: "{week}sett",
+    weekOfAge: "Settimana {week}",
+    yourChild: "Il tuo bimbo",
+    whoSource: "Standard di crescita WHO (banda P3–P97, P50 tratteggiata).",
     needTwoMeasurements: "Servono almeno 2 misurazioni per mostrare l'andamento",
   },
 

@@ -6,6 +6,7 @@ import { colors } from "../../utils/colors";
 import { useUnits, useUnitSystem } from "../../utils/units";
 import { weightToGrams } from "../../utils/weight";
 import { useTranslation } from "../../locales";
+import { syncBmiForDate } from "../../utils/bmiSync";
 
 function toLocalDate(date) {
   const d = new Date(date);
@@ -13,10 +14,11 @@ function toLocalDate(date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function WeightForm({ childId, entry, onDone, onClose }) {
+export default function WeightForm({ childId, entry, heights = [], bmis = [], unitSystem: unitSystemProp, onDone, onClose }) {
   const t = useTranslation();
   const units = useUnits();
-  const unitSystem = useUnitSystem();
+  const contextUnitSystem = useUnitSystem();
+  const unitSystem = unitSystemProp || contextUnitSystem;
   const isEdit = !!entry;
   const [weight, setWeight] = useState(entry?.weight ? String(entry.weight) : "");
   const [date, setDate] = useState(entry?.date ? toLocalDate(entry.date) : toLocalDate(new Date()));
@@ -39,6 +41,18 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
       } else {
         data.child = childId;
         await api.createWeight(data);
+      }
+      try {
+        await syncBmiForDate({
+          childId,
+          date,
+          weightValue: parseFloat(weight),
+          heights,
+          bmis,
+          unitSystem,
+        });
+      } catch (bmiErr) {
+        console.warn("BMI sync failed", bmiErr);
       }
       onDone();
     } catch {

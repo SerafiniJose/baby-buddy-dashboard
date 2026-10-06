@@ -71,6 +71,13 @@ export const Icons = {
       <path d="M3 9h4M3 15h4M9 3v4M15 3v4" />
     </svg>
   ),
+  Gauge: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 14a8 8 0 0 1 16 0" />
+      <path d="M12 14l4-4" />
+      <path d="M7 14h.01M17 14h.01M12 8h.01" />
+    </svg>
+  ),
   Heart: () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />

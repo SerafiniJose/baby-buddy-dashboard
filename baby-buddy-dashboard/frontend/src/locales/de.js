@@ -147,6 +147,11 @@ const locale = {
     noHeightData: "Noch keine Größendaten vorhanden",
     noHeadCircumferenceData: "Noch keine Kopfumfangdaten vorhanden",
     noBmiData: "Noch keine BMI-Daten vorhanden",
+    whoPercentiles: "WHO-Perzentile",
+    weekShort: "{week}W",
+    weekOfAge: "Woche {week}",
+    yourChild: "Dein Kind",
+    whoSource: "WHO Child Growth Standards (P3–P97-Band, P50 gestrichelt).",
     needTwoMeasurements: "Mindestens 2 Messungen erforderlich, um einen Verlauf anzuzeigen",
   },
 

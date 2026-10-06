@@ -121,6 +121,7 @@ describe("delete APIs", () => {
     await api.deleteWeight(6);
     await api.deleteHeight(7);
     await api.deleteHeadCircumference(8);
+    await api.deleteBmi(9);
 
     expect(calls).toEqual([
       { url: "./api/baby-buddy/feedings/1/", method: "DELETE" },
@@ -131,6 +132,7 @@ describe("delete APIs", () => {
       { url: "./api/baby-buddy/weight/6/", method: "DELETE" },
       { url: "./api/baby-buddy/height/7/", method: "DELETE" },
       { url: "./api/baby-buddy/head-circumference/8/", method: "DELETE" },
+      { url: "./api/baby-buddy/bmi/9/", method: "DELETE" },
     ]);
   });
 });
@@ -168,6 +170,44 @@ describe("head circumference API", () => {
         url: "./api/baby-buddy/head-circumference/12/",
         method: "PATCH",
         body: { head_circumference: 41.1, date: "2026-10-06" },
+      },
+    ]);
+  });
+});
+
+describe("BMI API", () => {
+  it("uses Baby Buddy's bmi endpoint for listing", async () => {
+    const urls = [];
+    vi.stubGlobal("fetch", async (url) => {
+      urls.push(url);
+      return { ok: true, status: 200, json: async () => ({ results: [] }) };
+    });
+
+    await api.getBmi({ child: 7, ordering: "-date" });
+
+    expect(urls).toEqual(["./api/baby-buddy/bmi/?child=7&ordering=-date"]);
+  });
+
+  it("posts and patches the bmi value", async () => {
+    const calls = [];
+    vi.stubGlobal("fetch", async (url, options) => {
+      calls.push({ url, method: options?.method, body: JSON.parse(options?.body || "{}") });
+      return { ok: true, status: 200, json: async () => ({ id: 12 }) };
+    });
+
+    await api.createBmi({ child: 7, bmi: 17.8, date: "2026-10-05" });
+    await api.updateBmi(12, { bmi: 18.1, date: "2026-10-06" });
+
+    expect(calls).toEqual([
+      {
+        url: "./api/baby-buddy/bmi/",
+        method: "POST",
+        body: { child: 7, bmi: 17.8, date: "2026-10-05" },
+      },
+      {
+        url: "./api/baby-buddy/bmi/12/",
+        method: "PATCH",
+        body: { bmi: 18.1, date: "2026-10-06" },
       },
     ]);
   });

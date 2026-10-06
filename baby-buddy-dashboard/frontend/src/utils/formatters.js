@@ -184,6 +184,19 @@ export function formatGrowthTick(timestamp) {
   });
 }
 
+export function calculateBmi(weightValue, heightValue, unitSystem = "metric") {
+  const weight = typeof weightValue === "number" ? weightValue : parseFloat(weightValue);
+  const height = typeof heightValue === "number" ? heightValue : parseFloat(heightValue);
+  if (!(weight > 0) || !(height > 0)) return null;
+
+  // Forms/charts use kg+cm in metric mode, lb+in in imperial mode. Baby Buddy stores
+  // weight in grams, but callers pass display-unit values after conversion at the API edge.
+  const bmi = unitSystem === "imperial"
+    ? (weight / (height * height)) * 703
+    : weight / ((height / 100) ** 2);
+  return Number.isFinite(bmi) ? Math.round(bmi * 10) / 10 : null;
+}
+
 function getLast7Days() {
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const result = [];

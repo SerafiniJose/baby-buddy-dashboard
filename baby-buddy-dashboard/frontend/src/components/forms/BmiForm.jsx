@@ -3,10 +3,7 @@ import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
 import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
-import { useUnits, useUnitSystem } from "../../utils/units";
 import { useTranslation } from "../../locales";
-import { weightFromGrams } from "../../utils/weight";
-import { syncBmiForDate } from "../../utils/bmiSync";
 
 function toLocalDate(date) {
   const d = new Date(date);
@@ -14,46 +11,26 @@ function toLocalDate(date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function HeightForm({ childId, entry, weights = [], bmis = [], unitSystem: unitSystemProp, onDone, onClose }) {
+export default function BmiForm({ childId, entry, onDone, onClose }) {
   const t = useTranslation();
-  const units = useUnits();
-  const contextUnitSystem = useUnitSystem();
-  const unitSystem = unitSystemProp || contextUnitSystem;
   const isEdit = !!entry;
-  const [height, setHeight] = useState(entry?.height ? String(entry.height) : "");
+  const [bmi, setBmi] = useState(entry?.bmi != null ? String(entry.bmi) : "");
   const [date, setDate] = useState(entry?.date ? toLocalDate(entry.date) : toLocalDate(new Date()));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!height) return;
+    if (!bmi) return;
     setError("");
     setSaving(true);
     try {
-      const data = {
-        height: parseFloat(height),
-        date,
-      };
+      const data = { bmi: parseFloat(bmi), date };
       if (isEdit) {
-        await api.updateHeight(entry.id, data);
+        await api.updateBmi(entry.id, data);
       } else {
         data.child = childId;
-        await api.createHeight(data);
-      }
-      try {
-        const matchingWeight = (weights || []).find((w) => w.date === date);
-        await syncBmiForDate({
-          childId,
-          date,
-          weightValue: matchingWeight ? weightFromGrams(matchingWeight.weight, unitSystem) : undefined,
-          heightValue: data.height,
-          weights,
-          bmis,
-          unitSystem,
-        });
-      } catch (bmiErr) {
-        console.warn("BMI sync failed", bmiErr);
+        await api.createBmi(data);
       }
       onDone();
     } catch {
@@ -65,7 +42,7 @@ export default function HeightForm({ childId, entry, weights = [], bmis = [], un
   const handleDelete = async () => {
     setError("");
     try {
-      await api.deleteHeight(entry.id);
+      await api.deleteBmi(entry.id);
       onDone();
     } catch {
       setError(t("common.deleteFailed"));
@@ -73,16 +50,16 @@ export default function HeightForm({ childId, entry, weights = [], bmis = [], un
   };
 
   return (
-    <Modal title={isEdit ? t("heightForm.editTitle") : t("heightForm.logTitle")} onClose={onClose}>
+    <Modal title={isEdit ? t("bmiForm.editTitle") : t("bmiForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label={t("heightForm.amount", { unit: units.length })}>
+        <FormField label={t("bmiForm.amount")}>
           <FormInput
             type="number"
-            value={height}
-            onChange={(e) => setHeight(e.target.value)}
-            placeholder="50.0"
-            min="0"
-            max="200"
+            value={bmi}
+            onChange={(e) => setBmi(e.target.value)}
+            placeholder="17.5"
+            min="5"
+            max="40"
             step="0.1"
             autoFocus
             required
@@ -98,8 +75,8 @@ export default function HeightForm({ childId, entry, weights = [], bmis = [], un
         </FormField>
         {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
-        <FormButton color={colors.height} disabled={saving || !height}>
-          {saving ? t("common.saving") : isEdit ? t("heightForm.update") : t("heightForm.save")}
+        <FormButton color={colors.bmi} disabled={saving || !bmi}>
+          {saving ? t("common.saving") : isEdit ? t("bmiForm.update") : t("bmiForm.save")}
         </FormButton>
       </form>
     </Modal>

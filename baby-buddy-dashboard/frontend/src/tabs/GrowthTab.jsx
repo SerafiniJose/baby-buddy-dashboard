@@ -14,6 +14,7 @@ import SectionCard from "../components/SectionCard";
 import CustomTooltip from "../components/CustomTooltip";
 import ChartDetailBar from "../components/ChartDetailBar";
 import DayActivitiesModal from "../components/DayActivitiesModal";
+import GrowthTrendChart from "../components/GrowthTrendChart";
 import { Icons } from "../components/Icons";
 import { colors } from "../utils/colors";
 import { weightFromGrams, formatWeightValue } from "../utils/weight";
@@ -21,7 +22,7 @@ import { useUnits, useUnitSystem } from "../utils/units";
 import { toGrowthSeries, formatGrowthTick, dailyFeedingByMetric, dailySleepTotals, getEntriesForDate } from "../utils/formatters";
 import { useTranslation } from "../locales";
 
-export default function GrowthTab({ weights, heights, headCircumferences, monthlyFeedings, monthlySleep, onEditEntry }) {
+export default function GrowthTab({ weights, heights, headCircumferences, bmis = [], birthDate, childSex, monthlyFeedings, monthlySleep, onEditEntry }) {
   const units = useUnits();
   const unitSystem = useUnitSystem();
   const t = useTranslation();
@@ -48,6 +49,7 @@ export default function GrowthTab({ weights, heights, headCircumferences, monthl
   const latestWeight = weightsInUnit[0];
   const latestHeight = heights[0];
   const latestHeadCircumference = headCircumferences?.[0];
+  const latestBmi = bmis?.[0];
 
   // Compute averages for stat cards
   const feedingDays = feedingSeries.filter((d) => d.value > 0);
@@ -208,6 +210,45 @@ export default function GrowthTab({ weights, heights, headCircumferences, monthl
         </div>
 
         <div className="fade-in fade-in-4">
+          <div
+            style={{
+              background: "var(--card-bg)",
+              borderRadius: 16,
+              padding: "20px 22px",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
+                  background: `${colors.bmi}18`,
+                  color: colors.bmi,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icons.Gauge />
+              </div>
+              <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                {t("growth.bmi")}
+              </span>
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
+              {latestBmi?.bmi != null ? latestBmi.bmi : "—"}
+            </div>
+            {latestBmi && (
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                {new Date(latestBmi.date).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="fade-in fade-in-5">
           <div
             style={{
               background: "var(--card-bg)",
@@ -535,6 +576,76 @@ export default function GrowthTab({ weights, heights, headCircumferences, monthl
               </div>
             )}
           </SectionCard>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: 16,
+          marginTop: 16,
+        }}
+      >
+        <div className="fade-in fade-in-10">
+          <GrowthTrendChart
+            title={t("growth.weightTrend")}
+            icon={<Icons.Weight />}
+            color={colors.growth}
+            metric="weight"
+            entries={weightsInUnit}
+            valueKey="weight"
+            unit={units.weight}
+            birthDate={birthDate}
+            childSex={childSex}
+            noDataKey="growth.noWeightData"
+            onEditEntry={onEditEntry}
+          />
+        </div>
+        <div className="fade-in fade-in-11">
+          <GrowthTrendChart
+            title={t("growth.heightTrend")}
+            icon={<Icons.Ruler />}
+            color={colors.height}
+            metric="height"
+            entries={heights}
+            valueKey="height"
+            unit={units.length}
+            birthDate={birthDate}
+            childSex={childSex}
+            noDataKey="growth.noHeightData"
+            onEditEntry={onEditEntry}
+          />
+        </div>
+        <div className="fade-in fade-in-12">
+          <GrowthTrendChart
+            title={t("growth.headCircumferenceTrend")}
+            icon={<Icons.Ruler />}
+            color={colors.headCircumference}
+            metric="headCircumference"
+            entries={headCircumferences}
+            valueKey="head_circumference"
+            unit={units.length}
+            birthDate={birthDate}
+            childSex={childSex}
+            noDataKey="growth.noHeadCircumferenceData"
+            onEditEntry={onEditEntry}
+          />
+        </div>
+        <div className="fade-in fade-in-13">
+          <GrowthTrendChart
+            title={t("growth.bmiTrend")}
+            icon={<Icons.Gauge />}
+            color={colors.bmi}
+            metric="bmi"
+            entries={bmis}
+            valueKey="bmi"
+            unit="kg/m²"
+            birthDate={birthDate}
+            childSex={childSex}
+            noDataKey="growth.noBmiData"
+            onEditEntry={onEditEntry}
+          />
         </div>
       </div>
 
