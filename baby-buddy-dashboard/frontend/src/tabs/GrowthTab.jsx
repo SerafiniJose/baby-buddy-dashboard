@@ -21,7 +21,7 @@ import { useUnits, useUnitSystem } from "../utils/units";
 import { toGrowthSeries, formatGrowthTick, dailyFeedingByMetric, dailySleepTotals, getEntriesForDate } from "../utils/formatters";
 import { useTranslation } from "../locales";
 
-export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySleep, onEditEntry }) {
+export default function GrowthTab({ weights, heights, headCircumferences, monthlyFeedings, monthlySleep, onEditEntry }) {
   const units = useUnits();
   const unitSystem = useUnitSystem();
   const t = useTranslation();
@@ -36,6 +36,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
   );
   const weightSeries = toGrowthSeries(weightsInUnit, "weight");
   const heightSeries = toGrowthSeries(heights, "height");
+  const headCircumferenceSeries = toGrowthSeries(headCircumferences, "head_circumference");
   const feedingSeries = dailyFeedingByMetric(monthlyFeedings, feedMetric);
   const feedMetricMeta = {
     volume: { unit: units.volume, labelKey: "chartMetric.amount" },
@@ -46,6 +47,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
 
   const latestWeight = weightsInUnit[0];
   const latestHeight = heights[0];
+  const latestHeadCircumference = headCircumferences?.[0];
 
   // Compute averages for stat cards
   const feedingDays = feedingSeries.filter((d) => d.value > 0);
@@ -181,6 +183,45 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
                   width: 30,
                   height: 30,
                   borderRadius: 8,
+                  background: `${colors.headCircumference}18`,
+                  color: colors.headCircumference,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icons.Ruler />
+              </div>
+              <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                {t("growth.headCircumference")}
+              </span>
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
+              {latestHeadCircumference ? `${latestHeadCircumference.head_circumference} ${units.length}` : "—"}
+            </div>
+            {latestHeadCircumference && (
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                {new Date(latestHeadCircumference.date).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="fade-in fade-in-4">
+          <div
+            style={{
+              background: "var(--card-bg)",
+              borderRadius: 16,
+              padding: "20px 22px",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
                   background: `${colors.feeding}18`,
                   color: colors.feeding,
                   display: "flex",
@@ -203,7 +244,7 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
           </div>
         </div>
 
-        <div className="fade-in fade-in-4">
+        <div className="fade-in fade-in-5">
           <div
             style={{
               background: "var(--card-bg)",
@@ -445,6 +486,52 @@ export default function GrowthTab({ weights, heights, monthlyFeedings, monthlySl
             ) : (
               <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 40 }}>
                 {heightSeries.length === 1 ? t("growth.needTwoMeasurements") : t("growth.noHeightData")}
+              </div>
+            )}
+          </SectionCard>
+        </div>
+
+        {/* Head Circumference Chart */}
+        <div className="fade-in fade-in-9">
+          <SectionCard title={t("growth.headCircumferenceTrend")} icon={<Icons.Ruler />} color={colors.headCircumference}>
+            {headCircumferenceSeries.length >= 2 ? (
+              <>
+                <div style={{ height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={headCircumferenceSeries} onClick={(data) => handleChartClick(data, "headCircumference")}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#252836" vertical={false} />
+                      <XAxis dataKey="timestamp" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatGrowthTick} tick={{ fontSize: 11, fill: "#5A6178" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "#5A6178" }} axisLine={false} tickLine={false} domain={["auto", "auto"]} />
+                      <Tooltip content={<CustomTooltip labelFormatter={formatGrowthTick} />} />
+                      <Line
+                        type="monotone"
+                        dataKey="head_circumference"
+                        stroke={colors.headCircumference}
+                        strokeWidth={2.5}
+                        dot={{ fill: colors.headCircumference, r: 4, cursor: "pointer" }}
+                        activeDot={{ r: 6, cursor: "pointer" }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                {selectedBar?.type === "headCircumference" && (
+                  <ChartDetailBar
+                    label={formatGrowthTick(selectedBar.label)}
+                    value={selectedBar.value}
+                    unit={units.length}
+                    color={colors.headCircumference}
+                    actionLabel={t("common.edit")}
+                    onViewEntries={() => {
+                      if (selectedBar.entry) onEditEntry?.("headCircumference", selectedBar.entry);
+                      setSelectedBar(null);
+                    }}
+                    onDismiss={() => setSelectedBar(null)}
+                  />
+                )}
+              </>
+            ) : (
+              <div style={{ color: "var(--text-dim)", fontSize: 13, textAlign: "center", padding: 40 }}>
+                {headCircumferenceSeries.length === 1 ? t("growth.needTwoMeasurements") : t("growth.noHeadCircumferenceData")}
               </div>
             )}
           </SectionCard>

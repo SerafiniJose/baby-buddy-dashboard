@@ -60,8 +60,11 @@ const locale = {
 
   tab: {
     overview: "Panoramica",
+    home: "Inizio",
     growth: "Crescita",
+    history: "Cronologia",
     notesAndMeds: "Note e Farmaci",
+    analysis: "Analisi",
   },
 
   diaper: {
@@ -354,6 +357,20 @@ const locale = {
     enterMode: "Modalità tata",
     exitMode: "Torna alla dashboard",
     logSleep: "Registra sonno",
+  },
+
+  history: {
+    title: "Cronologia",
+    filterLabel: "Vista cronologia",
+    filters: { all: "Tutto", notes: "Note", events: "Eventi", reminders: "Promemoria" },
+    types: { note: "Nota", event: "Evento", reminder: "Promemoria" },
+    emptyTitle: "Nessuna cronologia",
+    emptyAll: "Note, eventi e promemoria appariranno qui in ordine cronologico.",
+    untitledNote: "Nota senza titolo",
+    untitledEvent: "Evento senza titolo",
+    untitledReminder: "Promemoria senza titolo",
+    reminderStart: "inizia {start}",
+    reminderRange: "{start} a {end}",
   },
 
   time: {

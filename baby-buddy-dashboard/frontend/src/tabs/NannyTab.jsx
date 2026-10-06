@@ -48,7 +48,7 @@ export default function NannyTab({ childId, nannyName = "Nanny", feedings, nanny
 
   return (
     <div className="nanny-mode fade-in fade-in-1">
-      <SectionCard title={t("nanny.title")} icon={<Icons.Baby />} color={colors.feeding}>
+      <SectionCard title={t("nanny.title")} icon={<Icons.Caregiver />} color={colors.feeding}>
         <div className={`nanny-summary nanny-phase-${status.phase.id}`}>
           <div>
             <span className="nanny-eyebrow">{t(`${phaseKey}.label`)}</span>

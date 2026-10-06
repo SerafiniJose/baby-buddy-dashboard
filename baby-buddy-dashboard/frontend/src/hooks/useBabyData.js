@@ -30,6 +30,7 @@ export function useBabyData() {
   const [temperatures, setTemperatures] = useState([]);
   const [weights, setWeights] = useState([]);
   const [heights, setHeights] = useState([]);
+  const [headCircumferences, setHeadCircumferences] = useState([]);
   const [monthlyFeedings, setMonthlyFeedings] = useState([]);
   const [monthlySleep, setMonthlySleep] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -84,6 +85,7 @@ export function useBabyData() {
         tempRes,
         weightRes,
         heightRes,
+        headCircumferenceRes,
         timersRes,
         notesRes,
         monthlyFeedingsRes,
@@ -102,6 +104,7 @@ export function useBabyData() {
         api.getTemperature({ child: c, limit: 10, ordering: "-time" }),
         api.getWeight({ child: c, limit: 20, ordering: "-date" }),
         api.getHeight({ child: c, limit: 20, ordering: "-date" }),
+        api.getHeadCircumference({ child: c, limit: 20, ordering: "-date" }),
         api.getTimers(),
         api.getNotes({ child: c, limit: 200, ordering: "-time" }),
         api.getFeedings({ child: c, start_min: monthMin, limit: 500, ordering: "-start" }),
@@ -124,6 +127,7 @@ export function useBabyData() {
       setTemperatures(tempRes.results || []);
       setWeights(weightRes.results || []);
       setHeights(heightRes.results || []);
+      setHeadCircumferences(headCircumferenceRes.results || []);
       setTimers(timersRes.results || []);
       {
         const split = splitNotesByTag(notesRes.results || []);
@@ -195,6 +199,7 @@ export function useBabyData() {
     setTemperatures(mock.temperatures);
     setWeights(mock.weights);
     setHeights(mock.heights);
+    setHeadCircumferences(mock.headCircumferences || []);
     setTimers(mock.timers);
     {
       const split = splitNotesByTag(mock.notes || []);
@@ -232,6 +237,7 @@ export function useBabyData() {
       setTemperatures(mock.temperatures);
       setWeights(mock.weights);
       setHeights(mock.heights);
+      setHeadCircumferences(mock.headCircumferences || []);
       setTimers(mock.timers);
       {
         const split = splitNotesByTag(mock.notes || []);
@@ -329,6 +335,7 @@ export function useBabyData() {
     temperatures,
     weights,
     heights,
+    headCircumferences,
     monthlyFeedings,
     monthlySleep,
     monthlyChanges,

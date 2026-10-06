@@ -8,6 +8,15 @@ export const Icons = {
       <path d="M10 10c.5.5 3.5.5 4 0" />
     </svg>
   ),
+  Caregiver: () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="7" r="4" />
+      <path d="M4 21a7 7 0 0 1 12.4-4.4" />
+      <path d="M18.7 14.2a2.7 2.7 0 0 0-3.8 0l-.4.4-.4-.4a2.7 2.7 0 1 0-3.8 3.8l.4.4 3.8 3.6 3.8-3.6.4-.4a2.7 2.7 0 0 0 0-3.8z" />
+      <path d="M16.5 4.5l2 1.2 2-1.2" />
+      <path d="M18.5 5.7v2.8" />
+    </svg>
+  ),
   Bottle: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10 2h4v3h-4z" />

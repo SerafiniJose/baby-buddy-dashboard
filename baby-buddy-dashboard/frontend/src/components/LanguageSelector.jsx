@@ -1,24 +1,23 @@
+import CompactSelector from "./CompactSelector";
 import { getLanguage, setLanguage, SUPPORTED_LANGUAGES, useTranslation } from "../locales";
 
 export default function LanguageSelector() {
   const t = useTranslation();
   const language = getLanguage();
+  const options = SUPPORTED_LANGUAGES.map((option) => ({
+    value: option.code,
+    label: option.label,
+    shortLabel: option.code,
+    meta: option.code,
+  }));
 
   return (
-    <label className="language-selector">
-      <span className="sr-only">{t("settings.language")}</span>
-      <select
-        value={language}
-        onChange={(event) => setLanguage(event.target.value)}
-        aria-label={t("settings.language")}
-        title={t("settings.language")}
-      >
-        {SUPPORTED_LANGUAGES.map((option) => (
-          <option key={option.code} value={option.code}>
-            {option.code}
-          </option>
-        ))}
-      </select>
-    </label>
+    <CompactSelector
+      className="language-selector"
+      ariaLabel={t("settings.language")}
+      options={options}
+      value={language}
+      onChange={setLanguage}
+    />
   );
 }

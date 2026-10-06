@@ -2,22 +2,40 @@ import { useState } from "react";
 import { useTranslation } from "../locales";
 
 // Day x hour occupancy. The job is magnitude on a grid, so the encoding is sequential:
-// a single hue, more-is-darker, never a rainbow. Intensity is alpha over the card surface
-// so the ramp stays correct under both the light and dark themes without a second palette.
+// a single hue, more-is-darker, never a rainbow. Intensity is mixed against the card
+// surface so the ramp stays correct under both light and dark themes without a second palette.
 const LEVELS = 5;
+const HEATMAP_FILL_STOPS = [0, 16, 32, 50, 70, 92];
+const HEATMAP_BORDER_STOPS = [0, 30, 42, 56, 70, 86];
 
-function levelFor(value, max) {
+export function levelFor(value, max) {
   if (!value || !max) return 0;
   return Math.max(1, Math.ceil((value / max) * LEVELS));
 }
 
-function cellStyle(level, hue) {
+export function heatmapIntensity(level) {
+  const bounded = Math.max(0, Math.min(LEVELS, Number(level) || 0));
+  return {
+    fill: HEATMAP_FILL_STOPS[bounded],
+    border: HEATMAP_BORDER_STOPS[bounded],
+  };
+}
+
+export function cellStyle(level, hue) {
   if (level === 0) {
-    return { background: "var(--overlay-subtle)" };
+    return {
+      background: "var(--overlay-subtle)",
+      border: "1px solid var(--overlay-border)",
+    };
   }
-  // 0.18 -> 1.0 across the ramp; the floor keeps the lightest step visible on both themes
-  const alpha = 0.18 + (level / LEVELS) * 0.82;
-  return { background: `color-mix(in srgb, ${hue} ${Math.round(alpha * 100)}%, transparent)` };
+  // Mix the same hue against the active card surface rather than transparent. That keeps
+  // the ramp sequential while making the Less→More spread obvious in both light and dark
+  // themes; a hue-tinted border reinforces the endpoints without changing occupancyOnly.
+  const intensity = heatmapIntensity(level);
+  return {
+    background: `color-mix(in srgb, ${hue} ${intensity.fill}%, var(--card-bg))`,
+    border: `1px solid color-mix(in srgb, ${hue} ${intensity.border}%, var(--border))`,
+  };
 }
 
 const HOUR_TICKS = [0, 6, 12, 18];

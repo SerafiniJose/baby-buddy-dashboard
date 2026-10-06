@@ -75,3 +75,41 @@ describe("getAllFeedings", () => {
     expect(await api.getAllChanges({ child: 1 })).toHaveLength(PAGE_SIZE + 2);
   });
 });
+
+describe("head circumference API", () => {
+  it("uses Baby Buddy's head-circumference endpoint for listing", async () => {
+    const urls = [];
+    vi.stubGlobal("fetch", async (url) => {
+      urls.push(url);
+      return { ok: true, status: 200, json: async () => ({ results: [] }) };
+    });
+
+    await api.getHeadCircumference({ child: 7, ordering: "-date" });
+
+    expect(urls).toEqual(["./api/baby-buddy/head-circumference/?child=7&ordering=-date"]);
+  });
+
+  it("posts and patches the head_circumference value", async () => {
+    const calls = [];
+    vi.stubGlobal("fetch", async (url, options) => {
+      calls.push({ url, method: options?.method, body: JSON.parse(options?.body || "{}") });
+      return { ok: true, status: 200, json: async () => ({ id: 12 }) };
+    });
+
+    await api.createHeadCircumference({ child: 7, head_circumference: 40.5, date: "2026-10-05" });
+    await api.updateHeadCircumference(12, { head_circumference: 41.1, date: "2026-10-06" });
+
+    expect(calls).toEqual([
+      {
+        url: "./api/baby-buddy/head-circumference/",
+        method: "POST",
+        body: { child: 7, head_circumference: 40.5, date: "2026-10-05" },
+      },
+      {
+        url: "./api/baby-buddy/head-circumference/12/",
+        method: "PATCH",
+        body: { head_circumference: 41.1, date: "2026-10-06" },
+      },
+    ]);
+  });
+});

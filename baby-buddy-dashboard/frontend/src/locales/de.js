@@ -60,8 +60,11 @@ const locale = {
 
   tab: {
     overview: "Übersicht",
+    home: "Start",
     growth: "Wachstum",
+    history: "Verlauf",
     notesAndMeds: "Notizen & Medis",
+    analysis: "Analyse",
   },
 
   diaper: {
@@ -354,6 +357,20 @@ const locale = {
     enterMode: "Nanny-Modus",
     exitMode: "Zurück zum Dashboard",
     logSleep: "Schlaf erfassen",
+  },
+
+  history: {
+    title: "Verlauf",
+    filterLabel: "Verlaufsansicht",
+    filters: { all: "Alles", notes: "Notizen", events: "Termine", reminders: "Erinnerungen" },
+    types: { note: "Notiz", event: "Termin", reminder: "Erinnerung" },
+    emptyTitle: "Noch kein Verlauf",
+    emptyAll: "Notizen, Termine und Erinnerungen erscheinen hier in chronologischer Reihenfolge.",
+    untitledNote: "Notiz ohne Titel",
+    untitledEvent: "Termin ohne Titel",
+    untitledReminder: "Erinnerung ohne Titel",
+    reminderStart: "beginnt {start}",
+    reminderRange: "{start} bis {end}",
   },
 
   time: {

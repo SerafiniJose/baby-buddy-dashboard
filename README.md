@@ -6,14 +6,17 @@ A modern, responsive dashboard for [Baby Buddy](https://github.com/babybuddy/bab
 
 ## Screenshots
 
-| Overview | Growth |
-|----------|--------|
-| ![Overview](screenshots/overview.png) | ![Growth](screenshots/growth.png) |
+| Inicio | Historial | Crecimiento | Análisis |
+|--------|-----------|-------------|----------|
+| ![Inicio](screenshots/overview.png) | Notes, events, and reminders | ![Growth](screenshots/growth.png) | Reports and trends |
 
 ## Features
 
-- **Overview dashboard** — daily stats, timelines, and charts for feedings, sleep, diapers, and tummy time
-- **Growth tracking** — 30-day feeding totals, sleep averages, weight, and height trend charts
+- **Four-section navigation** — Inicio, Historial, Crecimiento, and Análisis are the only main dashboard destinations; Modo Niñera remains a separate header mode
+- **Inicio dashboard** — daily stats, timelines, and charts for feedings, sleep, diapers, and tummy time
+- **Historial** — a combined chronological view of notes, calendar events, and reminders, with native filters for Todo, Notas, Eventos, and Recordatorios
+- **Crecimiento tracking** — 30-day feeding totals, sleep averages, weight, and height trend charts
+- **Análisis** — reporting views for feeding and diaper trends
 - **Quick logging** — grouped floating action button to quickly log feedings, sleep, diaper changes, tummy time, temperature, weight, height, and notes
 - **Modo Niñera** — persistent, focused caretaker mode that hides the normal dashboard, shows the next routine cue, supports manual sleep logging, and keeps standalone caretaker tasks as tagged notes
 - **Internationalization** — dependency-free app i18n with English, Spanish, Italian, and German, browser-language detection, persisted language preference, and a header language selector
@@ -231,8 +234,10 @@ baby-buddy-dashboard/               # ← repository root
             │   ├── useBabyData.js   # Fetches and polls all baby data
             │   └── useTimers.js     # Timer state management
             ├── tabs/
-            │   ├── OverviewTab.jsx  # Daily stats, timelines, and charts
-            │   └── GrowthTab.jsx    # Weight, height, feeding & sleep trends
+            │   ├── OverviewTab.jsx  # Inicio: daily stats, timelines, and charts
+            │   ├── HistoryTab.jsx   # Historial: notes, events, reminders, combined chronology
+            │   ├── GrowthTab.jsx    # Crecimiento: weight, height, feeding & sleep trends
+            │   └── ReportsTab.jsx   # Análisis: feeding and diaper reports
             ├── components/
             │   ├── Icons.jsx        # SVG icon components
             │   ├── StatCard.jsx     # Stat display card
@@ -299,10 +304,11 @@ This repository is a personal fork of the upstream project. All upstream functio
 - Baths are stored as Baby Buddy Notes with the tag `bath`. A **Bath** quick-action appears under the Track FAB, and a **Baths** card on the Overview tab shows a "Last bath …" stat.
 - Notes tagged `bath` are managed exclusively by this dashboard and do **not** appear in the plain Notes tab. Do not add or remove the `bath` tag manually in Baby Buddy — doing so will cause unexpected behaviour.
 
-**Calendar tab**
+**Historial section**
 
-- A **Calendar** tab shows a month grid plus an Upcoming list of future events. Events are stored as Baby Buddy Notes tagged `event`. A "+ Add Event" button lets you create them from within the dashboard.
-- Notes tagged `event` do **not** appear in the Notes tab. Same caution applies: manage these tags only through this dashboard.
+- A **Historial** section groups notes, calendar events, and reminders. The **Todo** view combines them into a useful chronological list; the **Notas**, **Eventos**, and **Recordatorios** views reuse the existing dedicated screens and actions.
+- Events are stored as Baby Buddy Notes tagged `event`. A "+ Add Event" button lets you create them from within the dashboard.
+- Notes tagged `event`, `reminder`, and completion/task tags do **not** appear in the plain Notes view. Same caution applies: manage these tags only through this dashboard.
 
 **Feeding growth metric toggle**
 

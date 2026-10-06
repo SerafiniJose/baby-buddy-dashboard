@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useBabyData } from "./hooks/useBabyData";
 import { useTimers } from "./hooks/useTimers";
 import { UnitContext } from "./utils/units";
@@ -10,12 +10,11 @@ import { readStoredNannyMode, writeStoredNannyMode } from "./utils/nannyModePref
 import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
 import { api } from "./api";
 import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
+import { DEFAULT_EXPANDED_ACTION_GROUP, TIMER_ACTION_IDS } from "./utils/quickActions";
 import { useTranslation } from "./locales";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
-import NotesTab from "./tabs/NotesTab";
-import CalendarTab from "./tabs/CalendarTab";
-import RemindersTab from "./tabs/RemindersTab";
+import HistoryTab from "./tabs/HistoryTab";
 import ReportsTab from "./tabs/ReportsTab";
 import NannyTab from "./tabs/NannyTab";
 import FeedingForm from "./components/forms/FeedingForm";
@@ -29,24 +28,35 @@ import EventForm from "./components/forms/EventForm";
 import ReminderForm from "./components/forms/ReminderForm";
 import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
+import HeadCircumferenceForm from "./components/forms/HeadCircumferenceForm";
 import ThemeToggle from "./components/ThemeToggle";
 import LanguageSelector from "./components/LanguageSelector";
-import TimerButton from "./components/TimerButton";
 import AlertBanner from "./components/AlertBanner";
 import DailyFactCard from "./components/DailyFactCard";
 import NannyTaskForm from "./components/forms/NannyTaskForm";
 import "./styles.css";
 
 const TABS = [
-  { id: "overview", labelKey: "tab.overview", icon: <Icons.Activity /> },
+  { id: "overview", labelKey: "tab.home", icon: <Icons.Activity /> },
+  { id: "history", labelKey: "tab.history", icon: <Icons.Calendar /> },
   { id: "growth", labelKey: "tab.growth", icon: <Icons.TrendUp /> },
-  { id: "notes", labelKey: "tab.notes", icon: <Icons.StickyNote /> },
-  { id: "calendar", labelKey: "tab.calendar", icon: <Icons.Calendar /> },
-  { id: "reminders", labelKey: "tab.reminders", icon: <Icons.Clock /> },
-  { id: "reports", labelKey: "tab.reports", icon: <Icons.TrendUp /> },
+  { id: "reports", labelKey: "tab.analysis", icon: <Icons.TrendUp /> },
 ];
 
+const TIMER_ACTIONS_BY_ID = {
+  feeding: { id: "feeding", labelKey: "action.feeding", icon: <Icons.Bottle />, color: colors.feeding },
+  sleep: { id: "sleep", labelKey: "action.sleep", icon: <Icons.Moon />, color: colors.sleep },
+  tummy: { id: "tummy", labelKey: "action.tummyTime", icon: <Icons.Sun />, color: colors.tummy },
+};
+
+const TIMER_TYPES = TIMER_ACTION_IDS.map((id) => TIMER_ACTIONS_BY_ID[id]);
+
 const ACTION_GROUPS = [
+  {
+    id: "timer",
+    labelKey: "header.timer",
+    actions: TIMER_TYPES,
+  },
   {
     id: "track",
     labelKey: "group.track",
@@ -65,6 +75,7 @@ const ACTION_GROUPS = [
       { id: "temp", labelKey: "action.temp", icon: <Icons.Temp />, color: colors.temp },
       { id: "weight", labelKey: "action.weight", icon: <Icons.Weight />, color: colors.growth },
       { id: "height", labelKey: "action.height", icon: <Icons.Ruler />, color: colors.height },
+      { id: "headCircumference", labelKey: "action.headCircumference", icon: <Icons.Ruler />, color: colors.headCircumference },
     ],
   },
   {
@@ -74,12 +85,6 @@ const ACTION_GROUPS = [
       { id: "note", labelKey: "action.note", icon: <Icons.StickyNote />, color: colors.note },
     ],
   },
-];
-
-const TIMER_TYPES = [
-  { id: "feeding", labelKey: "action.feeding", icon: <Icons.Bottle />, color: colors.feeding },
-  { id: "sleep", labelKey: "action.sleep", icon: <Icons.Moon />, color: colors.sleep },
-  { id: "tummy", labelKey: "action.tummyTime", icon: <Icons.Sun />, color: colors.tummy },
 ];
 
 function toLocalDatetime(date) {
@@ -128,8 +133,7 @@ export default function App() {
   const [nannyMode, setNannyMode] = useState(readStoredNannyMode);
   const [modal, setModal] = useState(null);
   const [showActions, setShowActions] = useState(false);
-  const [expandedGroup, setExpandedGroup] = useState("track");
-  const [showTimerPicker, setShowTimerPicker] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState(DEFAULT_EXPANDED_ACTION_GROUP);
   const [editingTimerId, setEditingTimerId] = useState(null);
   const [dismissedAlerts, setDismissedAlerts] = useState({});
 
@@ -148,7 +152,6 @@ export default function App() {
     writeStoredNannyMode(true);
     setNannyMode(true);
     setShowActions(false);
-    setShowTimerPicker(false);
   };
 
   const exitNannyMode = () => {
@@ -211,7 +214,7 @@ export default function App() {
     <div className="app">
       {/* Header */}
       <header className="app-header fade-in">
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div className="header-title-group" style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div className="avatar">
             {data.child?.picture ? (
               <img src={data.child.picture} alt={data.child.first_name} className="avatar-img" />
@@ -228,7 +231,7 @@ export default function App() {
             )}
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="header-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {data.error && (
             <span className="sync-error">{t("header.connectionError")}</span>
           )}
@@ -236,7 +239,7 @@ export default function App() {
           <ThemeToggle mode={themeMode} onChange={changeThemeMode} />
           {!showNannyExperience && (
             <button className="nanny-mode-toggle" onClick={enterNannyMode} aria-label={t("nanny.enterMode")}>
-              <Icons.Baby />
+              <Icons.Caregiver />
               <span>{t("nanny.enterMode")}</span>
             </button>
           )}
@@ -273,25 +276,25 @@ export default function App() {
       )}
 
       {/* Active Timer Bars */}
-      {!showNannyExperience && timer.activeTimers.map((t) => (
-        <div key={t.id} className="timer-bar fade-in">
+      {!showNannyExperience && timer.activeTimers.map((activeTimer) => (
+        <div key={activeTimer.id} className="timer-bar fade-in">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span className="timer-pulse" />
             <Icons.Timer />
             <span style={{ fontSize: 13, fontWeight: 500 }}>
-              {t.name}
+              {activeTimer.name}
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {editingTimerId === t.id ? (
+            {editingTimerId === activeTimer.id ? (
               <input
                 type="datetime-local"
                 className="timer-edit-input"
-                defaultValue={toLocalDatetime(t.start)}
+                defaultValue={toLocalDatetime(activeTimer.start)}
                 autoFocus
                 onBlur={(e) => {
                   if (e.target.value) {
-                    timer.editTimer(t.id, `${e.target.value}:00`);
+                    timer.editTimer(activeTimer.id, `${e.target.value}:00`);
                   }
                   setEditingTimerId(null);
                 }}
@@ -305,15 +308,15 @@ export default function App() {
                 className="timer-elapsed"
                 style={{ cursor: "pointer" }}
                 title={t("header.timerEditHint")}
-                onClick={() => setEditingTimerId(t.id)}
+                onClick={() => setEditingTimerId(activeTimer.id)}
               >
-                {formatElapsed(timer.elapsedMap[t.id] || 0)}
+                {formatElapsed(timer.elapsedMap[activeTimer.id] || 0)}
               </span>
             )}
             <button
               className="timer-save-btn"
               onClick={async () => {
-                const stopped = await timer.stopTimer(t.id);
+                const stopped = await timer.stopTimer(activeTimer.id);
                 if (stopped) {
                   setModal({ type: timerNameToType(stopped.name), timerId: stopped.id });
                 }
@@ -323,7 +326,7 @@ export default function App() {
             </button>
             <button
               className="timer-discard-btn"
-              onClick={() => timer.discardTimer(t.id)}
+              onClick={() => timer.discardTimer(activeTimer.id)}
             >
               <Icons.X />
             </button>
@@ -380,9 +383,22 @@ export default function App() {
             weeklySleep={data.weeklySleep}
             changes={data.changes}
             recentChanges={data.recentChanges}
+            monthlyChanges={data.monthlyChanges}
             tummyTimes={data.tummyTimes}
             weeklyTummyTimes={data.weeklyTummyTimes}
             baths={data.baths}
+            onEditEntry={(type, entry) => setModal({ type, entry })}
+          />
+        )}
+        {activeTab === "history" && (
+          <HistoryTab
+            childId={data.child?.id}
+            notes={data.notes}
+            events={data.events}
+            reminders={data.reminders}
+            reminderDones={data.reminderDones}
+            onAddEvent={() => setModal({ type: "event" })}
+            onAddReminder={() => setModal({ type: "reminder" })}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
@@ -390,30 +406,9 @@ export default function App() {
           <GrowthTab
             weights={data.weights}
             heights={data.heights}
+            headCircumferences={data.headCircumferences}
             monthlyFeedings={data.monthlyFeedings}
             monthlySleep={data.monthlySleep}
-            onEditEntry={(type, entry) => setModal({ type, entry })}
-          />
-        )}
-        {activeTab === "notes" && (
-          <NotesTab
-            notes={data.notes}
-            onEditEntry={(type, entry) => setModal({ type, entry })}
-          />
-        )}
-        {activeTab === "calendar" && (
-          <CalendarTab
-            events={data.events}
-            onAddEvent={() => setModal({ type: "event" })}
-            onEditEntry={(type, entry) => setModal({ type, entry })}
-          />
-        )}
-        {activeTab === "reminders" && (
-          <RemindersTab
-            childId={data.child?.id}
-            reminders={data.reminders}
-            reminderDones={data.reminderDones}
-            onAddReminder={() => setModal({ type: "reminder" })}
             onEditEntry={(type, entry) => setModal({ type, entry })}
           />
         )}
@@ -449,7 +444,11 @@ export default function App() {
                           key={action.id}
                           className="fab-action"
                           onClick={() => {
-                            setModal({ type: action.id });
+                            if (group.id === "timer") {
+                              timer.startTimer(action.id);
+                            } else {
+                              setModal({ type: action.id });
+                            }
                             setShowActions(false);
                           }}
                         >
@@ -469,42 +468,10 @@ export default function App() {
             })}
           </div>
         )}
-        {showTimerPicker && (
-          <div className="fab-menu fade-in" style={{ right: 76 }}>
-            {TIMER_TYPES.map((timerType) => (
-              <button
-                key={timerType.id}
-                className="fab-action"
-                onClick={() => {
-                  timer.startTimer(timerType.id);
-                  setShowTimerPicker(false);
-                }}
-              >
-                <span
-                  className="fab-action-icon"
-                  style={{ background: `${timerType.color}18`, color: timerType.color }}
-                >
-                  {timerType.icon}
-                </span>
-                <span className="fab-action-label">{t(timerType.labelKey)}</span>
-              </button>
-            ))}
-          </div>
-        )}
-        <TimerButton
-          label={t("header.timer")}
-          icon={<Icons.Timer />}
-          color={colors.feeding}
-          active={false}
-          onClick={() => {
-            setShowTimerPicker(!showTimerPicker);
-            setShowActions(false);
-          }}
-        />
         <button
           className="fab-btn"
           style={{ background: showActions ? "var(--text-muted)" : "var(--accent)" }}
-          onClick={() => { setShowActions(!showActions); setShowTimerPicker(false); setExpandedGroup("track"); }}
+          onClick={() => { setShowActions(!showActions); setExpandedGroup(DEFAULT_EXPANDED_ACTION_GROUP); }}
         >
           <span style={{ transform: showActions ? "rotate(45deg)" : "none", transition: "transform 0.2s", display: "flex" }}>
             <Icons.Plus />
@@ -567,6 +534,14 @@ export default function App() {
       )}
       {modal?.type === "height" && (
         <HeightForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "headCircumference" && (
+        <HeadCircumferenceForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}

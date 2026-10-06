@@ -128,6 +128,13 @@ export const api = {
   updateHeight: (id, data) =>
     request(`height/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
 
+  // Head circumference
+  getHeadCircumference: (params) => request(`head-circumference/${qs(params)}`),
+  createHeadCircumference: (data) =>
+    request("head-circumference/", { method: "POST", body: JSON.stringify(data) }),
+  updateHeadCircumference: (id, data) =>
+    request(`head-circumference/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+
   // Pumping
   getPumping: (params) => request(`pumping/${qs(params)}`),
   createPumping: (data) =>

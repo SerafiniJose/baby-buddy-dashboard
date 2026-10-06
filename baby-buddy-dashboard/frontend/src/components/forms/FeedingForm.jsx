@@ -13,7 +13,9 @@ const TYPES = [
   { value: "solid food", labelKey: "feedingForm.types.solidFood" },
 ];
 
-const METHODS = [
+export const DEFAULT_FEEDING_METHOD = "both breasts";
+
+export const METHODS = [
   { value: "bottle", labelKey: "feedingForm.methods.bottle" },
   { value: "left breast", labelKey: "feedingForm.methods.leftBreast" },
   { value: "right breast", labelKey: "feedingForm.methods.rightBreast" },
@@ -34,7 +36,7 @@ export default function FeedingForm({ childId, timerId, entry, onDone, onClose }
   const now = new Date();
   const fifteenMinsAgo = new Date(now.getTime() - 15 * 60 * 1000);
   const [type, setType] = useState(entry?.type || "breast milk");
-  const [method, setMethod] = useState(entry?.method || "bottle");
+  const [method, setMethod] = useState(entry?.method || DEFAULT_FEEDING_METHOD);
   const [amount, setAmount] = useState(entry?.amount != null ? String(entry.amount) : "");
   const [start, setStart] = useState(entry?.start ? toLocalDatetime(new Date(entry.start)) : toLocalDatetime(fifteenMinsAgo));
   const [end, setEnd] = useState(entry?.end ? toLocalDatetime(new Date(entry.end)) : toLocalDatetime(now));

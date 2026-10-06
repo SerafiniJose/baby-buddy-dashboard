@@ -1,29 +1,25 @@
+import CompactSelector from "./CompactSelector";
 import { Icons } from "./Icons";
 import { useTranslation } from "../locales";
 
 export default function ThemeToggle({ mode, onChange }) {
   const t = useTranslation();
   const options = [
-    { mode: "auto", label: t("theme.auto"), icon: <Icons.Contrast /> },
-    { mode: "light", label: t("theme.light"), icon: <Icons.Sun /> },
-    { mode: "dark", label: t("theme.dark"), icon: <Icons.Moon /> },
+    { value: "auto", label: t("theme.auto"), shortLabel: t("theme.auto"), icon: <Icons.Contrast /> },
+    { value: "light", label: t("theme.light"), shortLabel: t("theme.light"), icon: <Icons.Sun /> },
+    { value: "dark", label: t("theme.dark"), shortLabel: t("theme.dark"), icon: <Icons.Moon /> },
   ];
+  const current = options.find((option) => option.value === mode) || options[0];
+  const label = `${t("theme.label")}: ${current.label}`;
 
   return (
-    <div className="theme-toggle" role="group" aria-label={t("theme.label")}>
-      {options.map((option) => (
-        <button
-          key={option.mode}
-          type="button"
-          className="theme-toggle-btn"
-          aria-pressed={mode === option.mode}
-          aria-label={option.label}
-          title={option.label}
-          onClick={() => onChange(option.mode)}
-        >
-          {option.icon}
-        </button>
-      ))}
-    </div>
+    <CompactSelector
+      className="theme-selector"
+      ariaLabel={label}
+      options={options}
+      value={mode}
+      onChange={onChange}
+      triggerDisplay="icon"
+    />
   );
 }

@@ -28,12 +28,13 @@ import {
   parseDuration,
   toBathTimeline,
 } from "../utils/formatters";
+import { filterEntriesInLastCalendarDays } from "../utils/overviewFilters";
 import { useUnits } from "../utils/units";
 import { useTranslation } from "../locales";
 
 const COLLAPSED_COUNT = 2;
 
-export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, recentChanges, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
+export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: weeklyFeedingsRaw, sleepEntries, weeklySleep, changes, recentChanges, monthlyChanges, tummyTimes, weeklyTummyTimes, baths, onEditEntry }) {
   const units = useUnits();
   const t = useTranslation();
   const [expanded, setExpanded] = useState({});
@@ -41,13 +42,24 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
   const [selectedBar, setSelectedBar] = useState(null);
   const toggle = (key) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const feedingTimeline = toFeedingTimeline(recentFeedings || [], units.volume);
-  const diaperTimeline = toDiaperTimeline(recentChanges || []);
-  const sleepBlocks = toSleepBlocks(sleepEntries);
-  const bathTimeline = toBathTimeline(baths || []);
-  const weeklyFeedings = aggregateByDayOfWeek(weeklyFeedingsRaw, "amount");
-  const sleepByDay = aggregateSleepByDay(weeklySleep);
-  const tummyByDay = aggregateTummyByDay(weeklyTummyTimes);
+  const weeklyFeedingsInWindow = filterEntriesInLastCalendarDays(weeklyFeedingsRaw, "start");
+  const weeklySleepInWindow = filterEntriesInLastCalendarDays(weeklySleep, "start");
+  const weeklyChangesInWindow = filterEntriesInLastCalendarDays(monthlyChanges, ["time", "date"]);
+  const weeklyTummyInWindow = filterEntriesInLastCalendarDays(weeklyTummyTimes, "start");
+  const weeklyBathsInWindow = filterEntriesInLastCalendarDays(baths, "time");
+  const showFeedings = weeklyFeedingsInWindow.length > 0;
+  const showSleep = weeklySleepInWindow.length > 0;
+  const showDiapers = weeklyChangesInWindow.length > 0;
+  const showTummy = weeklyTummyInWindow.length > 0;
+  const showBaths = weeklyBathsInWindow.length > 0;
+
+  const feedingTimeline = toFeedingTimeline(weeklyFeedingsInWindow, units.volume);
+  const diaperTimeline = toDiaperTimeline(weeklyChangesInWindow);
+  const sleepBlocks = toSleepBlocks(weeklySleepInWindow);
+  const bathTimeline = toBathTimeline(weeklyBathsInWindow);
+  const weeklyFeedings = aggregateByDayOfWeek(weeklyFeedingsInWindow, "amount");
+  const sleepByDay = aggregateSleepByDay(weeklySleepInWindow);
+  const tummyByDay = aggregateTummyByDay(weeklyTummyInWindow);
 
   const totalFeeding = feedings.reduce((s, f) => s + (f.amount || 0), 0);
   const totalSleep = sleepEntries.reduce(
@@ -88,6 +100,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
   return (
     <>
       {/* Quick Stats */}
+      {(showFeedings || showSleep || showDiapers || showTummy) && (
       <div
         style={{
           display: "grid",
@@ -96,6 +109,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
           marginBottom: 20,
         }}
       >
+        {showFeedings && (
         <div className="fade-in fade-in-1">
           <StatCard
             icon={<Icons.Bottle />}
@@ -105,6 +119,8 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             color={colors.feeding}
           />
         </div>
+        )}
+        {showSleep && (
         <div className="fade-in fade-in-2">
           <StatCard
             icon={<Icons.Moon />}
@@ -114,6 +130,8 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             color={colors.sleep}
           />
         </div>
+        )}
+        {showDiapers && (
         <div className="fade-in fade-in-3">
           <StatCard
             icon={<Icons.Droplet />}
@@ -123,6 +141,8 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             color={colors.diaper}
           />
         </div>
+        )}
+        {showTummy && (
         <div className="fade-in fade-in-4">
           <StatCard
             icon={<Icons.Sun />}
@@ -132,7 +152,9 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             color={colors.tummy}
           />
         </div>
+        )}
       </div>
+      )}
 
       {/* Main Grid */}
       <div
@@ -143,6 +165,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
         }}
       >
         {/* Feeding Timeline */}
+        {showFeedings && (
         <div className="fade-in fade-in-3">
           <SectionCard title={t("overview.recentFeedings")} icon={<Icons.Bottle />} color={colors.feeding}>
             {feedingTimeline.length > 0 ? (
@@ -196,8 +219,10 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             )}
           </SectionCard>
         </div>
+        )}
 
         {/* Sleep */}
+        {showSleep && (
         <div className="fade-in fade-in-4">
           <SectionCard title={t("overview.sleepPattern")} icon={<Icons.Moon />} color={colors.sleep}>
             {sleepBlocks.length > 0 ? (
@@ -251,8 +276,10 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             )}
           </SectionCard>
         </div>
+        )}
 
         {/* Diapers */}
+        {showDiapers && (
         <div className="fade-in fade-in-5">
           <SectionCard title={t("overview.diaperChanges")} icon={<Icons.Droplet />} color={colors.diaper}>
             {diaperTimeline.length > 0 ? (
@@ -321,8 +348,10 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             )}
           </SectionCard>
         </div>
+        )}
 
         {/* Tummy Time */}
+        {showTummy && (
         <div className="fade-in fade-in-6">
           <SectionCard title={t("overview.tummyTimeTitle")} icon={<Icons.Sun />} color={colors.tummy}>
             {tummyByDay.some((d) => d.minutes > 0) ? (
@@ -376,8 +405,10 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             )}
           </SectionCard>
         </div>
+        )}
 
         {/* Baths */}
+        {showBaths && (
         <div className="fade-in fade-in-7">
           <SectionCard title={t("overview.baths")} icon={<Icons.Bath />} color={colors.bath}>
             {bathTimeline.length > 0 ? (
@@ -409,6 +440,7 @@ export default function OverviewTab({ feedings, recentFeedings, weeklyFeedings: 
             )}
           </SectionCard>
         </div>
+        )}
       </div>
 
       {/* Day Activities Modal */}

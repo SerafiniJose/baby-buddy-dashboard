@@ -59,13 +59,16 @@ export default {
 
   tab: {
     overview: "Overview",
+    home: "Home",
     nanny: "Nanny",
     growth: "Growth",
+    history: "History",
     notes: "Notes",
     notesAndMeds: "Notes & Meds",
     calendar: "Calendar",
     reminders: "Reminders",
     reports: "Reports",
+    analysis: "Analysis",
   },
 
   diaper: {
@@ -424,6 +427,29 @@ export default {
     start: "start {date}",
     ends: "ends {date}",
     ongoing: "ongoing",
+  },
+
+  history: {
+    title: "History",
+    filterLabel: "History view",
+    filters: {
+      all: "All",
+      notes: "Notes",
+      events: "Events",
+      reminders: "Reminders",
+    },
+    types: {
+      note: "Note",
+      event: "Event",
+      reminder: "Reminder",
+    },
+    emptyTitle: "No history yet",
+    emptyAll: "Notes, events, and reminders will appear here in chronological order.",
+    untitledNote: "Untitled note",
+    untitledEvent: "Untitled event",
+    untitledReminder: "Untitled reminder",
+    reminderStart: "starts {start}",
+    reminderRange: "{start} to {end}",
   },
 
   reports: {

@@ -352,6 +352,11 @@ function emmaData() {
       id: i + 1, child: 1, date: isoDate(daysAgo((7 - i) * 15)),
       height: (49 + i * 1.5).toFixed(1),
     })).reverse(),
+    // Emma: 4 months, ~34–41cm over 8 measurements
+    headCircumferences: Array.from({ length: 8 }, (_, i) => ({
+      id: i + 1, child: 1, date: isoDate(daysAgo((7 - i) * 15)),
+      head_circumference: (34 + i).toFixed(1),
+    })).reverse(),
     notes: [
       { id: 1, child: 1, note: "Emma smiled for the first time today!", time: isoLocal(hoursAgo(3)) },
       { id: 2, child: 1, note: "Started showing interest in colorful toys during tummy time", time: isoLocal(hoursAgo(8)) },
@@ -413,6 +418,11 @@ function liamData() {
     heights: Array.from({ length: 6 }, (_, i) => ({
       id: i + 1, child: 2, date: isoDate(daysAgo((5 - i) * 21)),
       height: (84.0 + i * 0.8).toFixed(1),
+    })).reverse(),
+    // Liam: 2 years, ~47–50cm over 6 measurements
+    headCircumferences: Array.from({ length: 6 }, (_, i) => ({
+      id: i + 1, child: 2, date: isoDate(daysAgo((5 - i) * 21)),
+      head_circumference: (47.0 + i * 0.6).toFixed(1),
     })).reverse(),
     notes: [
       { id: 4, child: 2, note: "Liam said 'banana' clearly for the first time", time: isoLocal(hoursAgo(5)) },
