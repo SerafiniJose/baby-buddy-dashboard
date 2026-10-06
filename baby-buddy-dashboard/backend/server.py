@@ -306,12 +306,17 @@ async def proxy_baby_buddy(path: str, request: Request):
     except httpx.TimeoutException:
         raise HTTPException(504, "Baby Buddy request timed out")
 
-    excluded_headers = {"transfer-encoding", "content-encoding", "content-length", "connection", "server"}
+    # Exclude Baby Buddy's Date header because uvicorn emits its own Date header.
+    # Forward Baby Buddy's clock separately so the frontend can diagnose clock skew
+    # when the API rejects timestamps as being in the future.
+    excluded_headers = {"transfer-encoding", "content-encoding", "content-length", "connection", "server", "date"}
     response_headers = {
         k: v
         for k, v in response.headers.items()
         if k.lower() not in excluded_headers
     }
+    if "date" in response.headers:
+        response_headers["X-Baby-Buddy-Date"] = response.headers["date"]
 
     return Response(
         content=response.content,

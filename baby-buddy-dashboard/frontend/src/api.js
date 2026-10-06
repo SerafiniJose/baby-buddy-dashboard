@@ -22,6 +22,20 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_M
   }
 }
 
+// Diagnostic aid for Baby Buddy "Date/time can not be in the future" rejections.
+// The backend forwards Baby Buddy's own Date response header as X-Baby-Buddy-Date
+// (not Date, because uvicorn emits its own Date header). Comparing it against the
+// device clock makes real clock skew visible in the error message.
+function clockSkewSuffix(response) {
+  const serverDateHeader = response.headers?.get?.("X-Baby-Buddy-Date");
+  if (!serverDateHeader) return "";
+  const serverMs = Date.parse(serverDateHeader);
+  if (Number.isNaN(serverMs)) return "";
+  const clientMs = Date.now();
+  const skewMs = clientMs - serverMs;
+  return ` [clockCheck: device=${new Date(clientMs).toISOString()} server=${new Date(serverMs).toISOString()} deviceAheadByMs=${skewMs}]`;
+}
+
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}/${endpoint}`;
   const config = {
@@ -33,7 +47,7 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(`API error ${response.status}: ${text}`);
+    throw new Error(`API error ${response.status}: ${text}${clockSkewSuffix(response)}`);
   }
 
   if (response.status === 204) return null;
@@ -85,6 +99,7 @@ export const api = {
     request("feedings/", { method: "POST", body: JSON.stringify(data) }),
   updateFeeding: (id, data) =>
     request(`feedings/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteFeeding: (id) => request(`feedings/${id}/`, { method: "DELETE" }),
 
   // Sleep
   getSleep: (params) => request(`sleep/${qs(params)}`),
@@ -92,6 +107,7 @@ export const api = {
     request("sleep/", { method: "POST", body: JSON.stringify(data) }),
   updateSleep: (id, data) =>
     request(`sleep/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteSleep: (id) => request(`sleep/${id}/`, { method: "DELETE" }),
 
   // Diapers (changes)
   getChanges: (params) => request(`changes/${qs(params)}`),
@@ -99,6 +115,7 @@ export const api = {
     request("changes/", { method: "POST", body: JSON.stringify(data) }),
   updateChange: (id, data) =>
     request(`changes/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteChange: (id) => request(`changes/${id}/`, { method: "DELETE" }),
 
   // Tummy time
   getTummyTimes: (params) => request(`tummy-times/${qs(params)}`),
@@ -106,6 +123,7 @@ export const api = {
     request("tummy-times/", { method: "POST", body: JSON.stringify(data) }),
   updateTummyTime: (id, data) =>
     request(`tummy-times/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteTummyTime: (id) => request(`tummy-times/${id}/`, { method: "DELETE" }),
 
   // Temperature
   getTemperature: (params) => request(`temperature/${qs(params)}`),
@@ -113,6 +131,7 @@ export const api = {
     request("temperature/", { method: "POST", body: JSON.stringify(data) }),
   updateTemperature: (id, data) =>
     request(`temperature/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteTemperature: (id) => request(`temperature/${id}/`, { method: "DELETE" }),
 
   // Weight
   getWeight: (params) => request(`weight/${qs(params)}`),
@@ -120,6 +139,7 @@ export const api = {
     request("weight/", { method: "POST", body: JSON.stringify(data) }),
   updateWeight: (id, data) =>
     request(`weight/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteWeight: (id) => request(`weight/${id}/`, { method: "DELETE" }),
 
   // Height
   getHeight: (params) => request(`height/${qs(params)}`),
@@ -127,6 +147,7 @@ export const api = {
     request("height/", { method: "POST", body: JSON.stringify(data) }),
   updateHeight: (id, data) =>
     request(`height/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteHeight: (id) => request(`height/${id}/`, { method: "DELETE" }),
 
   // Head circumference
   getHeadCircumference: (params) => request(`head-circumference/${qs(params)}`),
@@ -134,6 +155,7 @@ export const api = {
     request("head-circumference/", { method: "POST", body: JSON.stringify(data) }),
   updateHeadCircumference: (id, data) =>
     request(`head-circumference/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteHeadCircumference: (id) => request(`head-circumference/${id}/`, { method: "DELETE" }),
 
   // Pumping
   getPumping: (params) => request(`pumping/${qs(params)}`),

@@ -76,6 +76,65 @@ describe("getAllFeedings", () => {
   });
 });
 
+describe("request errors", () => {
+  it("includes a clock-skew diagnostic when the proxy exposes Baby Buddy's Date header", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-06T10:00:00.000Z"));
+    vi.stubGlobal("fetch", async () => ({
+      ok: false,
+      status: 400,
+      headers: new Headers({ "X-Baby-Buddy-Date": "Tue, 06 Oct 2026 09:59:57 GMT" }),
+      text: async () => "Date/time can not be in the future",
+    }));
+
+    await expect(api.createFeeding({ child: 1 })).rejects.toThrow(
+      "Date/time can not be in the future [clockCheck: device=2026-10-06T10:00:00.000Z server=2026-10-06T09:59:57.000Z deviceAheadByMs=3000]"
+    );
+    vi.useRealTimers();
+  });
+
+  it("leaves errors unchanged when no Baby Buddy date is available", async () => {
+    vi.stubGlobal("fetch", async () => ({
+      ok: false,
+      status: 500,
+      headers: new Headers(),
+      text: async () => "boom",
+    }));
+
+    await expect(api.getChildren()).rejects.toThrow("API error 500: boom");
+  });
+});
+
+describe("delete APIs", () => {
+  it("issues DELETE requests for editable Baby Buddy entry types", async () => {
+    const calls = [];
+    vi.stubGlobal("fetch", async (url, options) => {
+      calls.push({ url, method: options?.method });
+      return { ok: true, status: 204, headers: new Headers(), json: async () => ({}) };
+    });
+
+    await api.deleteFeeding(1);
+    await api.deleteSleep(2);
+    await api.deleteChange(3);
+    await api.deleteTummyTime(4);
+    await api.deleteTemperature(5);
+    await api.deleteWeight(6);
+    await api.deleteHeight(7);
+    await api.deleteHeadCircumference(8);
+
+    expect(calls).toEqual([
+      { url: "./api/baby-buddy/feedings/1/", method: "DELETE" },
+      { url: "./api/baby-buddy/sleep/2/", method: "DELETE" },
+      { url: "./api/baby-buddy/changes/3/", method: "DELETE" },
+      { url: "./api/baby-buddy/tummy-times/4/", method: "DELETE" },
+      { url: "./api/baby-buddy/temperature/5/", method: "DELETE" },
+      { url: "./api/baby-buddy/weight/6/", method: "DELETE" },
+      { url: "./api/baby-buddy/height/7/", method: "DELETE" },
+      { url: "./api/baby-buddy/head-circumference/8/", method: "DELETE" },
+    ]);
+  });
+});
+
 describe("head circumference API", () => {
   it("uses Baby Buddy's head-circumference endpoint for listing", async () => {
     const urls = [];
