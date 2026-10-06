@@ -51,3 +51,7 @@ def test_proxy_omits_diagnostic_date_header_when_baby_buddy_sent_no_date():
 
     assert response.status_code == 204
     assert "x-baby-buddy-date" not in response.headers
+
+
+def test_default_nanny_name_is_generic():
+    assert server.NANNY_NAME == "Nanny"
