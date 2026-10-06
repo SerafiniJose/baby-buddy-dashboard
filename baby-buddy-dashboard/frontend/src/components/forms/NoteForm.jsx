@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
 import { useTranslation } from "../../locales";
@@ -16,19 +17,15 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
   const [time, setTime] = useState(entry?.time ? toLocalDatetime(new Date(entry.time)) : toLocalDatetime(new Date()));
   const [note, setNote] = useState(entry?.note || "");
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!window.confirm(t("common.deleteThisEntry"))) return;
     setError("");
-    setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
       setError(t("common.deleteFailed"));
-      setDeleting(false);
     }
   };
 
@@ -72,21 +69,11 @@ export default function NoteForm({ childId, entry, onDone, onClose }) {
             autoFocus
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
-        <FormButton color={colors.note} disabled={saving || deleting || !note.trim()}>
+        <FormButton color={colors.note} disabled={saving || !note.trim()}>
           {saving ? t("common.saving") : isEdit ? t("noteForm.update") : t("noteForm.save")}
         </FormButton>
-        {isEdit && (
-          <FormButton
-            type="button"
-            color="#EF4444"
-            disabled={saving || deleting}
-            onClick={handleDelete}
-            style={{ marginTop: 10, color: "#fff" }}
-          >
-            {deleting ? t("common.deleting") : t("common.delete")}
-          </FormButton>
-        )}
       </form>
     </Modal>
   );

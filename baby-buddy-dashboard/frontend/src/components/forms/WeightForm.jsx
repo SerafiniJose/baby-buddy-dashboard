@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
 import { useUnits, useUnitSystem } from "../../utils/units";
 import { weightToGrams } from "../../utils/weight";
@@ -46,6 +47,16 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
     }
   };
 
+  const handleDelete = async () => {
+    setError("");
+    try {
+      await api.deleteWeight(entry.id);
+      onDone();
+    } catch {
+      setError(t("common.deleteFailed"));
+    }
+  };
+
   return (
     <Modal title={isEdit ? t("weightForm.editTitle") : t("weightForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
@@ -70,6 +81,7 @@ export default function WeightForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.growth} disabled={saving || !weight}>
           {saving ? t("common.saving") : isEdit ? t("weightForm.update") : t("weightForm.save")}

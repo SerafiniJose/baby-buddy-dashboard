@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
+import { useTranslation } from "../../locales";
 import {
   parseReminderBody,
   serializeReminderBody,
@@ -9,6 +11,7 @@ import {
 import { REMINDER_TAG, toLocalISODate } from "../../utils/formatters";
 
 export default function ReminderForm({ childId, entry, onDone, onClose }) {
+  const t = useTranslation();
   const isEdit = !!entry;
   const parsed = isEdit ? parseReminderBody(entry.note) : null;
 
@@ -16,19 +19,15 @@ export default function ReminderForm({ childId, entry, onDone, onClose }) {
   const [start, setStart] = useState(parsed?.start || toLocalISODate(new Date()));
   const [end, setEnd] = useState(parsed?.end || "");
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this reminder?")) return;
     setError("");
-    setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
-      setError("Couldn't delete. Try again.");
-      setDeleting(false);
+      setError(t("reminderForm.deleteFailed"));
     }
   };
 
@@ -37,7 +36,7 @@ export default function ReminderForm({ childId, entry, onDone, onClose }) {
     const trimmed = title.trim();
     if (!trimmed || !start) return;
     if (end && end < start) {
-      setError("End date must be on or after start date.");
+      setError(t("reminderForm.endBeforeStart"));
       return;
     }
     setError("");
@@ -60,15 +59,15 @@ export default function ReminderForm({ childId, entry, onDone, onClose }) {
       }
       onDone();
     } catch {
-      setError("Couldn't save. Try again.");
+      setError(t("reminderForm.saveFailed"));
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={isEdit ? "Edit Reminder" : "Add Reminder"} onClose={onClose}>
+    <Modal title={isEdit ? t("reminderForm.editTitle") : t("reminderForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <FormField label="Title">
+        <FormField label={t("reminderForm.title")}>
           <FormInput
             type="text"
             value={title}
@@ -78,7 +77,7 @@ export default function ReminderForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
-        <FormField label="Start date">
+        <FormField label={t("reminderForm.startDate")}>
           <FormInput
             type="date"
             value={start}
@@ -86,28 +85,18 @@ export default function ReminderForm({ childId, entry, onDone, onClose }) {
             required
           />
         </FormField>
-        <FormField label="End date (optional)">
+        <FormField label={t("reminderForm.endDateOptional")}>
           <FormInput
             type="date"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
-        <FormButton color={colors.note} disabled={saving || deleting || !title.trim() || !start}>
-          {saving ? "Saving..." : isEdit ? "Update Reminder" : "Save Reminder"}
+        <FormButton color={colors.note} disabled={saving || !title.trim() || !start}>
+          {saving ? t("common.saving") : isEdit ? t("reminderForm.update") : t("reminderForm.save")}
         </FormButton>
-        {isEdit && (
-          <FormButton
-            type="button"
-            color="#EF4444"
-            disabled={saving || deleting}
-            onClick={handleDelete}
-            style={{ marginTop: 10, color: "#fff" }}
-          >
-            {deleting ? "Deleting..." : "Delete Reminder"}
-          </FormButton>
-        )}
       </form>
     </Modal>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
 import { useTranslation } from "../../locales";
@@ -54,6 +55,16 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
     }
   };
 
+  const handleDelete = async () => {
+    setError("");
+    try {
+      await api.deleteTummyTime(entry.id);
+      onDone();
+    } catch {
+      setError(t("common.deleteFailed"));
+    }
+  };
+
   return (
     <Modal title={isEdit ? t("tummyForm.editTitle") : t("tummyForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
@@ -89,6 +100,7 @@ export default function TummyTimeForm({ childId, timerId, entry, onDone, onClose
             placeholder={t("form.milestonePlaceholder")}
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.tummy} disabled={saving}>
           {saving ? t("common.saving") : isEdit ? t("tummyForm.update") : t("tummyForm.save")}

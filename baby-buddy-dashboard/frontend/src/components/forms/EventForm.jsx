@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
 import { EVENT_TAG, toIsoWithLocalOffset } from "../../utils/formatters";
 import { useTranslation } from "../../locales";
@@ -19,19 +20,15 @@ export default function EventForm({ childId, entry, onDone, onClose }) {
   const [time, setTime] = useState(defaultWhen(entry));
   const [title, setTitle] = useState(entry?.note || "");
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!window.confirm(t("common.deleteThisEntry"))) return;
     setError("");
-    setDeleting(true);
     try {
       await api.deleteNote(entry.id);
       onDone();
     } catch {
       setError(t("common.deleteFailed"));
-      setDeleting(false);
     }
   };
 
@@ -60,15 +57,11 @@ export default function EventForm({ childId, entry, onDone, onClose }) {
         <FormField label={t("eventForm.title")}>
           <FormInput type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
-        <FormButton color={colors.event} disabled={saving || deleting || !title.trim()}>
+        <FormButton color={colors.event} disabled={saving || !title.trim()}>
           {saving ? t("common.saving") : isEdit ? t("eventForm.update") : t("eventForm.save")}
         </FormButton>
-        {isEdit && (
-          <FormButton type="button" color="#EF4444" disabled={saving || deleting} onClick={handleDelete} style={{ marginTop: 10, color: "#fff" }}>
-            {deleting ? t("common.deleting") : t("common.delete")}
-          </FormButton>
-        )}
       </form>
     </Modal>
   );

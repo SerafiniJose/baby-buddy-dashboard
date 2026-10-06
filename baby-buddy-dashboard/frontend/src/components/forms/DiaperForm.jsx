@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormSelect, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
 import { useTranslation } from "../../locales";
@@ -47,6 +48,16 @@ export default function DiaperForm({ childId, entry, onDone, onClose, preset }) 
     } catch {
       setError(t("common.saveFailed"));
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setError("");
+    try {
+      await api.deleteChange(entry.id);
+      onDone();
+    } catch {
+      setError(t("common.deleteFailed"));
     }
   };
 
@@ -100,6 +111,7 @@ export default function DiaperForm({ childId, entry, onDone, onClose, preset }) 
             placeholder={t("common.optional")}
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.diaper} disabled={saving || (!wet && !solid)}>
           {saving ? t("common.saving") : isEdit ? t("diaperForm.update") : t("diaperForm.save")}

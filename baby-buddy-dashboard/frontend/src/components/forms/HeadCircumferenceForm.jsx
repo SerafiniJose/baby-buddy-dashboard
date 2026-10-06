@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 import { colors } from "../../utils/colors";
 import { useUnits } from "../../utils/units";
 import { useTranslation } from "../../locales";
@@ -45,6 +46,16 @@ export default function HeadCircumferenceForm({ childId, entry, onDone, onClose 
     }
   };
 
+  const handleDelete = async () => {
+    setError("");
+    try {
+      await api.deleteHeadCircumference(entry.id);
+      onDone();
+    } catch {
+      setError(t("common.deleteFailed"));
+    }
+  };
+
   return (
     <Modal title={isEdit ? t("headCircumferenceForm.editTitle") : t("headCircumferenceForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
@@ -69,6 +80,7 @@ export default function HeadCircumferenceForm({ childId, entry, onDone, onClose 
             required
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.headCircumference} disabled={saving || !headCircumference}>
           {saving ? t("common.saving") : isEdit ? t("headCircumferenceForm.update") : t("headCircumferenceForm.save")}

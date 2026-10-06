@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../../api";
 import Modal, { FormField, FormInput, FormButton, FormError } from "../Modal";
+import DeleteButton from "../DeleteButton";
 
 import { colors } from "../../utils/colors";
 import { toIsoWithLocalOffset } from "../../utils/formatters";
@@ -60,6 +61,16 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
     }
   };
 
+  const handleDelete = async () => {
+    setError("");
+    try {
+      await api.deleteSleep(entry.id);
+      onDone();
+    } catch {
+      setError(t("common.deleteFailed"));
+    }
+  };
+
   return (
     <Modal title={isEdit ? t("sleepForm.editTitle") : t("sleepForm.logTitle")} onClose={onClose}>
       <form onSubmit={handleSubmit}>
@@ -95,6 +106,7 @@ export default function SleepForm({ childId, timerId, entry, onDone, onClose }) 
             placeholder={t("common.optional")}
           />
         </FormField>
+        {isEdit && <DeleteButton onDelete={handleDelete} disabled={saving} />}
         {error && <FormError>{error}</FormError>}
         <FormButton color={colors.sleep} disabled={saving}>
           {saving ? t("common.saving") : isEdit ? t("sleepForm.update") : t("sleepForm.save")}
