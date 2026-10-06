@@ -7,6 +7,7 @@ import pytest
 
 from backend.medication_alerts import (
     ENTITY_ID,
+    MedicationApiUnsupported,
     is_any_medication_available,
     medication_availability,
     parse_duration_hours,
@@ -94,7 +95,7 @@ def test_check_once_returns_availability_across_children():
     assert slots[0]["child_name"] == "Emma"
 
 
-def test_check_once_treats_unsupported_medication_api_as_no_slots():
+def test_check_once_reports_unsupported_medication_api():
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/children/":
             return httpx.Response(200, json={"results": [{"id": 1, "first_name": "Emma"}]})
@@ -106,7 +107,8 @@ def test_check_once_treats_unsupported_medication_api_as_no_slots():
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://fake-baby-buddy") as client:
             return await _check_once(client)
 
-    assert asyncio.run(run()) == []
+    with pytest.raises(MedicationApiUnsupported):
+        asyncio.run(run())
 
 
 def test_check_once_pages_before_selecting_latest_medication_entry():

@@ -20,6 +20,10 @@ PAGE_SIZE = 500
 MAX_PAGES = 20
 
 
+class MedicationApiUnsupported(Exception):
+    """Baby Buddy does not expose the medication endpoint."""
+
+
 def parse_duration_hours(value):
     if not value:
         return None
@@ -120,8 +124,7 @@ async def _check_once(baby_buddy_client: httpx.AsyncClient):
                 },
             )
             if meds_res.status_code in (404, 405):
-                medications = []
-                break
+                raise MedicationApiUnsupported
             meds_res.raise_for_status()
             payload = meds_res.json()
             results = payload.get("results", [])
@@ -185,6 +188,9 @@ async def run_medication_alert_loop(baby_buddy_client: httpx.AsyncClient, superv
             try:
                 entries = await _check_once(baby_buddy_client)
                 await _publish_state(ha_client, entries)
+            except MedicationApiUnsupported:
+                await _delete_entity_state(ha_client)
+                logger.info("Medication API is unavailable; Home Assistant entity removed")
             except Exception:
                 logger.warning("Medication alert check failed, will retry next cycle", exc_info=True)
             await asyncio.sleep(CHECK_INTERVAL_SECONDS)
