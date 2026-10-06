@@ -1,4 +1,4 @@
-export const HISTORY_FILTERS = ["all", "notes", "events", "reminders"];
+export const HISTORY_FILTERS = ["all", "notes", "medications", "events", "reminders"];
 
 function parseTimestamp(value) {
   if (!value) return null;
@@ -50,9 +50,26 @@ function normalizeReminder(reminder, parseReminderBody = null) {
   };
 }
 
-export function normalizeHistoryItems({ notes = [], events = [], reminders = [] } = {}, options = {}) {
+function normalizeMedication(medication) {
+  const timestamp = parseTimestamp(medication?.time);
+  const dosage = medication?.dosage != null && medication?.dosage !== "" ? `${medication.dosage}${medication.dosage_unit ? ` ${medication.dosage_unit}` : ""}` : "";
+  const title = [medication?.name || "", dosage].filter(Boolean).join(" · ");
+  return {
+    id: `medication-${medication?.id ?? timestamp ?? "unknown"}`,
+    type: "medication",
+    timestamp,
+    date: medication?.time || null,
+    title,
+    detail: medication?.notes || dosage || "",
+    entryType: "medication",
+    entry: medication,
+  };
+}
+
+export function normalizeHistoryItems({ notes = [], events = [], reminders = [], medications = [] } = {}, options = {}) {
   return [
     ...notes.map(normalizeNote),
+    ...medications.map(normalizeMedication),
     ...events.map(normalizeEvent),
     ...reminders.map((reminder) => normalizeReminder(reminder, options.parseReminderBody)),
   ];
@@ -69,7 +86,7 @@ export function sortHistoryItems(items = []) {
 
 export function filterHistoryItems(items = [], filter = "all") {
   if (filter === "all") return items.slice();
-  const type = filter === "notes" ? "note" : filter === "events" ? "event" : filter === "reminders" ? "reminder" : null;
+  const type = filter === "notes" ? "note" : filter === "medications" ? "medication" : filter === "events" ? "event" : filter === "reminders" ? "reminder" : null;
   if (!type) return items.slice();
   return items.filter((item) => item?.type === type);
 }
@@ -79,5 +96,5 @@ export function buildHistoryItems(sources = {}, filter = "all", options = {}) {
 }
 
 export function hasHistoryItems(sources = {}) {
-  return Boolean(sources.notes?.length || sources.events?.length || sources.reminders?.length);
+  return Boolean(sources.notes?.length || sources.medications?.length || sources.events?.length || sources.reminders?.length);
 }

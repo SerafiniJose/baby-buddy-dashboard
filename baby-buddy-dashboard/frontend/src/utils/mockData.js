@@ -388,9 +388,13 @@ function emmaData() {
       },
       {
         id: 112, child: 1, tags: ["nanny-task"],
-        note: "Mandar foto a Jose si se duerme",
+        note: "Mandar foto a la familia si se duerme",
         time: isoLocal(hoursAgo(4)),
       },
+    ],
+    medications: [
+      { id: 1, child: 1, name: "Vitamin D", dosage: 1, dosage_unit: "drops", time: isoLocal(hoursAgo(26)), next_dose_interval: "1 00:00:00", notes: "Daily routine" },
+      { id: 2, child: 1, name: "Iron drops", dosage: 2, dosage_unit: "drops", time: isoLocal(hoursAgo(8)), next_dose_interval: "06:00:00", notes: "Schedule only" },
     ],
     monthlyFeedings: emmaMonthlyFeedings(),
     monthlySleep: emmaMonthlySleep(),

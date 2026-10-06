@@ -167,7 +167,7 @@ Modo Niñera is a focused caretaker mode in the app. Enter it from the header: w
 
 The caretaker can use **Log sleep** inside Modo Niñera to create a Baby Buddy sleep entry with explicit start and end times. The form rejects missing or invalid times and requires the end to be later than the start. Saving refreshes the data without leaving Modo Niñera.
 
-The caretaker name is configurable with the add-on option / environment variable `nanny_name` / `NANNY_NAME`; it defaults to `Nanny` for backwards compatibility and is used in the task heading and new-task form.
+The caretaker name is configurable with the add-on option / environment variable `nanny_name` / `NANNY_NAME`; it defaults to the generic label `Nanny` and is used in the task heading and new-task form.
 
 Expected feeding interval:
 
@@ -271,6 +271,7 @@ baby-buddy-dashboard/               # ← repository root
 | `baby_buddy_api_key` | Baby Buddy API token | — |
 | `refresh_interval` | Polling interval in seconds (5–300) | 30 |
 | `unit_system` | Unit labels: `metric` (kg, cm, mL, °C) or `imperial` (lb, in, oz, °F) | metric |
+| `medication_alerts` | Publish a Home Assistant sensor when the logged minimum medication interval has elapsed | false |
 | `nanny_name` | Name shown in Modo Niñera task headings/forms | Nanny |
 | `demo_mode` | Show mock data without connecting to Baby Buddy | false |
 
@@ -335,6 +336,7 @@ This repository is a personal fork of the upstream project. All upstream functio
 | `feeding_alert_hours` | float (0.5–48) | `3` | Hours since last feeding before alert fires |
 | `diaper_alert_hours` | float (0.5–48) | `3` | Hours since last diaper change before alert fires |
 | `ha_notify_service` | string | `persistent_notification` | HA service to call for notifications (e.g. `notify.mobile_app_<device>`) |
+| `medication_alerts` | boolean | `false` | Opt in to the Home Assistant minimum-interval availability sensor; it is not a dosing reminder |
 
 ## License
 

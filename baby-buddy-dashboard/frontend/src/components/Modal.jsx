@@ -1,6 +1,6 @@
 import { Icons } from "./Icons";
 
-export default function Modal({ title, children, onClose }) {
+export default function Modal({ title, children, onClose, maxWidth = 400 }) {
   return (
     <div
       style={{
@@ -22,7 +22,7 @@ export default function Modal({ title, children, onClose }) {
           border: "1px solid var(--border)",
           borderRadius: 16,
           width: "100%",
-          maxWidth: 400,
+          maxWidth,
           overflow: "hidden",
         }}
         onClick={(e) => e.stopPropagation()}

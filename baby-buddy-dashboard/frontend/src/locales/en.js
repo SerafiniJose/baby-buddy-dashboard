@@ -87,7 +87,7 @@ export default {
     timerDiscard: "Discard {name} timer",
     timerEditHint: "Click to edit start time",
     timerElapsed: "Elapsed time {elapsed}, click to edit start time",
-    medicationOverdue: "Medication overdue",
+    medicationAvailable: "Medication interval elapsed",
     openQuickActions: "Open quick actions",
     closeQuickActions: "Close quick actions",
     timer: "Timer",
@@ -169,16 +169,17 @@ export default {
     notesTitle: "Notes",
     noMedicationsLogged: "No medications logged",
     noNotesYet: "No notes yet — tap + to add one",
-    setNextDoseTime: "Set next dose time",
-    markAsTaken: "Mark as taken",
+    setNextDoseTime: "Set earliest next dose time",
+    logDoseNow: "Log dose now",
+    minimumIntervalActive: "The logged minimum interval has not elapsed yet",
     savingEllipsis: "Saving…",
     failedToLogDose: "Failed to log dose",
-    failedToUpdateNextDose: "Failed to update next dose",
-    nextDoseMustBeAfterLastDose: "Next dose must be after the last dose time",
-    dueOverdueBy: "Overdue by {elapsed}",
-    dueNextToday: "Next: Today at {time}",
-    dueNextTomorrow: "Next: Tomorrow at {time}",
-    dueNextOn: "Next: {date} at {time}",
+    failedToUpdateNextDose: "Failed to update the minimum interval",
+    nextDoseMustBeAfterLastDose: "The earliest next dose must be after the last dose time",
+    intervalElapsedBy: "Minimum interval elapsed {elapsed} ago",
+    earliestToday: "Earliest next dose: Today at {time}",
+    earliestTomorrow: "Earliest next dose: Tomorrow at {time}",
+    earliestOn: "Earliest next dose: {date} at {time}",
   },
 
   temperature: {
@@ -189,7 +190,9 @@ export default {
 
   medicationLog: {
     title: "Medication Log",
+    title30d: "30-day medication log",
     failedToLoad: "Failed to load log: {error}",
+    unavailable: "Medication tracking is not available from this Baby Buddy API.",
     noneInRange: "No medications logged in this range",
     columnDate: "Date",
     columnTime: "Time",
@@ -351,9 +354,17 @@ export default {
   medicationForm: {
     editTitle: "Edit Medication",
     logTitle: "Log Medication",
+    medication: "Medication",
+    namePlaceholder: "e.g., Paracetamol",
+    dosage: "Dosage",
+    dosageUnit: "Dosage Unit",
+    timeGiven: "Time Given",
+    nextDoseHours: "Minimum Interval Before Next Dose (hours)",
+    nextDosePlaceholder: "Optional, e.g. 8",
+    notSpecified: "Not specified",
     save: "Save Medication",
     update: "Update Medication",
-    dosageUnits: {
+    units: {
       mg: "MG",
       ml: "ML",
       tablets: "Tablets",
@@ -440,17 +451,20 @@ export default {
     filters: {
       all: "All",
       notes: "Notes",
+      medications: "Medications",
       events: "Events",
       reminders: "Reminders",
     },
     types: {
       note: "Note",
+      medication: "Medication",
       event: "Event",
       reminder: "Reminder",
     },
     emptyTitle: "No history yet",
-    emptyAll: "Notes, events, and reminders will appear here in chronological order.",
+    emptyAll: "Notes, medications, events, and reminders will appear here in chronological order.",
     untitledNote: "Untitled note",
+    untitledMedication: "Medication",
     untitledEvent: "Untitled event",
     untitledReminder: "Untitled reminder",
     reminderStart: "starts {start}",
@@ -507,6 +521,7 @@ export default {
   alert: {
     sinceLastFeeding: "{elapsed} since last feeding",
     sinceLastDiaper: "{elapsed} since last diaper change",
+
     actionFailed: "Couldn't mark done. Try again.",
   },
 

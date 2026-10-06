@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "../api";
 import { getMockData } from "../utils/mockData";
 import { splitNotesByTag, toLocalISODate } from "../utils/formatters";
+import { medicationFetchOrEmpty } from "../utils/medications";
 
 function fixChildPicture(c) {
   if (c?.picture) {
@@ -43,6 +44,9 @@ export function useBabyData() {
   const [heights, setHeights] = useState([]);
   const [headCircumferences, setHeadCircumferences] = useState([]);
   const [bmis, setBmis] = useState([]);
+  const [medications, setMedications] = useState([]);
+  const [medicationUnavailable, setMedicationUnavailable] = useState(false);
+  const [medicationError, setMedicationError] = useState("");
   const [monthlyFeedings, setMonthlyFeedings] = useState([]);
   const [monthlySleep, setMonthlySleep] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -100,6 +104,7 @@ export function useBabyData() {
         heightRes,
         headCircumferenceRes,
         bmiRes,
+        medicationRes,
         timersRes,
         notesRes,
         monthlyFeedingsRes,
@@ -120,6 +125,7 @@ export function useBabyData() {
         api.getHeight({ child: c, limit: 20, ordering: "-date" }),
         api.getHeadCircumference({ child: c, limit: 20, ordering: "-date" }),
         api.getBmi({ child: c, limit: 20, ordering: "-date" }),
+        medicationFetchOrEmpty(async () => ({ results: await api.getAllMedication({ child: c, ordering: "-time" }) })),
         api.getTimers(),
         api.getNotes({ child: c, limit: 200, ordering: "-time" }),
         api.getFeedings({ child: c, start_min: monthMin, limit: 500, ordering: "-start" }),
@@ -144,6 +150,9 @@ export function useBabyData() {
       setHeights(heightRes.results || []);
       setHeadCircumferences(headCircumferenceRes.results || []);
       setBmis(bmiRes.results || []);
+      setMedications(medicationRes.results || []);
+      setMedicationUnavailable(Boolean(medicationRes.unavailable));
+      setMedicationError(medicationRes.unavailable ? "" : (medicationRes.error || ""));
       setTimers(timersRes.results || []);
       {
         const split = splitNotesByTag(notesRes.results || []);
@@ -217,6 +226,9 @@ export function useBabyData() {
     setHeights(mock.heights);
     setHeadCircumferences(mock.headCircumferences || []);
     setBmis(mock.bmis || []);
+    setMedications(mock.medications || []);
+    setMedicationUnavailable(false);
+    setMedicationError("");
     setTimers(mock.timers);
     {
       const split = splitNotesByTag(mock.notes || []);
@@ -256,6 +268,9 @@ export function useBabyData() {
       setHeights(mock.heights);
       setHeadCircumferences(mock.headCircumferences || []);
       setBmis(mock.bmis || []);
+      setMedications(mock.medications || []);
+      setMedicationUnavailable(false);
+      setMedicationError("");
       setTimers(mock.timers);
       {
         const split = splitNotesByTag(mock.notes || []);
@@ -356,6 +371,9 @@ export function useBabyData() {
     heights,
     headCircumferences,
     bmis,
+    medications,
+    medicationUnavailable,
+    medicationError,
     childSex: sexFromChild(child, configuredChildSex),
     monthlyFeedings,
     monthlySleep,

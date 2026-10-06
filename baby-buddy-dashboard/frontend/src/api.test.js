@@ -122,6 +122,7 @@ describe("delete APIs", () => {
     await api.deleteHeight(7);
     await api.deleteHeadCircumference(8);
     await api.deleteBmi(9);
+    await api.deleteMedication(10);
 
     expect(calls).toEqual([
       { url: "./api/baby-buddy/feedings/1/", method: "DELETE" },
@@ -133,6 +134,7 @@ describe("delete APIs", () => {
       { url: "./api/baby-buddy/height/7/", method: "DELETE" },
       { url: "./api/baby-buddy/head-circumference/8/", method: "DELETE" },
       { url: "./api/baby-buddy/bmi/9/", method: "DELETE" },
+      { url: "./api/baby-buddy/medication/10/", method: "DELETE" },
     ]);
   });
 });
@@ -210,5 +212,44 @@ describe("BMI API", () => {
         body: { bmi: 18.1, date: "2026-10-06" },
       },
     ]);
+  });
+});
+
+describe("Medication API", () => {
+  it("uses Baby Buddy's medication endpoint for listing", async () => {
+    const urls = [];
+    vi.stubGlobal("fetch", async (url) => {
+      urls.push(url);
+      return { ok: true, status: 200, json: async () => ({ results: [] }) };
+    });
+
+    await api.getMedication({ child: 7, ordering: "-time" });
+
+    expect(urls).toEqual(["./api/baby-buddy/medication/?child=7&ordering=-time"]);
+  });
+
+  it("posts and patches medication dose schedules without advice fields", async () => {
+    const calls = [];
+    vi.stubGlobal("fetch", async (url, options) => {
+      calls.push({ url, method: options?.method, body: JSON.parse(options?.body || "{}") });
+      return { ok: true, status: 200, json: async () => ({ id: 42 }) };
+    });
+
+    await api.createMedication({ child: 7, name: "Vitamin D", dosage: 1, dosage_unit: "drops", time: "2026-10-05T08:00:00+02:00", next_dose_interval: "1 00:00:00" });
+    await api.updateMedication(42, { next_dose_interval: "12:00:00" });
+
+    expect(calls).toEqual([
+      {
+        url: "./api/baby-buddy/medication/",
+        method: "POST",
+        body: { child: 7, name: "Vitamin D", dosage: 1, dosage_unit: "drops", time: "2026-10-05T08:00:00+02:00", next_dose_interval: "1 00:00:00" },
+      },
+      {
+        url: "./api/baby-buddy/medication/42/",
+        method: "PATCH",
+        body: { next_dose_interval: "12:00:00" },
+      },
+    ]);
+    expect(JSON.stringify(calls)).not.toMatch(/recommend|safe|advice/i);
   });
 });

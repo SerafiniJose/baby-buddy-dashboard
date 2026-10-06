@@ -6,7 +6,7 @@ import { colors } from "../../utils/colors";
 import { useUnits, useUnitSystem } from "../../utils/units";
 import { useTranslation } from "../../locales";
 import { weightFromGrams } from "../../utils/weight";
-import { syncBmiForDate } from "../../utils/bmiSync";
+import { reconcileBmiAfterSourceRemoval, syncBmiForDate } from "../../utils/bmiSync";
 
 function toLocalDate(date) {
   const d = new Date(date);
@@ -14,7 +14,7 @@ function toLocalDate(date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function HeightForm({ childId, entry, weights = [], bmis = [], unitSystem: unitSystemProp, onDone, onClose }) {
+export default function HeightForm({ childId, entry, weights = [], heights = [], bmis = [], unitSystem: unitSystemProp, onDone, onClose }) {
   const t = useTranslation();
   const units = useUnits();
   const contextUnitSystem = useUnitSystem();
@@ -42,6 +42,9 @@ export default function HeightForm({ childId, entry, weights = [], bmis = [], un
         await api.createHeight(data);
       }
       try {
+        if (isEdit && entry.date !== date) {
+          await reconcileBmiAfterSourceRemoval({ sourceType: "height", sourceEntry: entry, weights, heights, bmis, unitSystem });
+        }
         const matchingWeight = (weights || []).find((w) => w.date === date);
         await syncBmiForDate({
           childId,
@@ -66,6 +69,11 @@ export default function HeightForm({ childId, entry, weights = [], bmis = [], un
     setError("");
     try {
       await api.deleteHeight(entry.id);
+      try {
+        await reconcileBmiAfterSourceRemoval({ sourceType: "height", sourceEntry: entry, weights, heights, bmis, unitSystem });
+      } catch (bmiErr) {
+        console.warn("BMI cleanup failed", bmiErr);
+      }
       onDone();
     } catch {
       setError(t("common.deleteFailed"));

@@ -6,7 +6,7 @@ import { colors } from "../../utils/colors";
 import { useUnits, useUnitSystem } from "../../utils/units";
 import { weightToGrams } from "../../utils/weight";
 import { useTranslation } from "../../locales";
-import { syncBmiForDate } from "../../utils/bmiSync";
+import { reconcileBmiAfterSourceRemoval, syncBmiForDate } from "../../utils/bmiSync";
 
 function toLocalDate(date) {
   const d = new Date(date);
@@ -14,7 +14,7 @@ function toLocalDate(date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function WeightForm({ childId, entry, heights = [], bmis = [], unitSystem: unitSystemProp, onDone, onClose }) {
+export default function WeightForm({ childId, entry, weights = [], heights = [], bmis = [], unitSystem: unitSystemProp, onDone, onClose }) {
   const t = useTranslation();
   const units = useUnits();
   const contextUnitSystem = useUnitSystem();
@@ -43,6 +43,9 @@ export default function WeightForm({ childId, entry, heights = [], bmis = [], un
         await api.createWeight(data);
       }
       try {
+        if (isEdit && entry.date !== date) {
+          await reconcileBmiAfterSourceRemoval({ sourceType: "weight", sourceEntry: entry, weights, heights, bmis, unitSystem });
+        }
         await syncBmiForDate({
           childId,
           date,
@@ -65,6 +68,11 @@ export default function WeightForm({ childId, entry, heights = [], bmis = [], un
     setError("");
     try {
       await api.deleteWeight(entry.id);
+      try {
+        await reconcileBmiAfterSourceRemoval({ sourceType: "weight", sourceEntry: entry, weights, heights, bmis, unitSystem });
+      } catch (bmiErr) {
+        console.warn("BMI cleanup failed", bmiErr);
+      }
       onDone();
     } catch {
       setError(t("common.deleteFailed"));

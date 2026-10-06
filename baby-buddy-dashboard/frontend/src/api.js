@@ -92,6 +92,7 @@ export const api = {
   getAllFeedings: (params) => requestAll("feedings/", params),
   getAllSleep: (params) => requestAll("sleep/", params),
   getAllChanges: (params) => requestAll("changes/", params),
+  getAllMedication: (params) => requestAll("medication/", params),
 
   // Feedings
   getFeedings: (params) => request(`feedings/${qs(params)}`),
@@ -164,6 +165,14 @@ export const api = {
   updateBmi: (id, data) =>
     request(`bmi/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteBmi: (id) => request(`bmi/${id}/`, { method: "DELETE" }),
+
+  // Medication
+  getMedication: (params) => request(`medication/${qs(params)}`),
+  createMedication: (data) =>
+    request("medication/", { method: "POST", body: JSON.stringify(data) }),
+  updateMedication: (id, data) =>
+    request(`medication/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteMedication: (id) => request(`medication/${id}/`, { method: "DELETE" }),
 
   // Pumping
   getPumping: (params) => request(`pumping/${qs(params)}`),

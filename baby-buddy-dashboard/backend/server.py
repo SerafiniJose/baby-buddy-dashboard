@@ -11,6 +11,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import httpx
 
+try:
+    from .medication_alerts import delete_medication_entity, run_medication_alert_loop
+except ImportError:  # direct script execution
+    from medication_alerts import delete_medication_entity, run_medication_alert_loop
+
 # --- Custom theme (add-on options) ---
 
 # camelCase API field -> snake_case suffix used in both env var names (THEME_{MODE}_{SUFFIX})
@@ -145,6 +150,7 @@ UNIT_SYSTEM = os.environ.get("UNIT_SYSTEM", "metric").lower()
 FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS", "3"))
 DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS", "3"))
 HA_NOTIFY_SERVICE = os.environ.get("HA_NOTIFY_SERVICE", "persistent_notification")
+MEDICATION_ALERTS = os.environ.get("MEDICATION_ALERTS", "").lower() in ("true", "1", "yes")
 NANNY_NAME = (os.environ.get("NANNY_NAME", "Nanny").strip() or "Nanny")
 CHILD_SEX = sanitize_child_sex(os.environ.get("CHILD_SEX", ""))
 SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
@@ -164,6 +170,7 @@ if options_path.exists():
     FEEDING_ALERT_HOURS = float(os.environ.get("FEEDING_ALERT_HOURS") or opts.get("feeding_alert_hours") or FEEDING_ALERT_HOURS)
     DIAPER_ALERT_HOURS = float(os.environ.get("DIAPER_ALERT_HOURS") or opts.get("diaper_alert_hours") or DIAPER_ALERT_HOURS)
     HA_NOTIFY_SERVICE = HA_NOTIFY_SERVICE if os.environ.get("HA_NOTIFY_SERVICE") else opts.get("ha_notify_service", HA_NOTIFY_SERVICE)
+    MEDICATION_ALERTS = MEDICATION_ALERTS if os.environ.get("MEDICATION_ALERTS") else bool(opts.get("medication_alerts", MEDICATION_ALERTS))
     NANNY_NAME = (os.environ.get("NANNY_NAME") or opts.get("nanny_name") or NANNY_NAME or "Nanny").strip() or "Nanny"
     CHILD_SEX = CHILD_SEX or sanitize_child_sex(opts.get("child_sex", ""))
     COLOR_PRESET = COLOR_PRESET or sanitize_color_preset(opts.get("color_preset", ""))
@@ -254,6 +261,16 @@ async def lifespan(app: FastAPI):
         limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
     )
     notifier_task = asyncio.create_task(alert_loop())
+    medication_task = (
+        asyncio.create_task(run_medication_alert_loop(http_client, SUPERVISOR_TOKEN))
+        if SUPERVISOR_TOKEN and MEDICATION_ALERTS
+        else None
+    )
+    if SUPERVISOR_TOKEN and not MEDICATION_ALERTS:
+        try:
+            await delete_medication_entity(SUPERVISOR_TOKEN)
+        except Exception:
+            logger.warning("Could not remove disabled medication entity", exc_info=True)
     try:
         yield
     finally:
@@ -262,6 +279,9 @@ async def lifespan(app: FastAPI):
             await notifier_task
         except asyncio.CancelledError:
             pass
+        if medication_task:
+            medication_task.cancel()
+            await asyncio.gather(medication_task, return_exceptions=True)
         await http_client.aclose()
 
 
@@ -279,6 +299,7 @@ async def get_config():
         "unit_system": UNIT_SYSTEM,
         "feeding_alert_hours": FEEDING_ALERT_HOURS,
         "diaper_alert_hours": DIAPER_ALERT_HOURS,
+        "medication_alerts": MEDICATION_ALERTS,
         "nanny_name": NANNY_NAME,
         "child_sex": CHILD_SEX,
         "theme": THEME,

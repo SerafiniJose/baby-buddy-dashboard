@@ -30,11 +30,13 @@ import WeightForm from "./components/forms/WeightForm";
 import HeightForm from "./components/forms/HeightForm";
 import HeadCircumferenceForm from "./components/forms/HeadCircumferenceForm";
 import BmiForm from "./components/forms/BmiForm";
+import MedicationForm from "./components/forms/MedicationForm";
 import ThemeToggle from "./components/ThemeToggle";
 import LanguageSelector from "./components/LanguageSelector";
 import AlertBanner from "./components/AlertBanner";
 import DailyFactCard from "./components/DailyFactCard";
 import NannyTaskForm from "./components/forms/NannyTaskForm";
+
 import "./styles.css";
 
 const TABS = [
@@ -67,6 +69,7 @@ const ACTION_GROUPS = [
       { id: "diaper", labelKey: "action.diaper", icon: <Icons.Droplet />, color: colors.diaper },
       { id: "tummy", labelKey: "action.tummy", icon: <Icons.Sun />, color: colors.tummy },
       { id: "bath", labelKey: "bathForm.logTitle", icon: <Icons.Bath />, color: colors.bath },
+      { id: "medication", labelKey: "action.medication", icon: <Icons.Pill />, color: colors.medication },
     ],
   },
   {
@@ -183,6 +186,7 @@ export default function App() {
     const key = `diaper-${lastChange.id}`;
     if (!dismissedAlerts[key]) alertMessages.push({ key, text: t("alert.sinceLastDiaper", { elapsed: timeAgo(lastChange.time) }) });
   }
+
 
   const today = toLocalISODate(new Date());
   pendingReminders(data.reminders, data.reminderDones, today, data.child?.id).forEach((r) => {
@@ -399,9 +403,13 @@ export default function App() {
             events={data.events}
             reminders={data.reminders}
             reminderDones={data.reminderDones}
+            medications={data.medications}
+            medicationUnavailable={data.medicationUnavailable}
+            medicationError={data.medicationError}
             onAddEvent={() => setModal({ type: "event" })}
             onAddReminder={() => setModal({ type: "reminder" })}
             onEditEntry={(type, entry) => setModal({ type, entry })}
+            onDataChanged={data.refetch}
           />
         )}
         {activeTab === "growth" && (
@@ -533,6 +541,7 @@ export default function App() {
         <WeightForm
           childId={data.child?.id}
           entry={modal.entry}
+          weights={data.weights}
           heights={data.heights}
           bmis={data.bmis}
           unitSystem={data.unitSystem}
@@ -545,6 +554,7 @@ export default function App() {
           childId={data.child?.id}
           entry={modal.entry}
           weights={data.weights}
+          heights={data.heights}
           bmis={data.bmis}
           unitSystem={data.unitSystem}
           onDone={handleFormDone}
@@ -561,6 +571,14 @@ export default function App() {
       )}
       {modal?.type === "bmi" && (
         <BmiForm
+          childId={data.child?.id}
+          entry={modal.entry}
+          onDone={handleFormDone}
+          onClose={closeModal}
+        />
+      )}
+      {modal?.type === "medication" && (
+        <MedicationForm
           childId={data.child?.id}
           entry={modal.entry}
           onDone={handleFormDone}

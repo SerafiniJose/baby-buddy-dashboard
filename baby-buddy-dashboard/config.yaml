@@ -30,6 +30,7 @@ options:
   feeding_alert_hours: 3
   diaper_alert_hours: 3
   ha_notify_service: persistent_notification
+  medication_alerts: false
   nanny_name: Nanny
   child_sex: ""
 schema:
@@ -41,6 +42,7 @@ schema:
   feeding_alert_hours: "float(0.5,48)"
   diaper_alert_hours: "float(0.5,48)"
   ha_notify_service: str
+  medication_alerts: bool
   nanny_name: str
   child_sex: "list(|male|female)?"
   color_preset: "list(teal_terracotta)?"

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { calculateBmi } from "./formatters";
-import { syncBmiForDate } from "./bmiSync";
+import { reconcileBmiAfterSourceRemoval, syncBmiForDate } from "./bmiSync";
 import { api } from "../api";
 
 afterEach(() => {
@@ -42,7 +42,7 @@ describe("syncBmiForDate", () => {
     await syncBmiForDate({
       childId: 1,
       date: "2026-10-06",
-      weights: [{ date: "2026-10-06", weight: 10 }],
+      weights: [{ date: "2026-10-06", weight: 10000 }],
       heightValue: 75,
       bmis: [{ id: 5, date: "2026-10-06", bmi: 16.1 }],
       unitSystem: "metric",
@@ -64,5 +64,49 @@ describe("syncBmiForDate", () => {
     await syncBmiForDate({ childId: 1, date: "2026-10-07", weightValue: 10, heights: [], bmis: [] });
     expect(create).not.toHaveBeenCalled();
     expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe("reconcileBmiAfterSourceRemoval", () => {
+  const sourceWeight = { id: 1, date: "2026-10-06", weight: 10000 };
+  const height = { id: 2, date: "2026-10-06", height: 75 };
+
+  it("deletes a BMI that matches the removed source pair", async () => {
+    const remove = vi.spyOn(api, "deleteBmi").mockResolvedValue(null);
+    await reconcileBmiAfterSourceRemoval({
+      sourceType: "weight",
+      sourceEntry: sourceWeight,
+      weights: [sourceWeight],
+      heights: [height],
+      bmis: [{ id: 3, date: "2026-10-06", bmi: 17.8 }],
+      unitSystem: "metric",
+    });
+    expect(remove).toHaveBeenCalledWith(3);
+  });
+
+  it("does not delete a manually entered BMI with a different value", async () => {
+    const remove = vi.spyOn(api, "deleteBmi").mockResolvedValue(null);
+    await reconcileBmiAfterSourceRemoval({
+      sourceType: "weight",
+      sourceEntry: sourceWeight,
+      weights: [sourceWeight],
+      heights: [height],
+      bmis: [{ id: 3, date: "2026-10-06", bmi: 19.2 }],
+      unitSystem: "metric",
+    });
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it("recomputes the BMI when another same-date source remains", async () => {
+    const update = vi.spyOn(api, "updateBmi").mockResolvedValue({});
+    await reconcileBmiAfterSourceRemoval({
+      sourceType: "weight",
+      sourceEntry: sourceWeight,
+      weights: [sourceWeight, { id: 4, date: "2026-10-06", weight: 11000 }],
+      heights: [height],
+      bmis: [{ id: 3, date: "2026-10-06", bmi: 17.8 }],
+      unitSystem: "metric",
+    });
+    expect(update).toHaveBeenCalledWith(3, { bmi: 19.6 });
   });
 });

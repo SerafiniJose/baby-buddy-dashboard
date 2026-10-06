@@ -1,6 +1,6 @@
 # Translating Baby Dashboard Plus
 
-Thanks for helping translate Jose's Baby Dashboard Plus fork. The UI is intentionally dependency-free: translations are plain JavaScript objects, and the test suite verifies that every literal `t("...")` lookup has a matching English source key and that all secondary catalogs stay structurally compatible.
+Thanks for helping translate the family's Baby Dashboard Plus fork. The UI is intentionally dependency-free: translations are plain JavaScript objects, and the test suite verifies that every literal `t("...")` lookup has a matching English source key and that all secondary catalogs stay structurally compatible.
 
 ## Supported UI languages
 

@@ -14,12 +14,14 @@ import RemindersTab from "./RemindersTab";
 const FILTER_ICON = {
   all: <Icons.Activity />,
   notes: <Icons.StickyNote />,
+  medications: <Icons.Pill />,
   events: <Icons.Calendar />,
   reminders: <Icons.Clock />,
 };
 
 const TYPE_COLOR = {
   note: colors.note,
+  medication: colors.medication,
   event: colors.event,
   reminder: colors.note,
 };
@@ -33,6 +35,7 @@ function formatDate(value) {
 
 function historyLabel(item, t) {
   if (item.type === "reminder") return item.title || t("history.untitledReminder");
+  if (item.type === "medication") return item.title || t("history.untitledMedication");
   if (item.type === "event") return item.title || t("history.untitledEvent");
   return item.title || t("history.untitledNote");
 }
@@ -47,10 +50,10 @@ function historyDetail(item, t) {
   return formatDate(item.date);
 }
 
-export default function HistoryTab({ childId, notes, events, reminders, reminderDones, onAddEvent, onAddReminder, onEditEntry }) {
+export default function HistoryTab({ childId, notes, events, reminders, reminderDones, medications, medicationUnavailable, medicationError, onAddEvent, onAddReminder, onEditEntry, onDataChanged }) {
   const t = useTranslation();
   const [view, setView] = useState("all");
-  const items = useMemo(() => buildHistoryItems({ notes, events, reminders }, view, { parseReminderBody }), [notes, events, reminders, view]);
+  const items = useMemo(() => buildHistoryItems({ notes, medications, events, reminders }, view, { parseReminderBody }), [notes, medications, events, reminders, view]);
 
   return (
     <div className="fade-in fade-in-1">
@@ -108,7 +111,12 @@ export default function HistoryTab({ childId, notes, events, reminders, reminder
 
       {view === "notes" && (
         <div className="history-specific-panel">
-          <NotesTab notes={notes} onEditEntry={onEditEntry} />
+          <NotesTab childId={childId} notes={notes} showMedications={false} onEditEntry={onEditEntry} onDataChanged={onDataChanged} />
+        </div>
+      )}
+      {view === "medications" && (
+        <div className="history-specific-panel">
+          <NotesTab childId={childId} notes={[]} medications={medications} medicationUnavailable={medicationUnavailable} medicationError={medicationError} showNotes={false} onEditEntry={onEditEntry} onDataChanged={onDataChanged} />
         </div>
       )}
       {view === "events" && (

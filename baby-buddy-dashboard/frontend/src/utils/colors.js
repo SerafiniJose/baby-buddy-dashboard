@@ -11,6 +11,7 @@ export const colors = {
   note: "#84CC16",
   bath: "#06B6D4",
   event: "#A855F7",
+  medication: "#22C55E",
 };
 
 // The per-category colors above are tuned as fills/icons on the built-in dark theme.
