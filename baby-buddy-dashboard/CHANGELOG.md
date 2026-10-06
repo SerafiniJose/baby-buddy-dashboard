@@ -4,6 +4,24 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-10-06
+### Added
+- **Focused, multilingual Nanny Mode** with configurable caretaker name, routine guidance, exclusive caretaker screens, and sleep start/end logging
+- **Four-section navigation** built around Home, History, Growth, and Analysis; History combines notes, events, and reminders with focused filters
+- **Head circumference tracking** with quick logging, Baby Buddy API integration, current measurement, trend chart, editing, translations, and demo data
+- **Timer actions in the + menu**, with Timer as the only group expanded whenever the menu opens
+- Shared compact, keyboard-accessible selectors for language and theme controls
+
+### Changed
+- New breastfeeding entries default to **Both breasts** while edits preserve the stored method
+- Home only shows feeding, sleep, diaper, tummy-time, and bath categories that have data in the current seven-day calendar window
+- Feeding Rhythm uses a wider sequential fill and border scale, making Less and More clearly distinguishable in both light and dark themes
+- Mobile header, navigation, action groups, and responsive spacing were tightened for small displays
+
+### Fixed
+- Active timers no longer shadow the translation helper and blank the dashboard after loading
+- Module-scope JSX imports are explicit, preventing runtime failures in test and development transforms
+
 ## [1.8.0] - 2026-09-04
 ### Added
 - **A daily fact card** — one interesting fact drawn from everything ever logged, shown with the alert banners and dismissable for the day:
