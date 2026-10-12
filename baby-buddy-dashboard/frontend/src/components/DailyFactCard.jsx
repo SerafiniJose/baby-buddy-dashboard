@@ -4,6 +4,8 @@ import { colors } from "../utils/colors";
 import { useUnits, useUnitSystem } from "../utils/units";
 import { buildFacts, pickDailyFact } from "../utils/facts";
 import { isFactDismissed, dismissFactForToday } from "../utils/factDismissal";
+import { buildNannyStatus, formatNannyInterval } from "../utils/nannyMode";
+import { formatTime } from "../utils/formatters";
 import { useTranslation } from "../locales";
 
 /**
@@ -21,6 +23,7 @@ export default function DailyFactCard({ feedings, sleep, changes, baths, tummyTi
     () => buildFacts({ feedings, sleep, changes, baths, tummyTimes, weights, units, unitSystem }),
     [feedings, sleep, changes, baths, tummyTimes, weights, units, unitSystem]
   );
+  const feedingStatus = useMemo(() => buildNannyStatus(feedings || []), [feedings]);
   const fact = pickDailyFact(facts);
 
   // Nothing to say yet (a brand-new instance, or the all-time fetch still in flight).
@@ -79,6 +82,19 @@ export default function DailyFactCard({ feedings, sleep, changes, baths, tummyTi
             </span>
           )}
         </div>
+        {feedingStatus.hungryAt && (
+          <div className="daily-fact-next-feeding">
+            <span>{t("dailyFact.nextFeeding")}</span>
+            <strong>{formatTime(feedingStatus.hungryAt)}</strong>
+            <small>
+              {feedingStatus.interval?.isFallback
+                ? t("dailyFact.nextFeedingFallback")
+                : t("dailyFact.nextFeedingAverage", {
+                    interval: formatNannyInterval(feedingStatus.interval?.intervalMs),
+                  })}
+            </small>
+          </div>
+        )}
       </div>
 
       <button

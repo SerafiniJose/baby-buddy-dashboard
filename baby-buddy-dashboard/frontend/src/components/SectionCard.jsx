@@ -1,6 +1,7 @@
-export default function SectionCard({ title, icon, children, color, actions }) {
+export default function SectionCard({ title, icon, children, color, actions, className, bodyClassName }) {
   return (
     <div
+      className={className}
       style={{
         background: "var(--card-bg)",
         borderRadius: 16,
@@ -45,7 +46,7 @@ export default function SectionCard({ title, icon, children, color, actions }) {
         </span>
         {actions}
       </div>
-      <div style={{ padding: "16px 20px" }}>{children}</div>
+      <div className={bodyClassName} style={{ padding: "16px 20px" }}>{children}</div>
     </div>
   );
 }

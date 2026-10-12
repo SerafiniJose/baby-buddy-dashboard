@@ -736,6 +736,33 @@ textarea.form-control {
   gap: 8px;
 }
 
+.daily-fact-next-feeding {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.daily-fact-next-feeding span {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.daily-fact-next-feeding strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.daily-fact-next-feeding small {
+  color: var(--text-dim);
+}
+
 /* Nanny mode */
 .nanny-mode-toggle,
 .nanny-primary-action {
@@ -798,6 +825,12 @@ textarea.form-control {
 }
 
 .nanny-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nanny-hero-column {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -872,7 +905,6 @@ textarea.form-control {
 }
 
 .nanny-stat span,
-.nanny-routine-item span,
 .nanny-task small,
 .nanny-tasks-head span {
   display: block;
@@ -893,36 +925,12 @@ textarea.form-control {
   font-size: 12px;
 }
 
-.nanny-routine,
 .nanny-task-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.nanny-routine-item {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-}
-
-.nanny-routine-active {
-  border-color: var(--accent-40);
-  background: var(--accent-08);
-}
-
-.nanny-routine-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
-.nanny-routine-item strong,
 .nanny-task strong {
   display: block;
   color: var(--text);
@@ -989,6 +997,157 @@ textarea.form-control {
   text-align: center;
   color: var(--text-dim);
   font-size: 13px;
+}
+
+@media (max-width: 700px) and (orientation: landscape) and (max-height: 420px) {
+  .app:has(.nanny-mode) {
+    padding: 8px 12px 80px;
+  }
+
+  .app:has(.nanny-mode) .app-header {
+    padding: 0 0 8px;
+  }
+
+  .nanny-exclusive-content {
+    min-height: 0;
+  }
+
+  .nanny-mode,
+  .nanny-hero-column {
+    gap: 10px;
+  }
+
+  .nanny-hero-card > div:first-child {
+    display: none !important;
+  }
+
+  .nanny-hero-card-body {
+    padding: 12px 14px !important;
+  }
+
+  .nanny-summary {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .nanny-summary h2 {
+    font-size: 20px;
+  }
+
+  .nanny-summary p {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .app:has(.nanny-mode) {
+    height: 100vh;
+    padding-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .app:has(.nanny-mode) .app-header {
+    padding-bottom: 12px;
+  }
+
+  .nanny-exclusive-content {
+    width: 100%;
+    height: calc(100vh - 104px);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .nanny-mode {
+    display: grid;
+    grid-template-columns: minmax(420px, min(48%, 520px)) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 16px;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .nanny-hero-column {
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .nanny-hero-card {
+    flex: 0 0 auto;
+  }
+
+  .nanny-hero-card-body {
+    padding: 14px 16px !important;
+  }
+
+  .nanny-summary {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .nanny-summary h2 {
+    font-size: clamp(20px, 2.4vw, 30px);
+  }
+
+  .nanny-summary p {
+    font-size: clamp(13px, 1.35vw, 16px);
+    line-height: 1.35;
+  }
+
+  .nanny-mode-actions {
+    justify-content: stretch;
+  }
+
+  .nanny-primary-action {
+    width: 100%;
+  }
+
+  .nanny-stat-grid {
+    grid-template-columns: 1fr;
+    align-content: stretch;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .nanny-stat-grid > * {
+    padding: 12px 14px !important;
+    gap: 6px !important;
+  }
+
+  .nanny-stat-grid > * > div:nth-child(3) {
+    font-size: clamp(23px, 3.2vw, 34px) !important;
+  }
+
+  .nanny-stat-grid > * {
+    min-height: 0;
+  }
+
+  .nanny-task-card {
+    min-height: 0;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .nanny-task-card-body {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .nanny-task-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    gap: 8px;
+    overflow: auto;
+  }
+
+  .nanny-task {
+    padding: 10px;
+  }
 }
 
 /* Calendar nav (month picker / actions) */
@@ -1204,12 +1363,8 @@ textarea.form-control {
     flex-direction: column;
     align-items: flex-start;
   }
-  .nanny-grid,
   .nanny-stat-grid {
     grid-template-columns: 1fr;
-  }
-  .nanny-grid > :last-child {
-    grid-column: auto;
   }
 }
 

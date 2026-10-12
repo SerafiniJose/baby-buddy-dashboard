@@ -4,6 +4,25 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2026-10-12
+### Added
+- **Medication tracking** with safe dose availability, medication forms, status rows, history filtering, demo data, backend alert support, and optional Home Assistant medication alerts
+- **Growth analysis upgrades** with BMI logging/synchronization, BMI trend charting, and WHO growth-standard overlays for weight, height, head circumference, and BMI
+- **Favorites in the + menu**, opening first with shortcuts for the feeding timer and diaper logging while preserving the full Timer group
+- **Next-feeding guidance below the daily fact card**, using the Nanny Mode interval average when available and a three-hour fallback otherwise
+- Backend diagnostics and delete endpoints, plus backend test coverage for server helpers and medication alerts
+- Translation documentation for maintaining the fork's multilingual UI
+
+### Changed
+- **Nanny Mode is redesigned for horizontal and mobile landscape screens**: the hero/tasks column stays compact on the left, timing statistics move into the larger right column, and the layout avoids scrolling on wide displays
+- **Tasks now appear before the timing cards** in Nanny Mode, with task content constrained to the smaller/primary column
+- The default nanny name is generic for privacy
+
+### Fixed
+- Removed the redundant Nanny Mode Routine timeline so it no longer repeats the same feeding guidance already shown in the hero and timing cards
+- Added inline delete confirmation across entry forms so destructive actions are explicit and consistent
+- Medication availability no longer depends on unavailable Home Assistant state
+
 ## [1.9.0] - 2026-10-06
 ### Added
 - **Focused, multilingual Nanny Mode** with configurable caretaker name, routine guidance, exclusive caretaker screens, and sleep start/end logging

@@ -10,7 +10,7 @@ import { readStoredNannyMode, writeStoredNannyMode } from "./utils/nannyModePref
 import { getAge, formatElapsed, timeAgo, toLocalISODate, REMINDER_DONE_TAG } from "./utils/formatters";
 import { api } from "./api";
 import { pendingReminders, serializeCompletionBody } from "./utils/reminders";
-import { DEFAULT_EXPANDED_ACTION_GROUP, TIMER_ACTION_IDS } from "./utils/quickActions";
+import { DEFAULT_EXPANDED_ACTION_GROUP, FAVORITE_ACTION_IDS, TIMER_ACTION_IDS } from "./utils/quickActions";
 import { useTranslation } from "./locales";
 import OverviewTab from "./tabs/OverviewTab";
 import GrowthTab from "./tabs/GrowthTab";
@@ -52,9 +52,20 @@ const TIMER_ACTIONS_BY_ID = {
   tummy: { id: "tummy", labelKey: "action.tummyTime", icon: <Icons.Sun />, color: colors.tummy },
 };
 
+const FAVORITE_ACTIONS_BY_ID = {
+  feedingTimer: { id: "feedingTimer", timerType: "feeding", labelKey: "action.feedingTimer", icon: <Icons.Timer />, color: colors.feeding },
+  diaper: { id: "diaper", modalType: "diaper", labelKey: "action.diaper", icon: <Icons.Droplet />, color: colors.diaper },
+};
+
 const TIMER_TYPES = TIMER_ACTION_IDS.map((id) => TIMER_ACTIONS_BY_ID[id]);
+const FAVORITE_ACTIONS = FAVORITE_ACTION_IDS.map((id) => FAVORITE_ACTIONS_BY_ID[id]);
 
 const ACTION_GROUPS = [
+  {
+    id: "favorites",
+    labelKey: "group.favorites",
+    actions: FAVORITE_ACTIONS,
+  },
   {
     id: "timer",
     labelKey: "header.timer",
@@ -457,10 +468,10 @@ export default function App() {
                           key={action.id}
                           className="fab-action"
                           onClick={() => {
-                            if (group.id === "timer") {
-                              timer.startTimer(action.id);
+                            if (action.timerType || group.id === "timer") {
+                              timer.startTimer(action.timerType || action.id);
                             } else {
-                              setModal({ type: action.id });
+                              setModal({ type: action.modalType || action.id });
                             }
                             setShowActions(false);
                           }}

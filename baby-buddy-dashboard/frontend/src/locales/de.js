@@ -38,6 +38,7 @@ const locale = {
 
   action: {
     feeding: "Füttern",
+    feedingTimer: "Fütterungs-Timer",
     sleep: "Schlaf",
     diaper: "Windel",
     tummy: "Bauch",
@@ -52,6 +53,7 @@ const locale = {
   },
 
   group: {
+    favorites: "Favoriten",
     track: "Erfassen",
     measure: "Messen",
     medication: "Medikament",

@@ -1,6 +1,5 @@
 import SectionCard from "../components/SectionCard";
 import StatCard from "../components/StatCard";
-import TimelineItem from "../components/TimelineItem";
 import { Icons } from "../components/Icons";
 import { colors } from "../utils/colors";
 import {
@@ -48,69 +47,26 @@ export default function NannyTab({ childId, nannyName = "Nanny", feedings, nanny
 
   return (
     <div className="nanny-mode fade-in fade-in-1">
-      <SectionCard title={t("nanny.title")} icon={<Icons.Caregiver />} color={colors.feeding}>
-        <div className={`nanny-summary nanny-phase-${status.phase.id}`}>
-          <div>
-            <span className="nanny-eyebrow">{t(`${phaseKey}.label`)}</span>
-            <h2>{t(`${phaseKey}.title`)}</h2>
-            <p>{t(`${phaseKey}.suggestion`)}</p>
-          </div>
-          <span className="nanny-phase-badge">{t(`${phaseKey}.label`)}</span>
-        </div>
-      </SectionCard>
-
-      <div className="nanny-mode-actions">
-        <button className="nanny-primary-action" onClick={onAddSleep} disabled={!childId}>
-          <Icons.Moon />
-          <span>{t("nanny.logSleep")}</span>
-        </button>
-      </div>
-
-      <div className="nanny-stat-grid">
-        <StatCard
-          icon={<Icons.Bottle />}
-          label={t("nanny.lastFeeding")}
-          value={status.lastFeedingEnd ? formatTime(status.lastFeedingEnd) : "—"}
-          sub={formatAmount(status.lastFeeding, t)}
-          color={colors.feeding}
-        />
-        <StatCard
-          icon={<Icons.Timer />}
-          label={t("nanny.elapsed")}
-          value={formatNannyElapsed(status.elapsedMs)}
-          sub={t("nanny.sinceFeedingEnd")}
-          color={colors.sleep}
-        />
-        <StatCard
-          icon={<Icons.Clock />}
-          label={t("nanny.nextFeeding")}
-          value={status.hungryAt ? formatTime(status.hungryAt) : "—"}
-          sub={intervalSub}
-          color={colors.diaper}
-        />
-      </div>
-
-      <div className="nanny-grid">
-        <SectionCard title={t("nanny.routine")} icon={<Icons.Clock />} color={colors.sleep}>
-          {status.routine.length === 0 ? (
-            <div className="nanny-empty">{t("nanny.noRoutine")}</div>
-          ) : (
-            <div className="nanny-timeline">
-              {status.routine.map((item, index) => (
-                <TimelineItem
-                  key={item.id}
-                  time={formatTime(item.time)}
-                  label={t(`nanny.routineLabels.${item.id}`)}
-                  detail={item.offset === "now" ? t("nanny.routineLabels.now") : item.offset === "avg" ? t("nanny.routineLabels.average", { interval: intervalText }) : item.offset}
-                  color={item.id === status.phase.id || (status.phase.id === "diaper" && item.id === "last") ? colors.feeding : colors.sleep}
-                  isLast={index === status.routine.length - 1}
-                />
-              ))}
+      <div className="nanny-hero-column">
+        <SectionCard className="nanny-hero-card" bodyClassName="nanny-hero-card-body" title={t("nanny.title")} icon={<Icons.Caregiver />} color={colors.feeding}>
+          <div className={`nanny-summary nanny-phase-${status.phase.id}`}>
+            <div>
+              <span className="nanny-eyebrow">{t(`${phaseKey}.label`)}</span>
+              <h2>{t(`${phaseKey}.title`)}</h2>
+              <p>{t(`${phaseKey}.suggestion`)}</p>
             </div>
-          )}
+            <span className="nanny-phase-badge">{t(`${phaseKey}.label`)}</span>
+          </div>
         </SectionCard>
 
-        <SectionCard title={t("nanny.tasksTitle", { name: nannyName })} icon={<Icons.StickyNote />} color={colors.note}>
+        <div className="nanny-mode-actions">
+          <button className="nanny-primary-action" onClick={onAddSleep} disabled={!childId}>
+            <Icons.Moon />
+            <span>{t("nanny.logSleep")}</span>
+          </button>
+        </div>
+
+        <SectionCard className="nanny-task-card" bodyClassName="nanny-task-card-body" title={t("nanny.tasksTitle", { name: nannyName })} icon={<Icons.StickyNote />} color={colors.note}>
           <div className="nanny-tasks-head">
             <span>{t("nanny.pendingTasks", { count: pendingCount })}</span>
             <button className="nanny-small-btn" onClick={onAddTask}>{t("nanny.addTask")}</button>
@@ -141,6 +97,30 @@ export default function NannyTab({ childId, nannyName = "Nanny", feedings, nanny
             </div>
           )}
         </SectionCard>
+      </div>
+
+      <div className="nanny-stat-grid" aria-label={t("nanny.statsLabel")}>
+        <StatCard
+          icon={<Icons.Bottle />}
+          label={t("nanny.lastFeeding")}
+          value={status.lastFeedingEnd ? formatTime(status.lastFeedingEnd) : "—"}
+          sub={formatAmount(status.lastFeeding, t)}
+          color={colors.feeding}
+        />
+        <StatCard
+          icon={<Icons.Timer />}
+          label={t("nanny.elapsed")}
+          value={formatNannyElapsed(status.elapsedMs)}
+          sub={t("nanny.sinceFeedingEnd")}
+          color={colors.sleep}
+        />
+        <StatCard
+          icon={<Icons.Clock />}
+          label={t("nanny.nextFeeding")}
+          value={status.hungryAt ? formatTime(status.hungryAt) : "—"}
+          sub={intervalSub}
+          color={colors.diaper}
+        />
       </div>
     </div>
   );

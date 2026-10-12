@@ -37,6 +37,7 @@ export default {
 
   action: {
     feeding: "Feeding",
+    feedingTimer: "Feeding timer",
     sleep: "Sleep",
     diaper: "Diaper",
     tummy: "Tummy",
@@ -51,6 +52,7 @@ export default {
   },
 
   group: {
+    favorites: "Favorites",
     track: "Track",
     measure: "Measure",
     medication: "Medication",
@@ -516,6 +518,9 @@ export default {
 
   dailyFact: {
     dismissUntilTomorrow: "Dismiss until tomorrow",
+    nextFeeding: "Next feeding",
+    nextFeedingAverage: "based on the last 15 days avg ({interval})",
+    nextFeedingFallback: "fallback: 3h after the last feeding",
   },
 
   alert: {
@@ -530,18 +535,14 @@ export default {
     enterMode: "Nanny mode",
     exitMode: "Back to dashboard",
     logSleep: "Log sleep",
-    now: "Now",
-    routine: "Routine",
     tasksTitle: "Tasks for {name}",
+    statsLabel: "Feeding timing statistics",
     lastFeeding: "Last feeding",
     elapsed: "Elapsed time",
     sinceFeedingEnd: "since the end of the feeding",
     nextFeeding: "Next feeding",
-    hungryAt: "Approx. hungry",
-    hungryRule: "feeding end +3h",
     intervalAverage: "Avg interval {interval} from last 15 days ({count} intervals)",
     intervalFallback: "Fallback interval: 3h after feeding end",
-    noRoutine: "Log a feeding to calculate the routine.",
     pendingTasks: { one: "{count} pending", other: "{count} pending" },
     addTask: "+ Task",
     noTasks: "No tasks yet. They are saved as Baby Buddy notes tagged {tag}, so the app works without Home Assistant.",
@@ -576,14 +577,6 @@ export default {
         label: "No data",
         suggestion: "I can't find a recent feeding. Ask when the last one was or log a new feeding if needed.",
       },
-    },
-    routineLabels: {
-      last: "Last feeding",
-      play: "Play time",
-      sleep: "Could be sleepy",
-      hungry: "Could be hungry",
-      average: "avg {interval}",
-      now: "now",
     },
   },
 

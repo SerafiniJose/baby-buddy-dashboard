@@ -38,6 +38,7 @@ const locale = {
 
   action: {
     feeding: "Pappa",
+    feedingTimer: "Timer pappa",
     sleep: "Sonno",
     diaper: "Pannolino",
     tummy: "Pancia",
@@ -52,6 +53,7 @@ const locale = {
   },
 
   group: {
+    favorites: "Preferiti",
     track: "Traccia",
     measure: "Misura",
     medication: "Farmaco",
