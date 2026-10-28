@@ -4,6 +4,10 @@ All notable changes to this fork (Baby Dashboard Plus) are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2026-10-28
+### Fixed
+- Bath form now sends the default note "Bath" when the note field is left blank, preventing empty-note submissions to the Baby Buddy API
+
 ## [1.9.1] - 2026-10-12
 ### Added
 - **Medication tracking** with safe dose availability, medication forms, status rows, history filtering, demo data, backend alert support, and optional Home Assistant medication alerts
