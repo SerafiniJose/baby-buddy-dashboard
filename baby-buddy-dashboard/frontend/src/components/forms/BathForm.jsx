@@ -34,7 +34,7 @@ export default function BathForm({ childId, entry, onDone, onClose }) {
     setError("");
     setSaving(true);
     try {
-      const data = { note: note.trim(), time: toIsoWithLocalOffset(time), tags: [BATH_TAG] };
+      const data = { note: note.trim() || "Bath", time: toIsoWithLocalOffset(time), tags: [BATH_TAG] };
       if (isEdit) await api.updateNote(entry.id, data);
       else { data.child = childId; await api.createNote(data); }
       onDone();
